@@ -108,3 +108,65 @@ Examples of secrets that must remain local:
 2. Replace placeholder subfolder READMEs with real run instructions.
 3. Add one environment template per model if local execution will continue from this repository.
 4. Add a release tag once the structure is considered stable.
+
+## EventAlpha 2.1 Integration
+
+This repository now also contains a unified EventAlpha integration layer:
+
+- shared core: `eventalpha_core/`
+- per-model adapters:
+  - `01_Crypto_BTC_ETH_SOL/eventalpha_adapter.py`
+  - `03_FX_AUD_NZD_EUR_GBP/backend/eventalpha_adapter.py`
+  - `04_WTI_Oil_Futures/backend/eventalpha_adapter.py`
+  - `05_Bond_Treasury/backend/eventalpha_adapter.py`
+  - `02_StockIndex_IBKR_ES_NQ/eventalpha_adapter.py`
+- unified paper runner:
+  - `run_eventalpha_paper.py`
+- verification script:
+  - `verify_eventalpha_full_stack.py`
+
+### What this means
+
+The five financial models no longer need to operate as five fully separate decision systems.
+
+Instead:
+
+1. each model exposes:
+   - `get_market_state()`
+   - `execute_decision(decision)`
+   - `manage_position(position)`
+2. `EventAlphaBrain` ranks assets, scores event severity, fuses Bayesian confidence, applies waiting policy, and then sends decisions into the model adapters
+3. the current implementation is paper-trading / research mode only
+
+### Quick run
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/run_eventalpha_paper.py --event-type cpi --title "Manual CPI test" --top-n 2
+```
+
+### Telegram trade alerts
+
+If you want the unified EventAlpha runner to notify you when one of the five models reaches an actual paper-trade entry decision, keep these environment variables set locally:
+
+```bash
+export TELEGRAM_BOT_TOKEN="your_bot_token"
+export TELEGRAM_CHAT_ID="your_chat_id"
+```
+
+Then run:
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/run_eventalpha_paper.py --event-type cpi --title "Manual CPI test" --top-n 2 --telegram-alerts
+```
+
+Disable alerts explicitly with:
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/run_eventalpha_paper.py --event-type cpi --title "Manual CPI test" --top-n 2 --no-telegram-alerts
+```
+
+### Full verification
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/verify_eventalpha_full_stack.py
+```
