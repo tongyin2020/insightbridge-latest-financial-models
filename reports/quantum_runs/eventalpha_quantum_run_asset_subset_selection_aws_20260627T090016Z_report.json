@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-06-27T09:00:37.388426+00:00",
+  "run_file": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_runs/eventalpha_quantum_run_asset_subset_selection_aws_20260627T090016Z.json",
+  "problem": "asset_subset_selection",
+  "baseline_exact": {
+    "bits": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "selected": [
+      "crypto",
+      "oil",
+      "index"
+    ],
+    "objective": 0.310834,
+    "base": 0.314603,
+    "pair_penalty": 0.003769,
+    "size_penalty": 0.0
+  },
+  "best_quantum_solution": {
+    "bitstring": "11100",
+    "decoded_bits": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "shots": 7,
+    "objective": 0.310834,
+    "selected": [
+      "crypto",
+      "oil",
+      "index"
+    ]
+  },
+  "delta_vs_exact": 0.0
+}

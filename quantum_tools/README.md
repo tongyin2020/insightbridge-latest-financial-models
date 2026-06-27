@@ -9,6 +9,10 @@ They do not place orders and do not touch broker execution.
   - Runs one problem locally or submits it to IBM Quantum.
 - `ibm_quantum_eventalpha_status.py`
   - Checks submitted IBM jobs and fetches decoded results.
+- `aws_braket_eventalpha_submit.py`
+  - Runs one problem locally on Braket LocalSimulator or submits it to AWS Braket.
+- `aws_braket_eventalpha_status.py`
+  - Checks submitted AWS Braket tasks, fetches decoded results, and can write a cross-check report.
 - `run_eventalpha_quantum_suite.py`
   - One-shot wrapper that runs local subset / wait / risk reviews and can optionally submit one selected problem to IBM.
 - `examples/run_eventalpha_testkit_once.py`
@@ -21,6 +25,9 @@ They do not place orders and do not touch broker execution.
 ```bash
 python3 quantum_tools/ibm_quantum_eventalpha_submit.py --mode local --problem asset_subset_selection
 python3 quantum_tools/ibm_quantum_eventalpha_submit.py --mode local --problem wait_bucket_optimization --asset oil
+python3 quantum_tools/aws_braket_eventalpha_submit.py --mode local --problem asset_subset_selection
+python3 quantum_tools/aws_braket_eventalpha_submit.py --mode aws --problem asset_subset_selection --submit-only
+python3 quantum_tools/aws_braket_eventalpha_status.py --fetch-results --write-report
 python3 quantum_tools/run_eventalpha_quantum_suite.py --shots 128 --grid-points 2
 python3 quantum_tools/examples/run_eventalpha_testkit_once.py --csv /Users/tongyin/Desktop/Test/decisions.csv --output /Users/tongyin/Desktop/Test/results --mode ibm-suite --preset quick
 ```

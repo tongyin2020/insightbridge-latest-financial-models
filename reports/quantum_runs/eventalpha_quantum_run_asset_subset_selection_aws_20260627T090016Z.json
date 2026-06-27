@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-06-27T09:00:16.827587+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T055326Z.json",
+  "problem": "asset_subset_selection",
+  "asset_filter": null,
+  "mode": "aws",
+  "shots": 128,
+  "reps": 1,
+  "grid_points": 2,
+  "result": {
+    "mode": "aws",
+    "device_arn": "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
+    "task_count": 1,
+    "submitted_tasks": [
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            0.0
+          ],
+          "beta": [
+            0.0
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/31d9aef3-8162-43b9-ab69-79e84c2c422b"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            0.0
+          ],
+          "beta": [
+            1.5707963267948966
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/9baa196d-8bd3-46af-b904-5ee44aa1ff02"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            3.141592653589793
+          ],
+          "beta": [
+            0.0
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/45dcd3e8-b55b-4e37-982a-36c5d3bdec88"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            3.141592653589793
+          ],
+          "beta": [
+            1.5707963267948966
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/14f2e342-5198-45d1-8610-556a4e16afcf"
+      }
+    ],
+    "waiting_for_results": true,
+    "s3_destination": {
+      "bucket": "amazon-braket-us-east-1-232076153294",
+      "prefix": "insightbridge-eventalpha-quantum"
+    }
+  }
+}

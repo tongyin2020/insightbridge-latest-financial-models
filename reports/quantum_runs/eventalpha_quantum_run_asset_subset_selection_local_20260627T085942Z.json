@@ -1,0 +1,562 @@
+{
+  "generated_at": "2026-06-27T08:59:42.801385+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T055326Z.json",
+  "problem": "asset_subset_selection",
+  "asset_filter": null,
+  "mode": "local",
+  "shots": 64,
+  "reps": 1,
+  "grid_points": 2,
+  "result": {
+    "mode": "local",
+    "task_count": 1,
+    "tasks": [
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "grid_size": 4,
+        "baseline_exact": {
+          "bits": [
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "selected": [
+            "crypto",
+            "oil",
+            "index"
+          ],
+          "objective": 0.310834,
+          "base": 0.314603,
+          "pair_penalty": 0.003769,
+          "size_penalty": 0.0
+        },
+        "best_run": {
+          "subject": null,
+          "params": {
+            "gamma": [
+              0.0
+            ],
+            "beta": [
+              1.5707963267948966
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "11100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              1,
+              1
+            ],
+            "shots": 3,
+            "objective": 0.310834,
+            "selected": [
+              "crypto",
+              "oil",
+              "index"
+            ]
+          },
+          "top_counts": [
+            [
+              "01101",
+              5
+            ],
+            [
+              "10000",
+              4
+            ],
+            [
+              "10010",
+              4
+            ],
+            [
+              "00000",
+              4
+            ],
+            [
+              "10100",
+              4
+            ],
+            [
+              "00111",
+              4
+            ],
+            [
+              "01001",
+              3
+            ],
+            [
+              "11011",
+              3
+            ]
+          ]
+        },
+        "all_runs_top3": [
+          {
+            "subject": null,
+            "params": {
+              "gamma": [
+                0.0
+              ],
+              "beta": [
+                1.5707963267948966
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "11100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                1,
+                1
+              ],
+              "shots": 3,
+              "objective": 0.310834,
+              "selected": [
+                "crypto",
+                "oil",
+                "index"
+              ]
+            },
+            "top_counts": [
+              [
+                "01101",
+                5
+              ],
+              [
+                "10000",
+                4
+              ],
+              [
+                "10010",
+                4
+              ],
+              [
+                "00000",
+                4
+              ],
+              [
+                "10100",
+                4
+              ],
+              [
+                "00111",
+                4
+              ],
+              [
+                "01001",
+                3
+              ],
+              [
+                "11011",
+                3
+              ]
+            ]
+          },
+          {
+            "subject": null,
+            "params": {
+              "gamma": [
+                3.141592653589793
+              ],
+              "beta": [
+                0.0
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "11100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                1,
+                1
+              ],
+              "shots": 2,
+              "objective": 0.310834,
+              "selected": [
+                "crypto",
+                "oil",
+                "index"
+              ]
+            },
+            "top_counts": [
+              [
+                "11011",
+                8
+              ],
+              [
+                "00010",
+                5
+              ],
+              [
+                "11111",
+                5
+              ],
+              [
+                "00011",
+                4
+              ],
+              [
+                "00100",
+                4
+              ],
+              [
+                "10011",
+                3
+              ],
+              [
+                "10111",
+                3
+              ],
+              [
+                "10010",
+                2
+              ]
+            ]
+          },
+          {
+            "subject": null,
+            "params": {
+              "gamma": [
+                3.141592653589793
+              ],
+              "beta": [
+                1.5707963267948966
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "11100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                1,
+                1
+              ],
+              "shots": 4,
+              "objective": 0.310834,
+              "selected": [
+                "crypto",
+                "oil",
+                "index"
+              ]
+            },
+            "top_counts": [
+              [
+                "01101",
+                4
+              ],
+              [
+                "00010",
+                4
+              ],
+              [
+                "10010",
+                4
+              ],
+              [
+                "11100",
+                4
+              ],
+              [
+                "10011",
+                4
+              ],
+              [
+                "10111",
+                3
+              ],
+              [
+                "11011",
+                3
+              ],
+              [
+                "01111",
+                3
+              ]
+            ]
+          }
+        ]
+      }
+    ],
+    "best_task": {
+      "subject": null,
+      "label": "asset_subset_selection",
+      "grid_size": 4,
+      "baseline_exact": {
+        "bits": [
+          0,
+          0,
+          1,
+          1,
+          1
+        ],
+        "selected": [
+          "crypto",
+          "oil",
+          "index"
+        ],
+        "objective": 0.310834,
+        "base": 0.314603,
+        "pair_penalty": 0.003769,
+        "size_penalty": 0.0
+      },
+      "best_run": {
+        "subject": null,
+        "params": {
+          "gamma": [
+            0.0
+          ],
+          "beta": [
+            1.5707963267948966
+          ]
+        },
+        "best_sampled_solution": {
+          "bitstring": "11100",
+          "decoded_bits": [
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "shots": 3,
+          "objective": 0.310834,
+          "selected": [
+            "crypto",
+            "oil",
+            "index"
+          ]
+        },
+        "top_counts": [
+          [
+            "01101",
+            5
+          ],
+          [
+            "10000",
+            4
+          ],
+          [
+            "10010",
+            4
+          ],
+          [
+            "00000",
+            4
+          ],
+          [
+            "10100",
+            4
+          ],
+          [
+            "00111",
+            4
+          ],
+          [
+            "01001",
+            3
+          ],
+          [
+            "11011",
+            3
+          ]
+        ]
+      },
+      "all_runs_top3": [
+        {
+          "subject": null,
+          "params": {
+            "gamma": [
+              0.0
+            ],
+            "beta": [
+              1.5707963267948966
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "11100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              1,
+              1
+            ],
+            "shots": 3,
+            "objective": 0.310834,
+            "selected": [
+              "crypto",
+              "oil",
+              "index"
+            ]
+          },
+          "top_counts": [
+            [
+              "01101",
+              5
+            ],
+            [
+              "10000",
+              4
+            ],
+            [
+              "10010",
+              4
+            ],
+            [
+              "00000",
+              4
+            ],
+            [
+              "10100",
+              4
+            ],
+            [
+              "00111",
+              4
+            ],
+            [
+              "01001",
+              3
+            ],
+            [
+              "11011",
+              3
+            ]
+          ]
+        },
+        {
+          "subject": null,
+          "params": {
+            "gamma": [
+              3.141592653589793
+            ],
+            "beta": [
+              0.0
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "11100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              1,
+              1
+            ],
+            "shots": 2,
+            "objective": 0.310834,
+            "selected": [
+              "crypto",
+              "oil",
+              "index"
+            ]
+          },
+          "top_counts": [
+            [
+              "11011",
+              8
+            ],
+            [
+              "00010",
+              5
+            ],
+            [
+              "11111",
+              5
+            ],
+            [
+              "00011",
+              4
+            ],
+            [
+              "00100",
+              4
+            ],
+            [
+              "10011",
+              3
+            ],
+            [
+              "10111",
+              3
+            ],
+            [
+              "10010",
+              2
+            ]
+          ]
+        },
+        {
+          "subject": null,
+          "params": {
+            "gamma": [
+              3.141592653589793
+            ],
+            "beta": [
+              1.5707963267948966
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "11100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              1,
+              1
+            ],
+            "shots": 4,
+            "objective": 0.310834,
+            "selected": [
+              "crypto",
+              "oil",
+              "index"
+            ]
+          },
+          "top_counts": [
+            [
+              "01101",
+              4
+            ],
+            [
+              "00010",
+              4
+            ],
+            [
+              "10010",
+              4
+            ],
+            [
+              "11100",
+              4
+            ],
+            [
+              "10011",
+              4
+            ],
+            [
+              "10111",
+              3
+            ],
+            [
+              "11011",
+              3
+            ],
+            [
+              "01111",
+              3
+            ]
+          ]
+        }
+      ]
+    }
+  }
+}
