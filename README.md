@@ -144,6 +144,32 @@ Instead:
 python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/run_eventalpha_paper.py --event-type cpi --title "Manual CPI test" --top-n 2
 ```
 
+### Hybrid execution run
+
+The repository now also supports the newer hybrid architecture:
+
+- quantum keeps `asset_subset_selection`
+- quantum keeps `wait_bucket_optimization`
+- classical takes back sizing, risk budget, and execution guardrails
+
+Run it locally:
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/run_eventalpha_hybrid.py --event-type cpi --title "Hybrid CPI test" --top-n 3
+```
+
+Or with the shell wrapper:
+
+```bash
+bash /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/run_eventalpha_hybrid.sh --event-type opec --title "Hybrid OPEC test"
+```
+
+Outputs are written to:
+
+```bash
+/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/hybrid_runs/
+```
+
 ### Telegram trade alerts
 
 If you want the unified EventAlpha runner to notify you when one of the five models reaches an actual paper-trade entry decision, keep these environment variables set locally:
