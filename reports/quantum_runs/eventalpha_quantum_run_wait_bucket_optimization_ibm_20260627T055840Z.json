@@ -1,0 +1,1423 @@
+{
+  "generated_at": "2026-06-27T05:58:40.467862+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T055326Z.json",
+  "event_type": "multi_event_real_history",
+  "problem": "wait_bucket_optimization",
+  "asset_filter": null,
+  "result": {
+    "mode": "ibm",
+    "backend": "ibm_fez",
+    "task_count": 5,
+    "grid_size": 4,
+    "tasks": [
+      {
+        "subject": {
+          "asset": "crypto"
+        },
+        "label": "wait_bucket_optimization:crypto",
+        "ising_offset": 4.062545999999999,
+        "grid_size": 4,
+        "best_run": {
+          "subject": {
+            "asset": "crypto"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "job_id": "d8vmbn0pknjs73a19o3g",
+          "best_sampled_solution": {
+            "bitstring": "001000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "shots": 5,
+            "objective": 1.133572,
+            "asset": "crypto",
+            "selected_waits": [
+              180
+            ],
+            "chosen_wait_seconds": 180,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "110000",
+              7
+            ],
+            [
+              "000010",
+              6
+            ],
+            [
+              "010100",
+              5
+            ],
+            [
+              "001000",
+              5
+            ],
+            [
+              "100011",
+              5
+            ]
+          ]
+        },
+        "all_runs_top3": [
+          {
+            "subject": {
+              "asset": "crypto"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmbn0pknjs73a19o3g",
+            "best_sampled_solution": {
+              "bitstring": "001000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              "shots": 5,
+              "objective": 1.133572,
+              "asset": "crypto",
+              "selected_waits": [
+                180
+              ],
+              "chosen_wait_seconds": 180,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "110000",
+                7
+              ],
+              [
+                "000010",
+                6
+              ],
+              [
+                "010100",
+                5
+              ],
+              [
+                "001000",
+                5
+              ],
+              [
+                "100011",
+                5
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "crypto"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "job_id": "d8vmbpg6c68s73ah0b5g",
+            "best_sampled_solution": {
+              "bitstring": "001000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              "shots": 1,
+              "objective": 1.133572,
+              "asset": "crypto",
+              "selected_waits": [
+                180
+              ],
+              "chosen_wait_seconds": 180,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "010111",
+                5
+              ],
+              [
+                "000000",
+                5
+              ],
+              [
+                "111011",
+                4
+              ],
+              [
+                "000001",
+                4
+              ],
+              [
+                "010011",
+                4
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "crypto"
+            },
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmbrmmvj5c73ei40q0",
+            "best_sampled_solution": {
+              "bitstring": "001000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              "shots": 2,
+              "objective": 1.133572,
+              "asset": "crypto",
+              "selected_waits": [
+                180
+              ],
+              "chosen_wait_seconds": 180,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "000000",
+                6
+              ],
+              [
+                "100001",
+                5
+              ],
+              [
+                "010010",
+                5
+              ],
+              [
+                "000010",
+                5
+              ],
+              [
+                "100010",
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "ising_offset": 3.9404115,
+        "grid_size": 4,
+        "best_run": {
+          "subject": {
+            "asset": "fx"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "job_id": "d8vmbvmmvj5c73ei40ug",
+          "best_sampled_solution": {
+            "bitstring": "000100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "shots": 3,
+            "objective": 1.166316,
+            "asset": "fx",
+            "selected_waits": [
+              120
+            ],
+            "chosen_wait_seconds": 120,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "000010",
+              7
+            ],
+            [
+              "011100",
+              6
+            ],
+            [
+              "000110",
+              5
+            ],
+            [
+              "100110",
+              4
+            ],
+            [
+              "001111",
+              4
+            ]
+          ]
+        },
+        "all_runs_top3": [
+          {
+            "subject": {
+              "asset": "fx"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmbvmmvj5c73ei40ug",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 3,
+              "objective": 1.166316,
+              "asset": "fx",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "000010",
+                7
+              ],
+              [
+                "011100",
+                6
+              ],
+              [
+                "000110",
+                5
+              ],
+              [
+                "100110",
+                4
+              ],
+              [
+                "001111",
+                4
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "fx"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "job_id": "d8vmc1hropqc738clle0",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 5,
+              "objective": 1.166316,
+              "asset": "fx",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "011111",
+                6
+              ],
+              [
+                "000011",
+                5
+              ],
+              [
+                "101010",
+                5
+              ],
+              [
+                "000100",
+                5
+              ],
+              [
+                "011010",
+                5
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "fx"
+            },
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmc3o6c68s73ah0bh0",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 3,
+              "objective": 1.166316,
+              "asset": "fx",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "100000",
+                5
+              ],
+              [
+                "111000",
+                4
+              ],
+              [
+                "001011",
+                4
+              ],
+              [
+                "001001",
+                4
+              ],
+              [
+                "000000",
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "subject": {
+          "asset": "index"
+        },
+        "label": "wait_bucket_optimization:index",
+        "ising_offset": 3.968391,
+        "grid_size": 4,
+        "best_run": {
+          "subject": {
+            "asset": "index"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "job_id": "d8vmc9gpknjs73a19om0",
+          "best_sampled_solution": {
+            "bitstring": "000100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "shots": 3,
+            "objective": 1.109859,
+            "asset": "index",
+            "selected_waits": [
+              120
+            ],
+            "chosen_wait_seconds": 120,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "101000",
+              6
+            ],
+            [
+              "001000",
+              6
+            ],
+            [
+              "000010",
+              5
+            ],
+            [
+              "110010",
+              5
+            ],
+            [
+              "000000",
+              5
+            ]
+          ]
+        },
+        "all_runs_top3": [
+          {
+            "subject": {
+              "asset": "index"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmc9gpknjs73a19om0",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 3,
+              "objective": 1.109859,
+              "asset": "index",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "101000",
+                6
+              ],
+              [
+                "001000",
+                6
+              ],
+              [
+                "000010",
+                5
+              ],
+              [
+                "110010",
+                5
+              ],
+              [
+                "000000",
+                5
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "index"
+            },
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmcdg6c68s73ah0bs0",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 4,
+              "objective": 1.109859,
+              "asset": "index",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "110000",
+                5
+              ],
+              [
+                "010100",
+                5
+              ],
+              [
+                "000110",
+                5
+              ],
+              [
+                "011000",
+                5
+              ],
+              [
+                "001100",
+                5
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "index"
+            },
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "job_id": "d8vmcfg6c68s73ah0bu0",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 1,
+              "objective": 1.109859,
+              "asset": "index",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "011101",
+                5
+              ],
+              [
+                "111101",
+                4
+              ],
+              [
+                "111001",
+                4
+              ],
+              [
+                "111000",
+                4
+              ],
+              [
+                "100111",
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "subject": {
+          "asset": "oil"
+        },
+        "label": "wait_bucket_optimization:oil",
+        "ising_offset": 4.564455000000001,
+        "grid_size": 4,
+        "best_run": {
+          "subject": {
+            "asset": "oil"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "job_id": "d8vmch9ropqc738cllu0",
+          "best_sampled_solution": {
+            "bitstring": "010000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            "shots": 1,
+            "objective": 0.990755,
+            "asset": "oil",
+            "selected_waits": [
+              240
+            ],
+            "chosen_wait_seconds": 240,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "011100",
+              6
+            ],
+            [
+              "100000",
+              6
+            ],
+            [
+              "110101",
+              5
+            ],
+            [
+              "111111",
+              5
+            ],
+            [
+              "101011",
+              4
+            ]
+          ]
+        },
+        "all_runs_top3": [
+          {
+            "subject": {
+              "asset": "oil"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmch9ropqc738cllu0",
+            "best_sampled_solution": {
+              "bitstring": "010000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                0,
+                1,
+                0
+              ],
+              "shots": 1,
+              "objective": 0.990755,
+              "asset": "oil",
+              "selected_waits": [
+                240
+              ],
+              "chosen_wait_seconds": 240,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "011100",
+                6
+              ],
+              [
+                "100000",
+                6
+              ],
+              [
+                "110101",
+                5
+              ],
+              [
+                "111111",
+                5
+              ],
+              [
+                "101011",
+                4
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "oil"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "job_id": "d8vmcjhropqc738clm0g",
+            "best_sampled_solution": {
+              "bitstring": "010000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                0,
+                1,
+                0
+              ],
+              "shots": 1,
+              "objective": 0.990755,
+              "asset": "oil",
+              "selected_waits": [
+                240
+              ],
+              "chosen_wait_seconds": 240,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "011000",
+                6
+              ],
+              [
+                "110110",
+                4
+              ],
+              [
+                "000100",
+                4
+              ],
+              [
+                "100101",
+                4
+              ],
+              [
+                "101110",
+                4
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "oil"
+            },
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmclmmvj5c73ei41k0",
+            "best_sampled_solution": {
+              "bitstring": "010000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                0,
+                1,
+                0
+              ],
+              "shots": 6,
+              "objective": 0.990755,
+              "asset": "oil",
+              "selected_waits": [
+                240
+              ],
+              "chosen_wait_seconds": 240,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "010000",
+                6
+              ],
+              [
+                "110010",
+                6
+              ],
+              [
+                "000110",
+                6
+              ],
+              [
+                "100110",
+                5
+              ],
+              [
+                "110111",
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "subject": {
+          "asset": "rates"
+        },
+        "label": "wait_bucket_optimization:rates",
+        "ising_offset": 3.8810830000000007,
+        "grid_size": 4,
+        "best_run": {
+          "subject": {
+            "asset": "rates"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "job_id": "d8vmcs8pknjs73a19p90",
+          "best_sampled_solution": {
+            "bitstring": "000100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "shots": 3,
+            "objective": 1.152372,
+            "asset": "rates",
+            "selected_waits": [
+              120
+            ],
+            "chosen_wait_seconds": 120,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "000000",
+              6
+            ],
+            [
+              "110100",
+              5
+            ],
+            [
+              "110111",
+              5
+            ],
+            [
+              "101010",
+              5
+            ],
+            [
+              "010111",
+              4
+            ]
+          ]
+        },
+        "all_runs_top3": [
+          {
+            "subject": {
+              "asset": "rates"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmcs8pknjs73a19p90",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 3,
+              "objective": 1.152372,
+              "asset": "rates",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "000000",
+                6
+              ],
+              [
+                "110100",
+                5
+              ],
+              [
+                "110111",
+                5
+              ],
+              [
+                "101010",
+                5
+              ],
+              [
+                "010111",
+                4
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "rates"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "job_id": "d8vmcu9ropqc738clmcg",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 3,
+              "objective": 1.152372,
+              "asset": "rates",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "010111",
+                5
+              ],
+              [
+                "010100",
+                5
+              ],
+              [
+                "010110",
+                5
+              ],
+              [
+                "001110",
+                5
+              ],
+              [
+                "111100",
+                5
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "rates"
+            },
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmd086c68s73ah0ci0",
+            "best_sampled_solution": {
+              "bitstring": "000100",
+              "decoded_bits": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              "shots": 4,
+              "objective": 1.152372,
+              "asset": "rates",
+              "selected_waits": [
+                120
+              ],
+              "chosen_wait_seconds": 120,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "100011",
+                10
+              ],
+              [
+                "001001",
+                5
+              ],
+              [
+                "110000",
+                5
+              ],
+              [
+                "000101",
+                5
+              ],
+              [
+                "000011",
+                5
+              ]
+            ]
+          }
+        ]
+      }
+    ],
+    "best_task": {
+      "subject": {
+        "asset": "fx"
+      },
+      "label": "wait_bucket_optimization:fx",
+      "ising_offset": 3.9404115,
+      "grid_size": 4,
+      "best_run": {
+        "subject": {
+          "asset": "fx"
+        },
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vmbvmmvj5c73ei40ug",
+        "best_sampled_solution": {
+          "bitstring": "000100",
+          "decoded_bits": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          "shots": 3,
+          "objective": 1.166316,
+          "asset": "fx",
+          "selected_waits": [
+            120
+          ],
+          "chosen_wait_seconds": 120,
+          "one_hot_valid": true
+        },
+        "top_counts": [
+          [
+            "000010",
+            7
+          ],
+          [
+            "011100",
+            6
+          ],
+          [
+            "000110",
+            5
+          ],
+          [
+            "100110",
+            4
+          ],
+          [
+            "001111",
+            4
+          ]
+        ]
+      },
+      "all_runs_top3": [
+        {
+          "subject": {
+            "asset": "fx"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "job_id": "d8vmbvmmvj5c73ei40ug",
+          "best_sampled_solution": {
+            "bitstring": "000100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "shots": 3,
+            "objective": 1.166316,
+            "asset": "fx",
+            "selected_waits": [
+              120
+            ],
+            "chosen_wait_seconds": 120,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "000010",
+              7
+            ],
+            [
+              "011100",
+              6
+            ],
+            [
+              "000110",
+              5
+            ],
+            [
+              "100110",
+              4
+            ],
+            [
+              "001111",
+              4
+            ]
+          ]
+        },
+        {
+          "subject": {
+            "asset": "fx"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              1.5707963267948966
+            ]
+          },
+          "job_id": "d8vmc1hropqc738clle0",
+          "best_sampled_solution": {
+            "bitstring": "000100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "shots": 5,
+            "objective": 1.166316,
+            "asset": "fx",
+            "selected_waits": [
+              120
+            ],
+            "chosen_wait_seconds": 120,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "011111",
+              6
+            ],
+            [
+              "000011",
+              5
+            ],
+            [
+              "101010",
+              5
+            ],
+            [
+              "000100",
+              5
+            ],
+            [
+              "011010",
+              5
+            ]
+          ]
+        },
+        {
+          "subject": {
+            "asset": "fx"
+          },
+          "params": {
+            "γ": [
+              3.141592653589793
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "job_id": "d8vmc3o6c68s73ah0bh0",
+          "best_sampled_solution": {
+            "bitstring": "000100",
+            "decoded_bits": [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            "shots": 3,
+            "objective": 1.166316,
+            "asset": "fx",
+            "selected_waits": [
+              120
+            ],
+            "chosen_wait_seconds": 120,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "100000",
+              5
+            ],
+            [
+              "111000",
+              4
+            ],
+            [
+              "001011",
+              4
+            ],
+            [
+              "001001",
+              4
+            ],
+            [
+              "000000",
+              4
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "baseline_exact": [
+    {
+      "asset": "crypto",
+      "wait_seconds": 180,
+      "score": 1.133572
+    },
+    {
+      "asset": "fx",
+      "wait_seconds": 120,
+      "score": 1.166316
+    },
+    {
+      "asset": "index",
+      "wait_seconds": 120,
+      "score": 1.109859
+    },
+    {
+      "asset": "oil",
+      "wait_seconds": 240,
+      "score": 0.990755
+    },
+    {
+      "asset": "rates",
+      "wait_seconds": 120,
+      "score": 1.152372
+    }
+  ],
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}
