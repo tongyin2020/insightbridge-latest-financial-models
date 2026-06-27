@@ -17,6 +17,7 @@ if str(BASE) not in sys.path:
 
 from eventalpha_core import (
     AssetClass,
+    Direction,
     EventAlphaBrain,
     EventMemoryDB,
     EventTradeRecord,
@@ -25,6 +26,8 @@ from eventalpha_core import (
     MacroEvent,
     MarketState,
     PositionState,
+    load_preferred_assets,
+    select_portfolio_candidates,
 )
 from eventalpha_core.telegram_notify import EventAlphaTelegramNotifier
 
@@ -113,9 +116,8 @@ def main() -> None:
     event = build_event(args.event_type, args.title)
 
     ranks = brain.rank_assets_for_event(event, states)
-    selected = ranks[: max(1, args.top_n)]
 
-    decisions = []
+    candidate_decisions = []
     executions = []
     exit_reviews = []
     regime_snapshots = []
@@ -127,22 +129,13 @@ def main() -> None:
         "sent_count": 0,
         "results": [],
     }
-    for rank in selected:
+    for rank in ranks:
         state = states[rank.asset]
         related = {
             a.value: s for a, s in states.items() if a != rank.asset
         }
         decision = brain.decide(event, state, related=related)
-        regime_snapshots.append(
-            {
-                "asset": rank.asset.value,
-                "symbol": rank.symbol,
-                "macro_regime": decision.metadata.get("macro_regime"),
-                "macro_regime_probabilities": decision.metadata.get("macro_regime_probabilities", {}),
-                "macro_regime_explanation": decision.metadata.get("macro_regime_explanation", []),
-            }
-        )
-        decisions.append(
+        candidate_decisions.append(
             {
                 "asset": rank.asset.value,
                 "symbol": rank.symbol,
@@ -161,32 +154,52 @@ def main() -> None:
                 },
             }
         )
-        if decision.action in {
-            decision.action.ENTER_SMALL,
-            decision.action.ENTER_NORMAL,
-            decision.action.ENTER_HEAVY,
-        }:
+
+    preference_info = load_preferred_assets()
+    portfolio_selection = select_portfolio_candidates(
+        candidate_decisions,
+        top_n=max(1, args.top_n),
+        preferred_assets=preference_info.get("preferred_assets", []),
+    )
+    decisions = portfolio_selection["selected"]
+
+    for row in decisions:
+        rank_asset = AssetClass(str(row["asset"]))
+        rank_symbol = str(row["symbol"])
+        decision_payload = row["decision"]
+        state = states[rank_asset]
+        regime_snapshots.append(
+            {
+                "asset": row["asset"],
+                "symbol": row["symbol"],
+                "macro_regime": decision_payload["metadata"].get("macro_regime"),
+                "macro_regime_probabilities": decision_payload["metadata"].get("macro_regime_probabilities", {}),
+                "macro_regime_explanation": decision_payload["metadata"].get("macro_regime_explanation", []),
+            }
+        )
+
+        if decision_payload["action"] in {"enter_small", "enter_normal", "enter_heavy"}:
             capital = 100000.0
-            risk_bias = learning.risk_multiplier_bias(event.event_type, rank.asset)
+            risk_bias = learning.risk_multiplier_bias(event.event_type, rank_asset)
             scaled_capital = capital * max(0.5, min(1.5, 1.0 + risk_bias))
-            result = modules[rank.asset].execute_decision(
+            result = modules[rank_asset].execute_decision(
                 {
-                    "symbol": rank.symbol,
-                    "market_state": adapter_states[rank.asset]["market_state"],
+                    "symbol": rank_symbol,
+                    "market_state": adapter_states[rank_asset]["market_state"],
                     "capital": scaled_capital,
                 }
             )
-            executions.append({"asset": rank.asset.value, "result": result})
+            executions.append({"asset": row["asset"], "result": result})
             learning.memory.append(
                 EventTradeRecord(
                     event_id=event.event_id,
                     event_type=event.event_type.value,
-                    asset=rank.asset.value,
-                    symbol=rank.symbol,
+                    asset=row["asset"],
+                    symbol=rank_symbol,
                     thesis=event.title,
-                    entry_confidence=decision.execution_confidence,
-                    seconds_waited=decision.wait_seconds,
-                    direction=decision.direction.value,
+                    entry_confidence=decision_payload["execution_confidence"],
+                    seconds_waited=decision_payload["wait_seconds"],
+                    direction=decision_payload["direction"],
                     entry_price=state.price,
                     exit_price=None,
                     mfe_pct=0.0,
@@ -196,16 +209,16 @@ def main() -> None:
                 )
             )
             position = PositionState(
-                asset=rank.asset,
-                symbol=rank.symbol,
-                direction=decision.direction,
+                asset=rank_asset,
+                symbol=rank_symbol,
+                direction=Direction(decision_payload["direction"]),
                 entry_price=state.price,
                 current_price=state.price * (1.0 + 0.004),
                 max_price_since_entry=state.price * (1.0 + 0.009),
                 min_price_since_entry=state.price * (1.0 - 0.003),
-                seconds_in_trade=max(decision.wait_seconds, 900),
-                confidence_at_entry=decision.execution_confidence,
-                confidence_now=max(0.05, decision.execution_confidence - 0.08),
+                seconds_in_trade=max(decision_payload["wait_seconds"], 900),
+                confidence_at_entry=decision_payload["execution_confidence"],
+                confidence_now=max(0.05, decision_payload["execution_confidence"] - 0.08),
                 spread_bps=state.spread_bps,
                 momentum_score=state.momentum_score,
                 reversal_score=state.reversal_score,
@@ -221,15 +234,15 @@ def main() -> None:
                 mfe_r_multiple=1.2,
                 current_r_multiple=0.5,
             )
-            adapter_exit = modules[rank.asset].manage_position(
+            adapter_exit = modules[rank_asset].manage_position(
                 {
-                    "symbol": rank.symbol,
+                    "symbol": rank_symbol,
                     "position_id": result.get("position_id"),
-                    "direction": decision.direction.value,
-                    "side": decision.direction.value,
+                    "direction": decision_payload["direction"],
+                    "side": decision_payload["direction"],
                     "entry_price": state.price,
                     "current_price": state.price * (1.0 + 0.004),
-                    "stop_loss": state.price * (0.992 if decision.direction.value == "long" else 1.008),
+                    "stop_loss": state.price * (0.992 if decision_payload["direction"] == "long" else 1.008),
                     "pnl_pct": 0.4,
                     "pnl_pips": 9,
                     "pnl_points": 14,
@@ -238,8 +251,8 @@ def main() -> None:
             )
             exit_reviews.append(
                 {
-                    "asset": rank.asset.value,
-                    "symbol": rank.symbol,
+                    "asset": row["asset"],
+                    "symbol": rank_symbol,
                     "brain_exit": {
                         "action": exit_signal.action.value,
                         "urgency": exit_signal.urgency,
@@ -289,6 +302,14 @@ def main() -> None:
             }
             for r in ranks
         ],
+        "portfolio_selection": {
+            "preference_source": preference_info,
+            "selected_assets": portfolio_selection["selected_assets"],
+            "selected_symbols": portfolio_selection["selected_symbols"],
+            "selected_count": portfolio_selection["selected_count"],
+            "overflow": portfolio_selection["overflow"],
+        },
+        "candidate_decisions": candidate_decisions,
         "selected_decisions": decisions,
         "executions": executions,
         "exit_reviews": exit_reviews,
