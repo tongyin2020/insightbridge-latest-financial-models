@@ -153,6 +153,19 @@ export TELEGRAM_BOT_TOKEN="your_bot_token"
 export TELEGRAM_CHAT_ID="your_chat_id"
 ```
 
+Or place them once in a local private file that is ignored by Git:
+
+```bash
+/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/.env.telegram.local
+```
+
+Example:
+
+```bash
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+```
+
 Then run:
 
 ```bash

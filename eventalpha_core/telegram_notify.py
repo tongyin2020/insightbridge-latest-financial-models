@@ -15,6 +15,21 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _load_local_env(env_path: Path) -> Dict[str, str]:
+    if not env_path.exists():
+        return {}
+    values: Dict[str, str] = {}
+    for raw_line in env_path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip("'").strip('"')
+        values[key] = value
+    return values
+
+
 @dataclass
 class TelegramNotifyConfig:
     enabled: bool
@@ -27,8 +42,9 @@ class TelegramNotifyConfig:
 
 class EventAlphaTelegramNotifier:
     def __init__(self, base_dir: Path) -> None:
-        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
-        chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+        local_env = _load_local_env(base_dir / ".env.telegram.local")
+        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", local_env.get("TELEGRAM_BOT_TOKEN", "")).strip()
+        chat_id = os.environ.get("TELEGRAM_CHAT_ID", local_env.get("TELEGRAM_CHAT_ID", "")).strip()
         reports_dir = base_dir / "reports"
         reports_dir.mkdir(parents=True, exist_ok=True)
         self.config = TelegramNotifyConfig(
