@@ -1,0 +1,1779 @@
+{
+  "generated_at": "2026-06-27T06:18:59.284854+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+  "local_results": [
+    {
+      "command": [
+        "python3",
+        "/Users/tongyin/Desktop/Anaconda_Local_Tools/ibm_quantum_eventalpha_submit.py",
+        "--pack",
+        "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+        "--mode",
+        "local",
+        "--problem",
+        "asset_subset_selection",
+        "--shots",
+        "512",
+        "--grid-points",
+        "3",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"generated_at\": \"2026-06-27T06:18:44.640766+00:00\",\n  \"pack_path\": \"/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json\",\n  \"event_type\": \"multi_event_real_history\",\n  \"problem\": \"asset_subset_selection\",\n  \"asset_filter\": null,\n  \"result\": {\n    \"mode\": \"local\",\n    \"task_count\": 1,\n    \"tasks\": [\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"ising_offset\": -0.026227249999999896,\n        \"grid_size\": 9,\n        \"best_run\": {\n          \"subject\": null,\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              0.0\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"11100\",\n            \"decoded_bits\": [\n              0,\n              0,\n              1,\n              1,\n              1\n            ],\n            \"shots\": 13,\n            \"objective\": 0.297124,\n            \"selected\": [\n              \"crypto\",\n              \"oil\",\n              \"index\"\n            ]\n          },\n          \"top_counts\": [\n            [\n              \"00011\",\n              28\n            ],\n            [\n              \"00100\",\n              26\n            ],\n            [\n              \"11001\",\n              22\n            ],\n            [\n              \"10100\",\n              21\n            ],\n            [\n              \"10010\",\n              21\n            ]\n          ]\n        },\n        \"all_runs_top3\": [\n          {\n            \"subject\": null,\n            \"params\": {\n              \"γ\": [\n                0.0\n              ],\n              \"β\": [\n                0.0\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"11100\",\n              \"decoded_bits\": [\n                0,\n                0,\n                1,\n                1,\n                1\n              ],\n              \"shots\": 13,\n              \"objective\": 0.297124,\n              \"selected\": [\n                \"crypto\",\n                \"oil\",\n                \"index\"\n              ]\n            },\n            \"top_counts\": [\n              [\n                \"00011\",\n                28\n              ],\n              [\n                \"00100\",\n                26\n              ],\n              [\n                \"11001\",\n                22\n              ],\n              [\n                \"10100\",\n                21\n              ],\n              [\n                \"10010\",\n                21\n              ]\n            ]\n          },\n          {\n            \"subject\": null,\n            \"params\": {\n              \"γ\": [\n                0.0\n              ],\n              \"β\": [\n                0.7853981633974483\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"11100\",\n              \"decoded_bits\": [\n                0,\n                0,\n                1,\n                1,\n                1\n              ],\n              \"shots\": 13,\n              \"objective\": 0.297124,\n              \"selected\": [\n                \"crypto\",\n                \"oil\",\n                \"index\"\n              ]\n            },\n            \"top_counts\": [\n              [\n                \"00011\",\n                28\n              ],\n              [\n                \"00100\",\n                26\n              ],\n              [\n                \"11001\",\n                22\n              ],\n              [\n                \"10100\",\n                21\n              ],\n              [\n                \"10010\",\n                21\n              ]\n            ]\n          },\n          {\n            \"subject\": null,\n            \"params\": {\n              \"γ\": [\n                0.0\n              ],\n              \"β\": [\n                1.5707963267948966\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"11100\",\n              \"decoded_bits\": [\n                0,\n                0,\n                1,\n                1,\n                1\n              ],\n              \"shots\": 13,\n              \"objective\": 0.297124,\n              \"selected\": [\n                \"crypto\",\n                \"oil\",\n                \"index\"\n              ]\n            },\n            \"top_counts\": [\n              [\n                \"00011\",\n                28\n              ],\n              [\n                \"00100\",\n                26\n              ],\n              [\n                \"11001\",\n                22\n              ],\n              [\n                \"10100\",\n                21\n              ],\n              [\n                \"10010\",\n                21\n              ]\n            ]\n          }\n        ]\n      }\n    ],\n    \"best_task\": {\n      \"subject\": null,\n      \"label\": \"asset_subset_selection\",\n      \"ising_offset\": -0.026227249999999896,\n      \"grid_size\": 9,\n      \"best_run\": {\n        \"subject\": null,\n        \"params\": {\n          \"γ\": [\n            0.0\n          ],\n          \"β\": [\n            0.0\n          ]\n        },\n        \"best_sampled_solution\": {\n          \"bitstring\": \"11100\",\n          \"decoded_bits\": [\n            0,\n            0,\n            1,\n            1,\n            1\n          ],\n          \"shots\": 13,\n          \"objective\": 0.297124,\n          \"selected\": [\n            \"crypto\",\n            \"oil\",\n            \"index\"\n          ]\n        },\n        \"top_counts\": [\n          [\n            \"00011\",\n            28\n          ],\n          [\n            \"00100\",\n            26\n          ],\n          [\n            \"11001\",\n            22\n          ],\n          [\n            \"10100\",\n            21\n          ],\n          [\n            \"10010\",\n            21\n          ]\n        ]\n      },\n      \"all_runs_top3\": [\n        {\n          \"subject\": null,\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              0.0\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"11100\",\n            \"decoded_bits\": [\n              0,\n              0,\n              1,\n              1,\n              1\n            ],\n            \"shots\": 13,\n            \"objective\": 0.297124,\n            \"selected\": [\n              \"crypto\",\n              \"oil\",\n              \"index\"\n            ]\n          },\n          \"top_counts\": [\n            [\n              \"00011\",\n              28\n            ],\n            [\n              \"00100\",\n              26\n            ],\n            [\n              \"11001\",\n              22\n            ],\n            [\n              \"10100\",\n              21\n            ],\n            [\n              \"10010\",\n              21\n            ]\n          ]\n        },\n        {\n          \"subject\": null,\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              0.7853981633974483\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"11100\",\n            \"decoded_bits\": [\n              0,\n              0,\n              1,\n              1,\n              1\n            ],\n            \"shots\": 13,\n            \"objective\": 0.297124,\n            \"selected\": [\n              \"crypto\",\n              \"oil\",\n              \"index\"\n            ]\n          },\n          \"top_counts\": [\n            [\n              \"00011\",\n              28\n            ],\n            [\n              \"00100\",\n              26\n            ],\n            [\n              \"11001\",\n              22\n            ],\n            [\n              \"10100\",\n              21\n            ],\n            [\n              \"10010\",\n              21\n            ]\n          ]\n        },\n        {\n          \"subject\": null,\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              1.5707963267948966\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"11100\",\n            \"decoded_bits\": [\n              0,\n              0,\n              1,\n              1,\n              1\n            ],\n            \"shots\": 13,\n            \"objective\": 0.297124,\n            \"selected\": [\n              \"crypto\",\n              \"oil\",\n              \"index\"\n            ]\n          },\n          \"top_counts\": [\n            [\n              \"00011\",\n              28\n            ],\n            [\n              \"00100\",\n              26\n            ],\n            [\n              \"11001\",\n              22\n            ],\n            [\n              \"10100\",\n              21\n            ],\n            [\n              \"10010\",\n              21\n            ]\n          ]\n        }\n      ]\n    }\n  },\n  \"baseline_exact\": {\n    \"bits\": [\n      0,\n      0,\n      1,\n      1,\n      1\n    ],\n    \"selected\": [\n      \"crypto\",\n      \"oil\",\n      \"index\"\n    ],\n    \"objective\": 0.297124,\n    \"base\": 0.299262,\n    \"pair_penalty\": 0.002138,\n    \"size_penalty\": 0.0\n  },\n  \"note\": \"This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders.\"\n}\n",
+      "stderr": "",
+      "payload": {
+        "generated_at": "2026-06-27T06:18:44.640766+00:00",
+        "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+        "event_type": "multi_event_real_history",
+        "problem": "asset_subset_selection",
+        "asset_filter": null,
+        "result": {
+          "mode": "local",
+          "task_count": 1,
+          "tasks": [
+            {
+              "subject": null,
+              "label": "asset_subset_selection",
+              "ising_offset": -0.026227249999999896,
+              "grid_size": 9,
+              "best_run": {
+                "subject": null,
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    0.0
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "11100",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    1,
+                    1,
+                    1
+                  ],
+                  "shots": 13,
+                  "objective": 0.297124,
+                  "selected": [
+                    "crypto",
+                    "oil",
+                    "index"
+                  ]
+                },
+                "top_counts": [
+                  [
+                    "00011",
+                    28
+                  ],
+                  [
+                    "00100",
+                    26
+                  ],
+                  [
+                    "11001",
+                    22
+                  ],
+                  [
+                    "10100",
+                    21
+                  ],
+                  [
+                    "10010",
+                    21
+                  ]
+                ]
+              },
+              "all_runs_top3": [
+                {
+                  "subject": null,
+                  "params": {
+                    "γ": [
+                      0.0
+                    ],
+                    "β": [
+                      0.0
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "11100",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      1,
+                      1,
+                      1
+                    ],
+                    "shots": 13,
+                    "objective": 0.297124,
+                    "selected": [
+                      "crypto",
+                      "oil",
+                      "index"
+                    ]
+                  },
+                  "top_counts": [
+                    [
+                      "00011",
+                      28
+                    ],
+                    [
+                      "00100",
+                      26
+                    ],
+                    [
+                      "11001",
+                      22
+                    ],
+                    [
+                      "10100",
+                      21
+                    ],
+                    [
+                      "10010",
+                      21
+                    ]
+                  ]
+                },
+                {
+                  "subject": null,
+                  "params": {
+                    "γ": [
+                      0.0
+                    ],
+                    "β": [
+                      0.7853981633974483
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "11100",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      1,
+                      1,
+                      1
+                    ],
+                    "shots": 13,
+                    "objective": 0.297124,
+                    "selected": [
+                      "crypto",
+                      "oil",
+                      "index"
+                    ]
+                  },
+                  "top_counts": [
+                    [
+                      "00011",
+                      28
+                    ],
+                    [
+                      "00100",
+                      26
+                    ],
+                    [
+                      "11001",
+                      22
+                    ],
+                    [
+                      "10100",
+                      21
+                    ],
+                    [
+                      "10010",
+                      21
+                    ]
+                  ]
+                },
+                {
+                  "subject": null,
+                  "params": {
+                    "γ": [
+                      0.0
+                    ],
+                    "β": [
+                      1.5707963267948966
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "11100",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      1,
+                      1,
+                      1
+                    ],
+                    "shots": 13,
+                    "objective": 0.297124,
+                    "selected": [
+                      "crypto",
+                      "oil",
+                      "index"
+                    ]
+                  },
+                  "top_counts": [
+                    [
+                      "00011",
+                      28
+                    ],
+                    [
+                      "00100",
+                      26
+                    ],
+                    [
+                      "11001",
+                      22
+                    ],
+                    [
+                      "10100",
+                      21
+                    ],
+                    [
+                      "10010",
+                      21
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "best_task": {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "ising_offset": -0.026227249999999896,
+            "grid_size": 9,
+            "best_run": {
+              "subject": null,
+              "params": {
+                "γ": [
+                  0.0
+                ],
+                "β": [
+                  0.0
+                ]
+              },
+              "best_sampled_solution": {
+                "bitstring": "11100",
+                "decoded_bits": [
+                  0,
+                  0,
+                  1,
+                  1,
+                  1
+                ],
+                "shots": 13,
+                "objective": 0.297124,
+                "selected": [
+                  "crypto",
+                  "oil",
+                  "index"
+                ]
+              },
+              "top_counts": [
+                [
+                  "00011",
+                  28
+                ],
+                [
+                  "00100",
+                  26
+                ],
+                [
+                  "11001",
+                  22
+                ],
+                [
+                  "10100",
+                  21
+                ],
+                [
+                  "10010",
+                  21
+                ]
+              ]
+            },
+            "all_runs_top3": [
+              {
+                "subject": null,
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    0.0
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "11100",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    1,
+                    1,
+                    1
+                  ],
+                  "shots": 13,
+                  "objective": 0.297124,
+                  "selected": [
+                    "crypto",
+                    "oil",
+                    "index"
+                  ]
+                },
+                "top_counts": [
+                  [
+                    "00011",
+                    28
+                  ],
+                  [
+                    "00100",
+                    26
+                  ],
+                  [
+                    "11001",
+                    22
+                  ],
+                  [
+                    "10100",
+                    21
+                  ],
+                  [
+                    "10010",
+                    21
+                  ]
+                ]
+              },
+              {
+                "subject": null,
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    0.7853981633974483
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "11100",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    1,
+                    1,
+                    1
+                  ],
+                  "shots": 13,
+                  "objective": 0.297124,
+                  "selected": [
+                    "crypto",
+                    "oil",
+                    "index"
+                  ]
+                },
+                "top_counts": [
+                  [
+                    "00011",
+                    28
+                  ],
+                  [
+                    "00100",
+                    26
+                  ],
+                  [
+                    "11001",
+                    22
+                  ],
+                  [
+                    "10100",
+                    21
+                  ],
+                  [
+                    "10010",
+                    21
+                  ]
+                ]
+              },
+              {
+                "subject": null,
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    1.5707963267948966
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "11100",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    1,
+                    1,
+                    1
+                  ],
+                  "shots": 13,
+                  "objective": 0.297124,
+                  "selected": [
+                    "crypto",
+                    "oil",
+                    "index"
+                  ]
+                },
+                "top_counts": [
+                  [
+                    "00011",
+                    28
+                  ],
+                  [
+                    "00100",
+                    26
+                  ],
+                  [
+                    "11001",
+                    22
+                  ],
+                  [
+                    "10100",
+                    21
+                  ],
+                  [
+                    "10010",
+                    21
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "baseline_exact": {
+          "bits": [
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "selected": [
+            "crypto",
+            "oil",
+            "index"
+          ],
+          "objective": 0.297124,
+          "base": 0.299262,
+          "pair_penalty": 0.002138,
+          "size_penalty": 0.0
+        },
+        "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "/Users/tongyin/Desktop/Anaconda_Local_Tools/ibm_quantum_eventalpha_submit.py",
+        "--pack",
+        "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+        "--mode",
+        "local",
+        "--problem",
+        "wait_bucket_optimization",
+        "--shots",
+        "512",
+        "--grid-points",
+        "3",
+        "--json",
+        "--asset",
+        "oil"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"generated_at\": \"2026-06-27T06:18:45.510377+00:00\",\n  \"pack_path\": \"/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json\",\n  \"event_type\": \"multi_event_real_history\",\n  \"problem\": \"wait_bucket_optimization\",\n  \"asset_filter\": \"oil\",\n  \"result\": {\n    \"mode\": \"local\",\n    \"task_count\": 1,\n    \"tasks\": [\n      {\n        \"subject\": {\n          \"asset\": \"oil\"\n        },\n        \"label\": \"wait_bucket_optimization:oil\",\n        \"ising_offset\": 4.8188055,\n        \"grid_size\": 9,\n        \"best_run\": {\n          \"subject\": {\n            \"asset\": \"oil\"\n          },\n          \"params\": {\n            \"γ\": [\n              3.141592653589793\n            ],\n            \"β\": [\n              0.7853981633974483\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"100000\",\n            \"decoded_bits\": [\n              0,\n              0,\n              0,\n              0,\n              0,\n              1\n            ],\n            \"shots\": 28,\n            \"objective\": 0.938339,\n            \"asset\": \"oil\",\n            \"selected_waits\": [\n              300\n            ],\n            \"chosen_wait_seconds\": 300,\n            \"one_hot_valid\": true,\n            \"constraint_valid\": true\n          },\n          \"top_counts\": [\n            [\n              \"111000\",\n              57\n            ],\n            [\n              \"000001\",\n              51\n            ],\n            [\n              \"110000\",\n              49\n            ],\n            [\n              \"111100\",\n              42\n            ],\n            [\n              \"111110\",\n              35\n            ]\n          ]\n        },\n        \"all_runs_top3\": [\n          {\n            \"subject\": {\n              \"asset\": \"oil\"\n            },\n            \"params\": {\n              \"γ\": [\n                3.141592653589793\n              ],\n              \"β\": [\n                0.7853981633974483\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"100000\",\n              \"decoded_bits\": [\n                0,\n                0,\n                0,\n                0,\n                0,\n                1\n              ],\n              \"shots\": 28,\n              \"objective\": 0.938339,\n              \"asset\": \"oil\",\n              \"selected_waits\": [\n                300\n              ],\n              \"chosen_wait_seconds\": 300,\n              \"one_hot_valid\": true,\n              \"constraint_valid\": true\n            },\n            \"top_counts\": [\n              [\n                \"111000\",\n                57\n              ],\n              [\n                \"000001\",\n                51\n              ],\n              [\n                \"110000\",\n                49\n              ],\n              [\n                \"111100\",\n                42\n              ],\n              [\n                \"111110\",\n                35\n              ]\n            ]\n          },\n          {\n            \"subject\": {\n              \"asset\": \"oil\"\n            },\n            \"params\": {\n              \"γ\": [\n                1.5707963267948966\n              ],\n              \"β\": [\n                0.7853981633974483\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"100000\",\n              \"decoded_bits\": [\n                0,\n                0,\n                0,\n                0,\n                0,\n                1\n              ],\n              \"shots\": 19,\n              \"objective\": 0.938339,\n              \"asset\": \"oil\",\n              \"selected_waits\": [\n                300\n              ],\n              \"chosen_wait_seconds\": 300,\n              \"one_hot_valid\": true,\n              \"constraint_valid\": true\n            },\n            \"top_counts\": [\n              [\n                \"000000\",\n                73\n              ],\n              [\n                \"101111\",\n                33\n              ],\n              [\n                \"111110\",\n                30\n              ],\n              [\n                \"011111\",\n                27\n              ],\n              [\n                \"001111\",\n                23\n              ]\n            ]\n          },\n          {\n            \"subject\": {\n              \"asset\": \"oil\"\n            },\n            \"params\": {\n              \"γ\": [\n                0.0\n              ],\n              \"β\": [\n                0.0\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"100000\",\n              \"decoded_bits\": [\n                0,\n                0,\n                0,\n                0,\n                0,\n                1\n              ],\n              \"shots\": 10,\n              \"objective\": 0.938339,\n              \"asset\": \"oil\",\n              \"selected_waits\": [\n                300\n              ],\n              \"chosen_wait_seconds\": 300,\n              \"one_hot_valid\": true,\n              \"constraint_valid\": true\n            },\n            \"top_counts\": [\n              [\n                \"000110\",\n                14\n              ],\n              [\n                \"000111\",\n                14\n              ],\n              [\n                \"110001\",\n                13\n              ],\n              [\n                \"001000\",\n                13\n              ],\n              [\n                \"111011\",\n                13\n              ]\n            ]\n          }\n        ]\n      }\n    ],\n    \"best_task\": {\n      \"subject\": {\n        \"asset\": \"oil\"\n      },\n      \"label\": \"wait_bucket_optimization:oil\",\n      \"ising_offset\": 4.8188055,\n      \"grid_size\": 9,\n      \"best_run\": {\n        \"subject\": {\n          \"asset\": \"oil\"\n        },\n        \"params\": {\n          \"γ\": [\n            3.141592653589793\n          ],\n          \"β\": [\n            0.7853981633974483\n          ]\n        },\n        \"best_sampled_solution\": {\n          \"bitstring\": \"100000\",\n          \"decoded_bits\": [\n            0,\n            0,\n            0,\n            0,\n            0,\n            1\n          ],\n          \"shots\": 28,\n          \"objective\": 0.938339,\n          \"asset\": \"oil\",\n          \"selected_waits\": [\n            300\n          ],\n          \"chosen_wait_seconds\": 300,\n          \"one_hot_valid\": true,\n          \"constraint_valid\": true\n        },\n        \"top_counts\": [\n          [\n            \"111000\",\n            57\n          ],\n          [\n            \"000001\",\n            51\n          ],\n          [\n            \"110000\",\n            49\n          ],\n          [\n            \"111100\",\n            42\n          ],\n          [\n            \"111110\",\n            35\n          ]\n        ]\n      },\n      \"all_runs_top3\": [\n        {\n          \"subject\": {\n            \"asset\": \"oil\"\n          },\n          \"params\": {\n            \"γ\": [\n              3.141592653589793\n            ],\n            \"β\": [\n              0.7853981633974483\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"100000\",\n            \"decoded_bits\": [\n              0,\n              0,\n              0,\n              0,\n              0,\n              1\n            ],\n            \"shots\": 28,\n            \"objective\": 0.938339,\n            \"asset\": \"oil\",\n            \"selected_waits\": [\n              300\n            ],\n            \"chosen_wait_seconds\": 300,\n            \"one_hot_valid\": true,\n            \"constraint_valid\": true\n          },\n          \"top_counts\": [\n            [\n              \"111000\",\n              57\n            ],\n            [\n              \"000001\",\n              51\n            ],\n            [\n              \"110000\",\n              49\n            ],\n            [\n              \"111100\",\n              42\n            ],\n            [\n              \"111110\",\n              35\n            ]\n          ]\n        },\n        {\n          \"subject\": {\n            \"asset\": \"oil\"\n          },\n          \"params\": {\n            \"γ\": [\n              1.5707963267948966\n            ],\n            \"β\": [\n              0.7853981633974483\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"100000\",\n            \"decoded_bits\": [\n              0,\n              0,\n              0,\n              0,\n              0,\n              1\n            ],\n            \"shots\": 19,\n            \"objective\": 0.938339,\n            \"asset\": \"oil\",\n            \"selected_waits\": [\n              300\n            ],\n            \"chosen_wait_seconds\": 300,\n            \"one_hot_valid\": true,\n            \"constraint_valid\": true\n          },\n          \"top_counts\": [\n            [\n              \"000000\",\n              73\n            ],\n            [\n              \"101111\",\n              33\n            ],\n            [\n              \"111110\",\n              30\n            ],\n            [\n              \"011111\",\n              27\n            ],\n            [\n              \"001111\",\n              23\n            ]\n          ]\n        },\n        {\n          \"subject\": {\n            \"asset\": \"oil\"\n          },\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              0.0\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"100000\",\n            \"decoded_bits\": [\n              0,\n              0,\n              0,\n              0,\n              0,\n              1\n            ],\n            \"shots\": 10,\n            \"objective\": 0.938339,\n            \"asset\": \"oil\",\n            \"selected_waits\": [\n              300\n            ],\n            \"chosen_wait_seconds\": 300,\n            \"one_hot_valid\": true,\n            \"constraint_valid\": true\n          },\n          \"top_counts\": [\n            [\n              \"000110\",\n              14\n            ],\n            [\n              \"000111\",\n              14\n            ],\n            [\n              \"110001\",\n              13\n            ],\n            [\n              \"001000\",\n              13\n            ],\n            [\n              \"111011\",\n              13\n            ]\n          ]\n        }\n      ]\n    }\n  },\n  \"baseline_exact\": {\n    \"asset\": \"oil\",\n    \"wait_seconds\": 300,\n    \"score\": 0.938339\n  },\n  \"note\": \"This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders.\"\n}\n",
+      "stderr": "",
+      "payload": {
+        "generated_at": "2026-06-27T06:18:45.510377+00:00",
+        "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+        "event_type": "multi_event_real_history",
+        "problem": "wait_bucket_optimization",
+        "asset_filter": "oil",
+        "result": {
+          "mode": "local",
+          "task_count": 1,
+          "tasks": [
+            {
+              "subject": {
+                "asset": "oil"
+              },
+              "label": "wait_bucket_optimization:oil",
+              "ising_offset": 4.8188055,
+              "grid_size": 9,
+              "best_run": {
+                "subject": {
+                  "asset": "oil"
+                },
+                "params": {
+                  "γ": [
+                    3.141592653589793
+                  ],
+                  "β": [
+                    0.7853981633974483
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "100000",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  "shots": 28,
+                  "objective": 0.938339,
+                  "asset": "oil",
+                  "selected_waits": [
+                    300
+                  ],
+                  "chosen_wait_seconds": 300,
+                  "one_hot_valid": true,
+                  "constraint_valid": true
+                },
+                "top_counts": [
+                  [
+                    "111000",
+                    57
+                  ],
+                  [
+                    "000001",
+                    51
+                  ],
+                  [
+                    "110000",
+                    49
+                  ],
+                  [
+                    "111100",
+                    42
+                  ],
+                  [
+                    "111110",
+                    35
+                  ]
+                ]
+              },
+              "all_runs_top3": [
+                {
+                  "subject": {
+                    "asset": "oil"
+                  },
+                  "params": {
+                    "γ": [
+                      3.141592653589793
+                    ],
+                    "β": [
+                      0.7853981633974483
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "100000",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1
+                    ],
+                    "shots": 28,
+                    "objective": 0.938339,
+                    "asset": "oil",
+                    "selected_waits": [
+                      300
+                    ],
+                    "chosen_wait_seconds": 300,
+                    "one_hot_valid": true,
+                    "constraint_valid": true
+                  },
+                  "top_counts": [
+                    [
+                      "111000",
+                      57
+                    ],
+                    [
+                      "000001",
+                      51
+                    ],
+                    [
+                      "110000",
+                      49
+                    ],
+                    [
+                      "111100",
+                      42
+                    ],
+                    [
+                      "111110",
+                      35
+                    ]
+                  ]
+                },
+                {
+                  "subject": {
+                    "asset": "oil"
+                  },
+                  "params": {
+                    "γ": [
+                      1.5707963267948966
+                    ],
+                    "β": [
+                      0.7853981633974483
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "100000",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1
+                    ],
+                    "shots": 19,
+                    "objective": 0.938339,
+                    "asset": "oil",
+                    "selected_waits": [
+                      300
+                    ],
+                    "chosen_wait_seconds": 300,
+                    "one_hot_valid": true,
+                    "constraint_valid": true
+                  },
+                  "top_counts": [
+                    [
+                      "000000",
+                      73
+                    ],
+                    [
+                      "101111",
+                      33
+                    ],
+                    [
+                      "111110",
+                      30
+                    ],
+                    [
+                      "011111",
+                      27
+                    ],
+                    [
+                      "001111",
+                      23
+                    ]
+                  ]
+                },
+                {
+                  "subject": {
+                    "asset": "oil"
+                  },
+                  "params": {
+                    "γ": [
+                      0.0
+                    ],
+                    "β": [
+                      0.0
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "100000",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1
+                    ],
+                    "shots": 10,
+                    "objective": 0.938339,
+                    "asset": "oil",
+                    "selected_waits": [
+                      300
+                    ],
+                    "chosen_wait_seconds": 300,
+                    "one_hot_valid": true,
+                    "constraint_valid": true
+                  },
+                  "top_counts": [
+                    [
+                      "000110",
+                      14
+                    ],
+                    [
+                      "000111",
+                      14
+                    ],
+                    [
+                      "110001",
+                      13
+                    ],
+                    [
+                      "001000",
+                      13
+                    ],
+                    [
+                      "111011",
+                      13
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "best_task": {
+            "subject": {
+              "asset": "oil"
+            },
+            "label": "wait_bucket_optimization:oil",
+            "ising_offset": 4.8188055,
+            "grid_size": 9,
+            "best_run": {
+              "subject": {
+                "asset": "oil"
+              },
+              "params": {
+                "γ": [
+                  3.141592653589793
+                ],
+                "β": [
+                  0.7853981633974483
+                ]
+              },
+              "best_sampled_solution": {
+                "bitstring": "100000",
+                "decoded_bits": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "shots": 28,
+                "objective": 0.938339,
+                "asset": "oil",
+                "selected_waits": [
+                  300
+                ],
+                "chosen_wait_seconds": 300,
+                "one_hot_valid": true,
+                "constraint_valid": true
+              },
+              "top_counts": [
+                [
+                  "111000",
+                  57
+                ],
+                [
+                  "000001",
+                  51
+                ],
+                [
+                  "110000",
+                  49
+                ],
+                [
+                  "111100",
+                  42
+                ],
+                [
+                  "111110",
+                  35
+                ]
+              ]
+            },
+            "all_runs_top3": [
+              {
+                "subject": {
+                  "asset": "oil"
+                },
+                "params": {
+                  "γ": [
+                    3.141592653589793
+                  ],
+                  "β": [
+                    0.7853981633974483
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "100000",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  "shots": 28,
+                  "objective": 0.938339,
+                  "asset": "oil",
+                  "selected_waits": [
+                    300
+                  ],
+                  "chosen_wait_seconds": 300,
+                  "one_hot_valid": true,
+                  "constraint_valid": true
+                },
+                "top_counts": [
+                  [
+                    "111000",
+                    57
+                  ],
+                  [
+                    "000001",
+                    51
+                  ],
+                  [
+                    "110000",
+                    49
+                  ],
+                  [
+                    "111100",
+                    42
+                  ],
+                  [
+                    "111110",
+                    35
+                  ]
+                ]
+              },
+              {
+                "subject": {
+                  "asset": "oil"
+                },
+                "params": {
+                  "γ": [
+                    1.5707963267948966
+                  ],
+                  "β": [
+                    0.7853981633974483
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "100000",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  "shots": 19,
+                  "objective": 0.938339,
+                  "asset": "oil",
+                  "selected_waits": [
+                    300
+                  ],
+                  "chosen_wait_seconds": 300,
+                  "one_hot_valid": true,
+                  "constraint_valid": true
+                },
+                "top_counts": [
+                  [
+                    "000000",
+                    73
+                  ],
+                  [
+                    "101111",
+                    33
+                  ],
+                  [
+                    "111110",
+                    30
+                  ],
+                  [
+                    "011111",
+                    27
+                  ],
+                  [
+                    "001111",
+                    23
+                  ]
+                ]
+              },
+              {
+                "subject": {
+                  "asset": "oil"
+                },
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    0.0
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "100000",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  "shots": 10,
+                  "objective": 0.938339,
+                  "asset": "oil",
+                  "selected_waits": [
+                    300
+                  ],
+                  "chosen_wait_seconds": 300,
+                  "one_hot_valid": true,
+                  "constraint_valid": true
+                },
+                "top_counts": [
+                  [
+                    "000110",
+                    14
+                  ],
+                  [
+                    "000111",
+                    14
+                  ],
+                  [
+                    "110001",
+                    13
+                  ],
+                  [
+                    "001000",
+                    13
+                  ],
+                  [
+                    "111011",
+                    13
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "baseline_exact": {
+          "asset": "oil",
+          "wait_seconds": 300,
+          "score": 0.938339
+        },
+        "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "/Users/tongyin/Desktop/Anaconda_Local_Tools/ibm_quantum_eventalpha_submit.py",
+        "--pack",
+        "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+        "--mode",
+        "local",
+        "--problem",
+        "risk_tier_allocation",
+        "--shots",
+        "512",
+        "--grid-points",
+        "3",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"generated_at\": \"2026-06-27T06:18:46.513792+00:00\",\n  \"pack_path\": \"/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json\",\n  \"event_type\": \"multi_event_real_history\",\n  \"problem\": \"risk_tier_allocation\",\n  \"asset_filter\": null,\n  \"result\": {\n    \"mode\": \"local\",\n    \"task_count\": 1,\n    \"tasks\": [\n      {\n        \"subject\": null,\n        \"label\": \"risk_tier_allocation\",\n        \"ising_offset\": 168.83513750000003,\n        \"grid_size\": 9,\n        \"best_run\": {\n          \"subject\": null,\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              0.0\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"010000011000\",\n            \"decoded_bits\": [\n              0,\n              0,\n              0,\n              1,\n              1,\n              0,\n              0,\n              0,\n              0,\n              0,\n              1,\n              0\n            ],\n            \"shots\": 1,\n            \"objective\": 24.247084,\n            \"allocation\": {\n              \"crypto\": {\n                \"tier\": \"heavy\",\n                \"weight\": 1.5\n              },\n              \"oil\": {\n                \"tier\": \"skip\",\n                \"weight\": 0.0\n              },\n              \"index\": {\n                \"tier\": \"normal\",\n                \"weight\": 1.0\n              }\n            },\n            \"risk_used\": 2.5,\n            \"one_hot_valid\": true,\n            \"budget_valid\": true,\n            \"constraint_valid\": true\n          },\n          \"top_counts\": [\n            [\n              \"001000111100\",\n              3\n            ],\n            [\n              \"111011111010\",\n              3\n            ],\n            [\n              \"100100101000\",\n              3\n            ],\n            [\n              \"011100000101\",\n              2\n            ],\n            [\n              \"010010011100\",\n              2\n            ]\n          ]\n        },\n        \"all_runs_top3\": [\n          {\n            \"subject\": null,\n            \"params\": {\n              \"γ\": [\n                0.0\n              ],\n              \"β\": [\n                0.0\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"010000011000\",\n              \"decoded_bits\": [\n                0,\n                0,\n                0,\n                1,\n                1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                1,\n                0\n              ],\n              \"shots\": 1,\n              \"objective\": 24.247084,\n              \"allocation\": {\n                \"crypto\": {\n                  \"tier\": \"heavy\",\n                  \"weight\": 1.5\n                },\n                \"oil\": {\n                  \"tier\": \"skip\",\n                  \"weight\": 0.0\n                },\n                \"index\": {\n                  \"tier\": \"normal\",\n                  \"weight\": 1.0\n                }\n              },\n              \"risk_used\": 2.5,\n              \"one_hot_valid\": true,\n              \"budget_valid\": true,\n              \"constraint_valid\": true\n            },\n            \"top_counts\": [\n              [\n                \"001000111100\",\n                3\n              ],\n              [\n                \"111011111010\",\n                3\n              ],\n              [\n                \"100100101000\",\n                3\n              ],\n              [\n                \"011100000101\",\n                2\n              ],\n              [\n                \"010010011100\",\n                2\n              ]\n            ]\n          },\n          {\n            \"subject\": null,\n            \"params\": {\n              \"γ\": [\n                0.0\n              ],\n              \"β\": [\n                0.7853981633974483\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"010000011000\",\n              \"decoded_bits\": [\n                0,\n                0,\n                0,\n                1,\n                1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                1,\n                0\n              ],\n              \"shots\": 1,\n              \"objective\": 24.247084,\n              \"allocation\": {\n                \"crypto\": {\n                  \"tier\": \"heavy\",\n                  \"weight\": 1.5\n                },\n                \"oil\": {\n                  \"tier\": \"skip\",\n                  \"weight\": 0.0\n                },\n                \"index\": {\n                  \"tier\": \"normal\",\n                  \"weight\": 1.0\n                }\n              },\n              \"risk_used\": 2.5,\n              \"one_hot_valid\": true,\n              \"budget_valid\": true,\n              \"constraint_valid\": true\n            },\n            \"top_counts\": [\n              [\n                \"001000111100\",\n                3\n              ],\n              [\n                \"111011111010\",\n                3\n              ],\n              [\n                \"100100101000\",\n                3\n              ],\n              [\n                \"011100000101\",\n                2\n              ],\n              [\n                \"010010011100\",\n                2\n              ]\n            ]\n          },\n          {\n            \"subject\": null,\n            \"params\": {\n              \"γ\": [\n                0.0\n              ],\n              \"β\": [\n                1.5707963267948966\n              ]\n            },\n            \"best_sampled_solution\": {\n              \"bitstring\": \"010000011000\",\n              \"decoded_bits\": [\n                0,\n                0,\n                0,\n                1,\n                1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                1,\n                0\n              ],\n              \"shots\": 1,\n              \"objective\": 24.247084,\n              \"allocation\": {\n                \"crypto\": {\n                  \"tier\": \"heavy\",\n                  \"weight\": 1.5\n                },\n                \"oil\": {\n                  \"tier\": \"skip\",\n                  \"weight\": 0.0\n                },\n                \"index\": {\n                  \"tier\": \"normal\",\n                  \"weight\": 1.0\n                }\n              },\n              \"risk_used\": 2.5,\n              \"one_hot_valid\": true,\n              \"budget_valid\": true,\n              \"constraint_valid\": true\n            },\n            \"top_counts\": [\n              [\n                \"001000111100\",\n                3\n              ],\n              [\n                \"111011111010\",\n                3\n              ],\n              [\n                \"100100101000\",\n                3\n              ],\n              [\n                \"011100000101\",\n                2\n              ],\n              [\n                \"010010011100\",\n                2\n              ]\n            ]\n          }\n        ]\n      }\n    ],\n    \"best_task\": {\n      \"subject\": null,\n      \"label\": \"risk_tier_allocation\",\n      \"ising_offset\": 168.83513750000003,\n      \"grid_size\": 9,\n      \"best_run\": {\n        \"subject\": null,\n        \"params\": {\n          \"γ\": [\n            0.0\n          ],\n          \"β\": [\n            0.0\n          ]\n        },\n        \"best_sampled_solution\": {\n          \"bitstring\": \"010000011000\",\n          \"decoded_bits\": [\n            0,\n            0,\n            0,\n            1,\n            1,\n            0,\n            0,\n            0,\n            0,\n            0,\n            1,\n            0\n          ],\n          \"shots\": 1,\n          \"objective\": 24.247084,\n          \"allocation\": {\n            \"crypto\": {\n              \"tier\": \"heavy\",\n              \"weight\": 1.5\n            },\n            \"oil\": {\n              \"tier\": \"skip\",\n              \"weight\": 0.0\n            },\n            \"index\": {\n              \"tier\": \"normal\",\n              \"weight\": 1.0\n            }\n          },\n          \"risk_used\": 2.5,\n          \"one_hot_valid\": true,\n          \"budget_valid\": true,\n          \"constraint_valid\": true\n        },\n        \"top_counts\": [\n          [\n            \"001000111100\",\n            3\n          ],\n          [\n            \"111011111010\",\n            3\n          ],\n          [\n            \"100100101000\",\n            3\n          ],\n          [\n            \"011100000101\",\n            2\n          ],\n          [\n            \"010010011100\",\n            2\n          ]\n        ]\n      },\n      \"all_runs_top3\": [\n        {\n          \"subject\": null,\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              0.0\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"010000011000\",\n            \"decoded_bits\": [\n              0,\n              0,\n              0,\n              1,\n              1,\n              0,\n              0,\n              0,\n              0,\n              0,\n              1,\n              0\n            ],\n            \"shots\": 1,\n            \"objective\": 24.247084,\n            \"allocation\": {\n              \"crypto\": {\n                \"tier\": \"heavy\",\n                \"weight\": 1.5\n              },\n              \"oil\": {\n                \"tier\": \"skip\",\n                \"weight\": 0.0\n              },\n              \"index\": {\n                \"tier\": \"normal\",\n                \"weight\": 1.0\n              }\n            },\n            \"risk_used\": 2.5,\n            \"one_hot_valid\": true,\n            \"budget_valid\": true,\n            \"constraint_valid\": true\n          },\n          \"top_counts\": [\n            [\n              \"001000111100\",\n              3\n            ],\n            [\n              \"111011111010\",\n              3\n            ],\n            [\n              \"100100101000\",\n              3\n            ],\n            [\n              \"011100000101\",\n              2\n            ],\n            [\n              \"010010011100\",\n              2\n            ]\n          ]\n        },\n        {\n          \"subject\": null,\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              0.7853981633974483\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"010000011000\",\n            \"decoded_bits\": [\n              0,\n              0,\n              0,\n              1,\n              1,\n              0,\n              0,\n              0,\n              0,\n              0,\n              1,\n              0\n            ],\n            \"shots\": 1,\n            \"objective\": 24.247084,\n            \"allocation\": {\n              \"crypto\": {\n                \"tier\": \"heavy\",\n                \"weight\": 1.5\n              },\n              \"oil\": {\n                \"tier\": \"skip\",\n                \"weight\": 0.0\n              },\n              \"index\": {\n                \"tier\": \"normal\",\n                \"weight\": 1.0\n              }\n            },\n            \"risk_used\": 2.5,\n            \"one_hot_valid\": true,\n            \"budget_valid\": true,\n            \"constraint_valid\": true\n          },\n          \"top_counts\": [\n            [\n              \"001000111100\",\n              3\n            ],\n            [\n              \"111011111010\",\n              3\n            ],\n            [\n              \"100100101000\",\n              3\n            ],\n            [\n              \"011100000101\",\n              2\n            ],\n            [\n              \"010010011100\",\n              2\n            ]\n          ]\n        },\n        {\n          \"subject\": null,\n          \"params\": {\n            \"γ\": [\n              0.0\n            ],\n            \"β\": [\n              1.5707963267948966\n            ]\n          },\n          \"best_sampled_solution\": {\n            \"bitstring\": \"010000011000\",\n            \"decoded_bits\": [\n              0,\n              0,\n              0,\n              1,\n              1,\n              0,\n              0,\n              0,\n              0,\n              0,\n              1,\n              0\n            ],\n            \"shots\": 1,\n            \"objective\": 24.247084,\n            \"allocation\": {\n              \"crypto\": {\n                \"tier\": \"heavy\",\n                \"weight\": 1.5\n              },\n              \"oil\": {\n                \"tier\": \"skip\",\n                \"weight\": 0.0\n              },\n              \"index\": {\n                \"tier\": \"normal\",\n                \"weight\": 1.0\n              }\n            },\n            \"risk_used\": 2.5,\n            \"one_hot_valid\": true,\n            \"budget_valid\": true,\n            \"constraint_valid\": true\n          },\n          \"top_counts\": [\n            [\n              \"001000111100\",\n              3\n            ],\n            [\n              \"111011111010\",\n              3\n            ],\n            [\n              \"100100101000\",\n              3\n            ],\n            [\n              \"011100000101\",\n              2\n            ],\n            [\n              \"010010011100\",\n              2\n            ]\n          ]\n        }\n      ]\n    }\n  },\n  \"baseline_exact\": {\n    \"allocation\": {\n      \"crypto\": {\n        \"tier\": \"heavy\",\n        \"weight\": 1.5\n      },\n      \"oil\": {\n        \"tier\": \"skip\",\n        \"weight\": 0.0\n      },\n      \"index\": {\n        \"tier\": \"normal\",\n        \"weight\": 1.0\n      }\n    },\n    \"risk_used\": 2.5,\n    \"objective\": 24.247085\n  },\n  \"note\": \"This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders.\"\n}\n",
+      "stderr": "",
+      "payload": {
+        "generated_at": "2026-06-27T06:18:46.513792+00:00",
+        "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+        "event_type": "multi_event_real_history",
+        "problem": "risk_tier_allocation",
+        "asset_filter": null,
+        "result": {
+          "mode": "local",
+          "task_count": 1,
+          "tasks": [
+            {
+              "subject": null,
+              "label": "risk_tier_allocation",
+              "ising_offset": 168.83513750000003,
+              "grid_size": 9,
+              "best_run": {
+                "subject": null,
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    0.0
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "010000011000",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0
+                  ],
+                  "shots": 1,
+                  "objective": 24.247084,
+                  "allocation": {
+                    "crypto": {
+                      "tier": "heavy",
+                      "weight": 1.5
+                    },
+                    "oil": {
+                      "tier": "skip",
+                      "weight": 0.0
+                    },
+                    "index": {
+                      "tier": "normal",
+                      "weight": 1.0
+                    }
+                  },
+                  "risk_used": 2.5,
+                  "one_hot_valid": true,
+                  "budget_valid": true,
+                  "constraint_valid": true
+                },
+                "top_counts": [
+                  [
+                    "001000111100",
+                    3
+                  ],
+                  [
+                    "111011111010",
+                    3
+                  ],
+                  [
+                    "100100101000",
+                    3
+                  ],
+                  [
+                    "011100000101",
+                    2
+                  ],
+                  [
+                    "010010011100",
+                    2
+                  ]
+                ]
+              },
+              "all_runs_top3": [
+                {
+                  "subject": null,
+                  "params": {
+                    "γ": [
+                      0.0
+                    ],
+                    "β": [
+                      0.0
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "010000011000",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      0,
+                      1,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0
+                    ],
+                    "shots": 1,
+                    "objective": 24.247084,
+                    "allocation": {
+                      "crypto": {
+                        "tier": "heavy",
+                        "weight": 1.5
+                      },
+                      "oil": {
+                        "tier": "skip",
+                        "weight": 0.0
+                      },
+                      "index": {
+                        "tier": "normal",
+                        "weight": 1.0
+                      }
+                    },
+                    "risk_used": 2.5,
+                    "one_hot_valid": true,
+                    "budget_valid": true,
+                    "constraint_valid": true
+                  },
+                  "top_counts": [
+                    [
+                      "001000111100",
+                      3
+                    ],
+                    [
+                      "111011111010",
+                      3
+                    ],
+                    [
+                      "100100101000",
+                      3
+                    ],
+                    [
+                      "011100000101",
+                      2
+                    ],
+                    [
+                      "010010011100",
+                      2
+                    ]
+                  ]
+                },
+                {
+                  "subject": null,
+                  "params": {
+                    "γ": [
+                      0.0
+                    ],
+                    "β": [
+                      0.7853981633974483
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "010000011000",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      0,
+                      1,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0
+                    ],
+                    "shots": 1,
+                    "objective": 24.247084,
+                    "allocation": {
+                      "crypto": {
+                        "tier": "heavy",
+                        "weight": 1.5
+                      },
+                      "oil": {
+                        "tier": "skip",
+                        "weight": 0.0
+                      },
+                      "index": {
+                        "tier": "normal",
+                        "weight": 1.0
+                      }
+                    },
+                    "risk_used": 2.5,
+                    "one_hot_valid": true,
+                    "budget_valid": true,
+                    "constraint_valid": true
+                  },
+                  "top_counts": [
+                    [
+                      "001000111100",
+                      3
+                    ],
+                    [
+                      "111011111010",
+                      3
+                    ],
+                    [
+                      "100100101000",
+                      3
+                    ],
+                    [
+                      "011100000101",
+                      2
+                    ],
+                    [
+                      "010010011100",
+                      2
+                    ]
+                  ]
+                },
+                {
+                  "subject": null,
+                  "params": {
+                    "γ": [
+                      0.0
+                    ],
+                    "β": [
+                      1.5707963267948966
+                    ]
+                  },
+                  "best_sampled_solution": {
+                    "bitstring": "010000011000",
+                    "decoded_bits": [
+                      0,
+                      0,
+                      0,
+                      1,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0
+                    ],
+                    "shots": 1,
+                    "objective": 24.247084,
+                    "allocation": {
+                      "crypto": {
+                        "tier": "heavy",
+                        "weight": 1.5
+                      },
+                      "oil": {
+                        "tier": "skip",
+                        "weight": 0.0
+                      },
+                      "index": {
+                        "tier": "normal",
+                        "weight": 1.0
+                      }
+                    },
+                    "risk_used": 2.5,
+                    "one_hot_valid": true,
+                    "budget_valid": true,
+                    "constraint_valid": true
+                  },
+                  "top_counts": [
+                    [
+                      "001000111100",
+                      3
+                    ],
+                    [
+                      "111011111010",
+                      3
+                    ],
+                    [
+                      "100100101000",
+                      3
+                    ],
+                    [
+                      "011100000101",
+                      2
+                    ],
+                    [
+                      "010010011100",
+                      2
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "best_task": {
+            "subject": null,
+            "label": "risk_tier_allocation",
+            "ising_offset": 168.83513750000003,
+            "grid_size": 9,
+            "best_run": {
+              "subject": null,
+              "params": {
+                "γ": [
+                  0.0
+                ],
+                "β": [
+                  0.0
+                ]
+              },
+              "best_sampled_solution": {
+                "bitstring": "010000011000",
+                "decoded_bits": [
+                  0,
+                  0,
+                  0,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                "shots": 1,
+                "objective": 24.247084,
+                "allocation": {
+                  "crypto": {
+                    "tier": "heavy",
+                    "weight": 1.5
+                  },
+                  "oil": {
+                    "tier": "skip",
+                    "weight": 0.0
+                  },
+                  "index": {
+                    "tier": "normal",
+                    "weight": 1.0
+                  }
+                },
+                "risk_used": 2.5,
+                "one_hot_valid": true,
+                "budget_valid": true,
+                "constraint_valid": true
+              },
+              "top_counts": [
+                [
+                  "001000111100",
+                  3
+                ],
+                [
+                  "111011111010",
+                  3
+                ],
+                [
+                  "100100101000",
+                  3
+                ],
+                [
+                  "011100000101",
+                  2
+                ],
+                [
+                  "010010011100",
+                  2
+                ]
+              ]
+            },
+            "all_runs_top3": [
+              {
+                "subject": null,
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    0.0
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "010000011000",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0
+                  ],
+                  "shots": 1,
+                  "objective": 24.247084,
+                  "allocation": {
+                    "crypto": {
+                      "tier": "heavy",
+                      "weight": 1.5
+                    },
+                    "oil": {
+                      "tier": "skip",
+                      "weight": 0.0
+                    },
+                    "index": {
+                      "tier": "normal",
+                      "weight": 1.0
+                    }
+                  },
+                  "risk_used": 2.5,
+                  "one_hot_valid": true,
+                  "budget_valid": true,
+                  "constraint_valid": true
+                },
+                "top_counts": [
+                  [
+                    "001000111100",
+                    3
+                  ],
+                  [
+                    "111011111010",
+                    3
+                  ],
+                  [
+                    "100100101000",
+                    3
+                  ],
+                  [
+                    "011100000101",
+                    2
+                  ],
+                  [
+                    "010010011100",
+                    2
+                  ]
+                ]
+              },
+              {
+                "subject": null,
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    0.7853981633974483
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "010000011000",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0
+                  ],
+                  "shots": 1,
+                  "objective": 24.247084,
+                  "allocation": {
+                    "crypto": {
+                      "tier": "heavy",
+                      "weight": 1.5
+                    },
+                    "oil": {
+                      "tier": "skip",
+                      "weight": 0.0
+                    },
+                    "index": {
+                      "tier": "normal",
+                      "weight": 1.0
+                    }
+                  },
+                  "risk_used": 2.5,
+                  "one_hot_valid": true,
+                  "budget_valid": true,
+                  "constraint_valid": true
+                },
+                "top_counts": [
+                  [
+                    "001000111100",
+                    3
+                  ],
+                  [
+                    "111011111010",
+                    3
+                  ],
+                  [
+                    "100100101000",
+                    3
+                  ],
+                  [
+                    "011100000101",
+                    2
+                  ],
+                  [
+                    "010010011100",
+                    2
+                  ]
+                ]
+              },
+              {
+                "subject": null,
+                "params": {
+                  "γ": [
+                    0.0
+                  ],
+                  "β": [
+                    1.5707963267948966
+                  ]
+                },
+                "best_sampled_solution": {
+                  "bitstring": "010000011000",
+                  "decoded_bits": [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0
+                  ],
+                  "shots": 1,
+                  "objective": 24.247084,
+                  "allocation": {
+                    "crypto": {
+                      "tier": "heavy",
+                      "weight": 1.5
+                    },
+                    "oil": {
+                      "tier": "skip",
+                      "weight": 0.0
+                    },
+                    "index": {
+                      "tier": "normal",
+                      "weight": 1.0
+                    }
+                  },
+                  "risk_used": 2.5,
+                  "one_hot_valid": true,
+                  "budget_valid": true,
+                  "constraint_valid": true
+                },
+                "top_counts": [
+                  [
+                    "001000111100",
+                    3
+                  ],
+                  [
+                    "111011111010",
+                    3
+                  ],
+                  [
+                    "100100101000",
+                    3
+                  ],
+                  [
+                    "011100000101",
+                    2
+                  ],
+                  [
+                    "010010011100",
+                    2
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "baseline_exact": {
+          "allocation": {
+            "crypto": {
+              "tier": "heavy",
+              "weight": 1.5
+            },
+            "oil": {
+              "tier": "skip",
+              "weight": 0.0
+            },
+            "index": {
+              "tier": "normal",
+              "weight": 1.0
+            }
+          },
+          "risk_used": 2.5,
+          "objective": 24.247085
+        },
+        "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+      }
+    }
+  ],
+  "ibm_result": {
+    "command": [
+      "python3",
+      "/Users/tongyin/Desktop/Anaconda_Local_Tools/ibm_quantum_eventalpha_submit.py",
+      "--pack",
+      "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+      "--mode",
+      "ibm",
+      "--submit-only",
+      "--problem",
+      "asset_subset_selection",
+      "--shots",
+      "512",
+      "--grid-points",
+      "3",
+      "--backend",
+      "ibm_fez",
+      "--json"
+    ],
+    "returncode": 0,
+    "stdout": "{\n  \"generated_at\": \"2026-06-27T06:18:59.149943+00:00\",\n  \"pack_path\": \"/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json\",\n  \"event_type\": \"multi_event_real_history\",\n  \"problem\": \"asset_subset_selection\",\n  \"asset_filter\": null,\n  \"result\": {\n    \"mode\": \"ibm\",\n    \"backend\": \"ibm_fez\",\n    \"task_count\": 1,\n    \"grid_size\": 9,\n    \"submitted_jobs\": [\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            0.0\n          ],\n          \"β\": [\n            0.0\n          ]\n        },\n        \"job_id\": \"d8vmmj6mvj5c73ei4ip0\"\n      },\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            0.0\n          ],\n          \"β\": [\n            0.7853981633974483\n          ]\n        },\n        \"job_id\": \"d8vmmj9ropqc738cm6lg\"\n      },\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            0.0\n          ],\n          \"β\": [\n            1.5707963267948966\n          ]\n        },\n        \"job_id\": \"d8vmmjg6c68s73ah0t70\"\n      },\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            1.5707963267948966\n          ],\n          \"β\": [\n            0.0\n          ]\n        },\n        \"job_id\": \"d8vmmjhropqc738cm6mg\"\n      },\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            1.5707963267948966\n          ],\n          \"β\": [\n            0.7853981633974483\n          ]\n        },\n        \"job_id\": \"d8vmmjpropqc738cm6n0\"\n      },\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            1.5707963267948966\n          ],\n          \"β\": [\n            1.5707963267948966\n          ]\n        },\n        \"job_id\": \"d8vmmk1ropqc738cm6o0\"\n      },\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            3.141592653589793\n          ],\n          \"β\": [\n            0.0\n          ]\n        },\n        \"job_id\": \"d8vmmkemvj5c73ei4ir0\"\n      },\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            3.141592653589793\n          ],\n          \"β\": [\n            0.7853981633974483\n          ]\n        },\n        \"job_id\": \"d8vmmkmmvj5c73ei4it0\"\n      },\n      {\n        \"subject\": null,\n        \"label\": \"asset_subset_selection\",\n        \"params\": {\n          \"γ\": [\n            3.141592653589793\n          ],\n          \"β\": [\n            1.5707963267948966\n          ]\n        },\n        \"job_id\": \"d8vmmkopknjs73a1aa80\"\n      }\n    ],\n    \"waiting_for_results\": true\n  },\n  \"baseline_exact\": {\n    \"bits\": [\n      0,\n      0,\n      1,\n      1,\n      1\n    ],\n    \"selected\": [\n      \"crypto\",\n      \"oil\",\n      \"index\"\n    ],\n    \"objective\": 0.297124,\n    \"base\": 0.299262,\n    \"pair_penalty\": 0.002138,\n    \"size_penalty\": 0.0\n  },\n  \"note\": \"This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders.\"\n}\n",
+    "stderr": "qiskit_runtime_service._discover_account:WARNING:2026-06-27 01:18:47,761: Loading account with the given token. A saved account will not be used.\nqiskit_runtime_service.__init__:WARNING:2026-06-27 01:18:50,531: Instance was not set at service instantiation. Free and trial plan instances will be prioritized. Based on the following filters: (tags: None, region: us-east, eu-de), and available plans: (open), the available account instances are: open-instance. If you need a specific instance set it explicitly either by using a saved account with a saved default instance or passing it in directly to QiskitRuntimeService().\nqiskit_runtime_service.backends:WARNING:2026-06-27 01:18:50,531: Using instance: open-instance, plan: open\n",
+    "payload": {
+      "generated_at": "2026-06-27T06:18:59.149943+00:00",
+      "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+      "event_type": "multi_event_real_history",
+      "problem": "asset_subset_selection",
+      "asset_filter": null,
+      "result": {
+        "mode": "ibm",
+        "backend": "ibm_fez",
+        "task_count": 1,
+        "grid_size": 9,
+        "submitted_jobs": [
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmmj6mvj5c73ei4ip0"
+          },
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.7853981633974483
+              ]
+            },
+            "job_id": "d8vmmj9ropqc738cm6lg"
+          },
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "job_id": "d8vmmjg6c68s73ah0t70"
+          },
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                1.5707963267948966
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmmjhropqc738cm6mg"
+          },
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                1.5707963267948966
+              ],
+              "β": [
+                0.7853981633974483
+              ]
+            },
+            "job_id": "d8vmmjpropqc738cm6n0"
+          },
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                1.5707963267948966
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "job_id": "d8vmmk1ropqc738cm6o0"
+          },
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "job_id": "d8vmmkemvj5c73ei4ir0"
+          },
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.7853981633974483
+              ]
+            },
+            "job_id": "d8vmmkmmvj5c73ei4it0"
+          },
+          {
+            "subject": null,
+            "label": "asset_subset_selection",
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "job_id": "d8vmmkopknjs73a1aa80"
+          }
+        ],
+        "waiting_for_results": true
+      },
+      "baseline_exact": {
+        "bits": [
+          0,
+          0,
+          1,
+          1,
+          1
+        ],
+        "selected": [
+          "crypto",
+          "oil",
+          "index"
+        ],
+        "objective": 0.297124,
+        "base": 0.299262,
+        "pair_penalty": 0.002138,
+        "size_penalty": 0.0
+      },
+      "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+    }
+  },
+  "note": "This suite only evaluates abstract optimization tasks for the five financial models. It does not place trades."
+}

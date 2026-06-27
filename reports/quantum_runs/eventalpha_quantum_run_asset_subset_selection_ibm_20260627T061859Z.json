@@ -1,0 +1,152 @@
+{
+  "generated_at": "2026-06-27T06:18:59.149943+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T061843Z.json",
+  "event_type": "multi_event_real_history",
+  "problem": "asset_subset_selection",
+  "asset_filter": null,
+  "result": {
+    "mode": "ibm",
+    "backend": "ibm_fez",
+    "task_count": 1,
+    "grid_size": 9,
+    "submitted_jobs": [
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vmmj6mvj5c73ei4ip0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.7853981633974483
+          ]
+        },
+        "job_id": "d8vmmj9ropqc738cm6lg"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vmmjg6c68s73ah0t70"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            1.5707963267948966
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vmmjhropqc738cm6mg"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            1.5707963267948966
+          ],
+          "β": [
+            0.7853981633974483
+          ]
+        },
+        "job_id": "d8vmmjpropqc738cm6n0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            1.5707963267948966
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vmmk1ropqc738cm6o0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vmmkemvj5c73ei4ir0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.7853981633974483
+          ]
+        },
+        "job_id": "d8vmmkmmvj5c73ei4it0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vmmkopknjs73a1aa80"
+      }
+    ],
+    "waiting_for_results": true
+  },
+  "baseline_exact": {
+    "bits": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "selected": [
+      "crypto",
+      "oil",
+      "index"
+    ],
+    "objective": 0.297124,
+    "base": 0.299262,
+    "pair_penalty": 0.002138,
+    "size_penalty": 0.0
+  },
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}
