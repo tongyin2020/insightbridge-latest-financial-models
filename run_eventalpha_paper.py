@@ -264,6 +264,7 @@ def main() -> None:
                 event_type=event.event_type.value,
                 title=event.title,
                 decisions=decisions,
+                executions=executions,
             )
             telegram_summary["results"] = telegram_notifications
             telegram_summary["sent_count"] = sum(1 for row in telegram_notifications if row.get("sent"))

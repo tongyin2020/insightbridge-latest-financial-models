@@ -127,6 +127,14 @@ class EventAlphaTelegramNotifier:
             f"<b>Wait</b>: {int(payload.get('wait_seconds', 0))}s",
             f"<b>Risk Fraction</b>: {float(payload.get('max_risk_fraction', 0.0)):.4f}",
         ]
+        if payload.get("rank_score") is not None:
+            lines.append(f"<b>Rank Score</b>: {float(payload.get('rank_score', 0.0)):.4f}")
+        if payload.get("execution_status"):
+            lines.append(f"<b>Execution</b>: {html.escape(str(payload.get('execution_status')))}")
+        if payload.get("position_id"):
+            lines.append(f"<b>Position ID</b>: {html.escape(str(payload.get('position_id')))}")
+        if payload.get("notional") is not None:
+            lines.append(f"<b>Planned Notional</b>: {float(payload.get('notional', 0.0)):.2f}")
         if reasons:
             lines.append("<b>Reasons</b>:")
             for reason in reasons[:6]:
@@ -160,13 +168,20 @@ class EventAlphaTelegramNotifier:
         event_type: str,
         title: str,
         decisions: List[Dict[str, Any]],
+        executions: List[Dict[str, Any]] | None = None,
     ) -> List[Dict[str, Any]]:
+        execution_map = {}
+        for row in executions or []:
+            key = (row.get("asset"), row.get("result", {}).get("execution_plan", {}).get("symbol"))
+            execution_map[key] = row.get("result", {})
         results = []
         for row in decisions:
             decision = row.get("decision", {})
             action = str(decision.get("action", ""))
             if action not in {"enter_small", "enter_normal", "enter_heavy"}:
                 continue
+            exec_result = execution_map.get((row.get("asset"), row.get("symbol")), {})
+            exec_plan = exec_result.get("execution_plan", {})
             payload = {
                 "event_type": event_type,
                 "title": title,
@@ -177,6 +192,10 @@ class EventAlphaTelegramNotifier:
                 "execution_confidence": decision.get("execution_confidence", 0.0),
                 "wait_seconds": decision.get("wait_seconds", 0),
                 "max_risk_fraction": decision.get("max_risk_fraction", 0.0),
+                "rank_score": row.get("rank_score"),
+                "execution_status": exec_result.get("status"),
+                "position_id": exec_result.get("position_id"),
+                "notional": exec_plan.get("notional"),
                 "reasons": decision.get("reasons", []),
             }
             result = self.send_trade_alert(payload)
