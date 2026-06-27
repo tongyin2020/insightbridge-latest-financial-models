@@ -20,6 +20,7 @@ secrets/
 reports/eventalpha_runs/
 reports/runtime_logs/
 reports/eventalpha_telegram_alert_state.json
+reports/quantum_research/
 *.pid
 *.log
 

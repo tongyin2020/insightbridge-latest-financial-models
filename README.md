@@ -216,3 +216,38 @@ Runtime state and logs are written locally under:
 ```bash
 python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/verify_eventalpha_full_stack.py
 ```
+
+## Quantum Research Layer
+
+The repository now includes a local research layer for reviewing EventAlpha quantum runs, tuning subset penalties, and opening a lightweight dashboard.
+
+### One-shot research suite
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/run_quantum_research_suite.py
+```
+
+This generates:
+
+- dashboard dataset CSV
+- dashboard HTML views
+- penalty tuning CSV / JSON
+- penalty sensitivity markdown report
+
+All outputs are written under:
+
+```bash
+/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_research/
+```
+
+### Serve the local dashboard
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/quantum_research/dashboard_app.py
+```
+
+Then open:
+
+```bash
+http://127.0.0.1:8050
+```
