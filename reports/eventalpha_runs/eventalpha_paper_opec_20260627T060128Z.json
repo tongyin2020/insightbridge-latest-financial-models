@@ -1,0 +1,845 @@
+{
+  "generated_at": "2026-06-27T06:01:28.646542+00:00",
+  "event": {
+    "event_id": "opec_20260627060127",
+    "event_type": "opec",
+    "title": "Telegram delivery validation"
+  },
+  "macro_regime_snapshots": [
+    {
+      "asset": "oil",
+      "symbol": "WTI",
+      "macro_regime": "mixed",
+      "macro_regime_probabilities": {
+        "risk_on": 0.1235,
+        "risk_off": 0.0878,
+        "inflation_shock": 0.0926,
+        "growth_shock": 0.052,
+        "liquidity_crisis": 0.1301,
+        "central_bank_pivot": 0.1531,
+        "war_shock": 0.1443,
+        "dollar_squeeze": 0.1078,
+        "neutral": 0.1088
+      },
+      "macro_regime_explanation": [
+        "central_bank_pivot=0.15",
+        "war_shock=0.14",
+        "liquidity_crisis=0.13",
+        "risk_on=0.12"
+      ]
+    },
+    {
+      "asset": "index",
+      "symbol": "ES_PROXY",
+      "macro_regime": "war_shock",
+      "macro_regime_probabilities": {
+        "risk_on": 0.0595,
+        "risk_off": 0.1194,
+        "inflation_shock": 0.1155,
+        "growth_shock": 0.0953,
+        "liquidity_crisis": 0.12,
+        "central_bank_pivot": 0.1251,
+        "war_shock": 0.1507,
+        "dollar_squeeze": 0.1142,
+        "neutral": 0.1003
+      },
+      "macro_regime_explanation": [
+        "war_shock=0.15",
+        "central_bank_pivot=0.13",
+        "liquidity_crisis=0.12",
+        "risk_off=0.12"
+      ]
+    }
+  ],
+  "asset_ranking": [
+    {
+      "asset": "oil",
+      "symbol": "WTI",
+      "score": 0.9949,
+      "reasons": [
+        "event_asset_prior=0.95",
+        "liquidity=0.82",
+        "spread_bps=8.0",
+        "momentum=0.71",
+        "cross_asset=0.56",
+        "memory_edge=0.95"
+      ]
+    },
+    {
+      "asset": "index",
+      "symbol": "ES_PROXY",
+      "score": 0.7682999999999999,
+      "reasons": [
+        "event_asset_prior=0.35",
+        "liquidity=0.84",
+        "spread_bps=6.0",
+        "momentum=0.78",
+        "cross_asset=0.64",
+        "memory_edge=0.58"
+      ]
+    },
+    {
+      "asset": "fx",
+      "symbol": "AUD/USD",
+      "score": 0.75434,
+      "reasons": [
+        "event_asset_prior=0.45",
+        "liquidity=0.82",
+        "spread_bps=1.8",
+        "momentum=0.59",
+        "cross_asset=0.62",
+        "memory_edge=0.50"
+      ]
+    },
+    {
+      "asset": "crypto",
+      "symbol": "BTC",
+      "score": 0.6638785598015211,
+      "reasons": [
+        "event_asset_prior=0.15",
+        "liquidity=0.95",
+        "spread_bps=0.6",
+        "momentum=0.40",
+        "cross_asset=0.48",
+        "memory_edge=0.50"
+      ]
+    },
+    {
+      "asset": "rates",
+      "symbol": "ZN",
+      "score": 0.583,
+      "reasons": [
+        "event_asset_prior=0.25",
+        "liquidity=0.78",
+        "spread_bps=9.9",
+        "momentum=0.45",
+        "cross_asset=0.68",
+        "memory_edge=0.50"
+      ]
+    }
+  ],
+  "portfolio_selection": {
+    "preference_source": {
+      "source": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_research/penalty_results.json",
+      "available": true,
+      "preferred_assets": [
+        "fx",
+        "oil",
+        "index"
+      ],
+      "preferred_case_ids": [
+        "fx_fomc_001",
+        "oil_opec_001",
+        "index_nfp_001"
+      ],
+      "preferred_share": 0.7708
+    },
+    "selected_assets": [
+      "oil",
+      "index"
+    ],
+    "selected_symbols": [
+      "WTI",
+      "ES_PROXY"
+    ],
+    "selected_count": 2,
+    "overflow": []
+  },
+  "candidate_decisions": [
+    {
+      "asset": "oil",
+      "symbol": "WTI",
+      "rank_score": 0.9949,
+      "decision": {
+        "action": "enter_heavy",
+        "grade": "high_conviction",
+        "direction": "long",
+        "raw_score": 0.8129333333333335,
+        "calibrated_confidence": 0.9890130573694068,
+        "execution_confidence": 0.9890130573694068,
+        "wait_seconds": 301,
+        "max_risk_fraction": 0.017,
+        "reasons": [
+          "regime=mixed",
+          "severity=0.81",
+          "grade=high_conviction",
+          "posterior=0.99",
+          "execution_confidence=0.99",
+          "memory_edge=0.95",
+          "cross_asset_alignment=0.70",
+          "wait_seconds=301",
+          "macro_direction:0.64x1.00",
+          "news_semantics:0.66x0.85",
+          "price_confirmation:0.66x1.10",
+          "cross_asset_confirmation:0.70x1.15",
+          "liquidity_quality:0.71x0.75",
+          "event_memory_edge:0.95x0.65"
+        ],
+        "metadata": {
+          "event_id": "opec_20260627060127",
+          "event_type": "opec",
+          "action_band": "heavy_candidate_requires_confirmation",
+          "wait_reason": "event_type=opec; severity=0.81; volatility_z=0.80",
+          "severity_tradeable": true,
+          "macro_regime": "mixed",
+          "macro_regime_probabilities": {
+            "risk_on": 0.1235,
+            "risk_off": 0.0878,
+            "inflation_shock": 0.0926,
+            "growth_shock": 0.052,
+            "liquidity_crisis": 0.1301,
+            "central_bank_pivot": 0.1531,
+            "war_shock": 0.1443,
+            "dollar_squeeze": 0.1078,
+            "neutral": 0.1088
+          },
+          "macro_regime_explanation": [
+            "central_bank_pivot=0.15",
+            "war_shock=0.14",
+            "liquidity_crisis=0.13",
+            "risk_on=0.12"
+          ]
+        }
+      }
+    },
+    {
+      "asset": "index",
+      "symbol": "ES_PROXY",
+      "rank_score": 0.7682999999999999,
+      "decision": {
+        "action": "enter_heavy",
+        "grade": "high_conviction",
+        "direction": "long",
+        "raw_score": 0.8409333333333335,
+        "calibrated_confidence": 0.9890130573694068,
+        "execution_confidence": 0.9890130573694068,
+        "wait_seconds": 305,
+        "max_risk_fraction": 0.017,
+        "reasons": [
+          "regime=war_shock",
+          "severity=0.84",
+          "grade=high_conviction",
+          "posterior=0.99",
+          "execution_confidence=0.99",
+          "memory_edge=0.58",
+          "cross_asset_alignment=0.71",
+          "wait_seconds=305",
+          "macro_direction:0.73x1.00",
+          "news_semantics:0.55x0.85",
+          "price_confirmation:0.68x1.10",
+          "cross_asset_confirmation:0.71x1.15",
+          "liquidity_quality:0.76x0.75",
+          "event_memory_edge:0.58x0.65"
+        ],
+        "metadata": {
+          "event_id": "opec_20260627060127",
+          "event_type": "opec",
+          "action_band": "heavy_candidate_requires_confirmation",
+          "wait_reason": "event_type=opec; severity=0.84; volatility_z=1.40",
+          "severity_tradeable": true,
+          "macro_regime": "war_shock",
+          "macro_regime_probabilities": {
+            "risk_on": 0.0595,
+            "risk_off": 0.1194,
+            "inflation_shock": 0.1155,
+            "growth_shock": 0.0953,
+            "liquidity_crisis": 0.12,
+            "central_bank_pivot": 0.1251,
+            "war_shock": 0.1507,
+            "dollar_squeeze": 0.1142,
+            "neutral": 0.1003
+          },
+          "macro_regime_explanation": [
+            "war_shock=0.15",
+            "central_bank_pivot=0.13",
+            "liquidity_crisis=0.12",
+            "risk_off=0.12"
+          ]
+        }
+      }
+    },
+    {
+      "asset": "fx",
+      "symbol": "AUD/USD",
+      "rank_score": 0.75434,
+      "decision": {
+        "action": "watch",
+        "grade": "high_conviction",
+        "direction": "flat",
+        "raw_score": 0.8316000000000001,
+        "calibrated_confidence": 0.9890130573694068,
+        "execution_confidence": 0.9890130573694068,
+        "wait_seconds": 300,
+        "max_risk_fraction": 0.0,
+        "reasons": [
+          "regime=war_shock",
+          "severity=0.83",
+          "grade=high_conviction",
+          "posterior=0.99",
+          "execution_confidence=0.99",
+          "memory_edge=0.50",
+          "cross_asset_alignment=0.73",
+          "wait_seconds=300",
+          "macro_direction:0.63x1.00",
+          "news_semantics:0.58x0.85",
+          "price_confirmation:0.58x1.10",
+          "cross_asset_confirmation:0.73x1.15",
+          "liquidity_quality:0.79x0.75",
+          "event_memory_edge:0.50x0.65",
+          "direction_or_confidence_not_confirmed"
+        ],
+        "metadata": {
+          "event_id": "opec_20260627060127",
+          "event_type": "opec",
+          "action_band": "heavy_candidate_requires_confirmation",
+          "wait_reason": "event_type=opec; severity=0.83; volatility_z=1.20",
+          "severity_tradeable": true,
+          "macro_regime": "war_shock",
+          "macro_regime_probabilities": {
+            "risk_on": 0.1194,
+            "risk_off": 0.0834,
+            "inflation_shock": 0.1211,
+            "growth_shock": 0.0503,
+            "liquidity_crisis": 0.1204,
+            "central_bank_pivot": 0.148,
+            "war_shock": 0.158,
+            "dollar_squeeze": 0.0941,
+            "neutral": 0.1052
+          },
+          "macro_regime_explanation": [
+            "war_shock=0.16",
+            "central_bank_pivot=0.15",
+            "inflation_shock=0.12",
+            "liquidity_crisis=0.12"
+          ]
+        }
+      }
+    },
+    {
+      "asset": "crypto",
+      "symbol": "BTC",
+      "rank_score": 0.6638785598015211,
+      "decision": {
+        "action": "watch",
+        "grade": "high_conviction",
+        "direction": "flat",
+        "raw_score": 0.8398617675053006,
+        "calibrated_confidence": 0.9890130573694068,
+        "execution_confidence": 0.9890130573694068,
+        "wait_seconds": 300,
+        "max_risk_fraction": 0.0,
+        "reasons": [
+          "regime=war_shock",
+          "severity=0.84",
+          "grade=high_conviction",
+          "posterior=0.99",
+          "execution_confidence=0.99",
+          "memory_edge=0.50",
+          "cross_asset_alignment=0.71",
+          "wait_seconds=300",
+          "macro_direction:0.54x1.00",
+          "news_semantics:0.55x0.85",
+          "price_confirmation:0.53x1.10",
+          "cross_asset_confirmation:0.71x1.15",
+          "liquidity_quality:0.94x0.75",
+          "event_memory_edge:0.50x0.65",
+          "direction_or_confidence_not_confirmed"
+        ],
+        "metadata": {
+          "event_id": "opec_20260627060127",
+          "event_type": "opec",
+          "action_band": "heavy_candidate_requires_confirmation",
+          "wait_reason": "event_type=opec; severity=0.84; volatility_z=1.38",
+          "severity_tradeable": true,
+          "macro_regime": "war_shock",
+          "macro_regime_probabilities": {
+            "risk_on": 0.1285,
+            "risk_off": 0.0849,
+            "inflation_shock": 0.1169,
+            "growth_shock": 0.0485,
+            "liquidity_crisis": 0.1215,
+            "central_bank_pivot": 0.1429,
+            "war_shock": 0.1544,
+            "dollar_squeeze": 0.1006,
+            "neutral": 0.1016
+          },
+          "macro_regime_explanation": [
+            "war_shock=0.15",
+            "central_bank_pivot=0.14",
+            "risk_on=0.13",
+            "liquidity_crisis=0.12"
+          ]
+        }
+      }
+    },
+    {
+      "asset": "rates",
+      "symbol": "ZN",
+      "rank_score": 0.583,
+      "decision": {
+        "action": "watch",
+        "grade": "high_conviction",
+        "direction": "flat",
+        "raw_score": 0.8409333333333335,
+        "calibrated_confidence": 0.9775899182349287,
+        "execution_confidence": 0.9775899182349287,
+        "wait_seconds": 300,
+        "max_risk_fraction": 0.0,
+        "reasons": [
+          "regime=war_shock",
+          "severity=0.84",
+          "grade=high_conviction",
+          "posterior=0.98",
+          "execution_confidence=0.98",
+          "memory_edge=0.50",
+          "cross_asset_alignment=0.77",
+          "wait_seconds=300",
+          "macro_direction:0.56x1.00",
+          "news_semantics:0.48x0.85",
+          "price_confirmation:0.49x1.10",
+          "cross_asset_confirmation:0.77x1.15",
+          "liquidity_quality:0.67x0.75",
+          "event_memory_edge:0.50x0.65",
+          "direction_or_confidence_not_confirmed"
+        ],
+        "metadata": {
+          "event_id": "opec_20260627060127",
+          "event_type": "opec",
+          "action_band": "heavy_candidate_requires_confirmation",
+          "wait_reason": "event_type=opec; severity=0.84; volatility_z=1.40",
+          "severity_tradeable": true,
+          "macro_regime": "war_shock",
+          "macro_regime_probabilities": {
+            "risk_on": 0.1162,
+            "risk_off": 0.0812,
+            "inflation_shock": 0.1238,
+            "growth_shock": 0.0543,
+            "liquidity_crisis": 0.1225,
+            "central_bank_pivot": 0.1379,
+            "war_shock": 0.1538,
+            "dollar_squeeze": 0.1078,
+            "neutral": 0.1024
+          },
+          "macro_regime_explanation": [
+            "war_shock=0.15",
+            "central_bank_pivot=0.14",
+            "inflation_shock=0.12",
+            "liquidity_crisis=0.12"
+          ]
+        }
+      }
+    }
+  ],
+  "selected_decisions": [
+    {
+      "asset": "oil",
+      "symbol": "WTI",
+      "rank_score": 0.9949,
+      "decision": {
+        "action": "enter_heavy",
+        "grade": "high_conviction",
+        "direction": "long",
+        "raw_score": 0.8129333333333335,
+        "calibrated_confidence": 0.9890130573694068,
+        "execution_confidence": 0.9890130573694068,
+        "wait_seconds": 301,
+        "max_risk_fraction": 0.017,
+        "reasons": [
+          "regime=mixed",
+          "severity=0.81",
+          "grade=high_conviction",
+          "posterior=0.99",
+          "execution_confidence=0.99",
+          "memory_edge=0.95",
+          "cross_asset_alignment=0.70",
+          "wait_seconds=301",
+          "macro_direction:0.64x1.00",
+          "news_semantics:0.66x0.85",
+          "price_confirmation:0.66x1.10",
+          "cross_asset_confirmation:0.70x1.15",
+          "liquidity_quality:0.71x0.75",
+          "event_memory_edge:0.95x0.65"
+        ],
+        "metadata": {
+          "event_id": "opec_20260627060127",
+          "event_type": "opec",
+          "action_band": "heavy_candidate_requires_confirmation",
+          "wait_reason": "event_type=opec; severity=0.81; volatility_z=0.80",
+          "severity_tradeable": true,
+          "macro_regime": "mixed",
+          "macro_regime_probabilities": {
+            "risk_on": 0.1235,
+            "risk_off": 0.0878,
+            "inflation_shock": 0.0926,
+            "growth_shock": 0.052,
+            "liquidity_crisis": 0.1301,
+            "central_bank_pivot": 0.1531,
+            "war_shock": 0.1443,
+            "dollar_squeeze": 0.1078,
+            "neutral": 0.1088
+          },
+          "macro_regime_explanation": [
+            "central_bank_pivot=0.15",
+            "war_shock=0.14",
+            "liquidity_crisis=0.13",
+            "risk_on=0.12"
+          ]
+        }
+      },
+      "portfolio_score": 1.902928,
+      "preferred_asset": true,
+      "portfolio_eligible": true
+    },
+    {
+      "asset": "index",
+      "symbol": "ES_PROXY",
+      "rank_score": 0.7682999999999999,
+      "decision": {
+        "action": "enter_heavy",
+        "grade": "high_conviction",
+        "direction": "long",
+        "raw_score": 0.8409333333333335,
+        "calibrated_confidence": 0.9890130573694068,
+        "execution_confidence": 0.9890130573694068,
+        "wait_seconds": 305,
+        "max_risk_fraction": 0.017,
+        "reasons": [
+          "regime=war_shock",
+          "severity=0.84",
+          "grade=high_conviction",
+          "posterior=0.99",
+          "execution_confidence=0.99",
+          "memory_edge=0.58",
+          "cross_asset_alignment=0.71",
+          "wait_seconds=305",
+          "macro_direction:0.73x1.00",
+          "news_semantics:0.55x0.85",
+          "price_confirmation:0.68x1.10",
+          "cross_asset_confirmation:0.71x1.15",
+          "liquidity_quality:0.76x0.75",
+          "event_memory_edge:0.58x0.65"
+        ],
+        "metadata": {
+          "event_id": "opec_20260627060127",
+          "event_type": "opec",
+          "action_band": "heavy_candidate_requires_confirmation",
+          "wait_reason": "event_type=opec; severity=0.84; volatility_z=1.40",
+          "severity_tradeable": true,
+          "macro_regime": "war_shock",
+          "macro_regime_probabilities": {
+            "risk_on": 0.0595,
+            "risk_off": 0.1194,
+            "inflation_shock": 0.1155,
+            "growth_shock": 0.0953,
+            "liquidity_crisis": 0.12,
+            "central_bank_pivot": 0.1251,
+            "war_shock": 0.1507,
+            "dollar_squeeze": 0.1142,
+            "neutral": 0.1003
+          },
+          "macro_regime_explanation": [
+            "war_shock=0.15",
+            "central_bank_pivot=0.13",
+            "liquidity_crisis=0.12",
+            "risk_off=0.12"
+          ]
+        }
+      },
+      "portfolio_score": 1.801532,
+      "preferred_asset": true,
+      "portfolio_eligible": true
+    }
+  ],
+  "executions": [
+    {
+      "asset": "oil",
+      "result": {
+        "adapter": "oil_eventalpha_phase1",
+        "timestamp": "2026-06-27T06:01:27.522909+00:00",
+        "status": "accepted",
+        "mode": "scan",
+        "opportunity": {
+          "id": "opp_d3aea801",
+          "symbol": "WTI",
+          "direction": "long",
+          "confidence": 68.8,
+          "entry_price": 73.4,
+          "stop_loss": 71.6,
+          "take_profit_1": 75.8,
+          "take_profit_2": 77.6,
+          "size": 1,
+          "reasoning": "做多WTI | 综合置信度 69% | 信号区: balanced_long | 门控: OPEN | 主要因子: inventory: +18.0, momentum: +12.0, usd: -4.0",
+          "signal_components": {
+            "inventory": 18.0,
+            "usd": -4.0,
+            "momentum": 12.0
+          },
+          "gate_status": "OPEN",
+          "fragility_score": 22.0,
+          "regime": "normal",
+          "status": "pending",
+          "created_at": "2026-06-27T06:01:27.522752+00:00",
+          "expires_at": "2026-06-27T06:06:27.522754+00:00",
+          "acted_at": "",
+          "position_id": "",
+          "exit_tiers": [
+            {
+              "tier": "WARNING",
+              "mult": "-50%",
+              "price": 72.5,
+              "action": "预警通知"
+            },
+            {
+              "tier": "PRE_REDUCE",
+              "mult": "-70%",
+              "price": 72.14,
+              "action": "减仓50%"
+            },
+            {
+              "tier": "MAIN_STOP",
+              "mult": "-100%",
+              "price": 71.6,
+              "action": "全部平仓"
+            },
+            {
+              "tier": "DISASTER",
+              "mult": "-150%",
+              "price": 70.7,
+              "action": "灾难保护"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "asset": "index",
+      "result": {
+        "adapter": "index_eventalpha_phase2",
+        "timestamp": "2026-06-27T06:01:27.524449+00:00",
+        "status": "accepted",
+        "position_id": "index_pos_e54fc00bd2",
+        "execution_plan": {
+          "position_id": "index_pos_e54fc00bd2",
+          "symbol": "ES_PROXY",
+          "side": "BUY",
+          "confidence": 0.78,
+          "status": "paper_open",
+          "created_at": "2026-06-27T06:01:27.524445+00:00"
+        }
+      }
+    }
+  ],
+  "exit_reviews": [
+    {
+      "asset": "oil",
+      "symbol": "WTI",
+      "brain_exit": {
+        "action": "reduce",
+        "urgency": 3,
+        "reason": "profit_giveback: mfe=1.20R now=0.50R",
+        "reduce_fraction": 0.25,
+        "metadata": {
+          "escape_score": 0.22,
+          "escape_reasons": [
+            "profit_giveback: mfe=1.20R now=0.50R"
+          ]
+        }
+      },
+      "adapter_exit": {
+        "adapter": "oil_eventalpha_phase1",
+        "timestamp": "2026-06-27T06:01:27.524143+00:00",
+        "symbol": "WTI",
+        "direction": "long",
+        "entry_price": 73.4,
+        "current_price": 73.6936,
+        "price_pnl": 0.2936,
+        "event_state": {
+          "cooldown_active": false,
+          "cooldown_reason": "",
+          "cooldown_remaining_sec": 0,
+          "halt_trading": false,
+          "risk_modifier": 0.5,
+          "upcoming_high_impact": 7,
+          "total_events": 10
+        },
+        "position_action": "hold"
+      }
+    },
+    {
+      "asset": "index",
+      "symbol": "ES_PROXY",
+      "brain_exit": {
+        "action": "reduce",
+        "urgency": 3,
+        "reason": "profit_giveback: mfe=1.20R now=0.50R",
+        "reduce_fraction": 0.25,
+        "metadata": {
+          "escape_score": 0.22,
+          "escape_reasons": [
+            "profit_giveback: mfe=1.20R now=0.50R"
+          ]
+        }
+      },
+      "adapter_exit": {
+        "adapter": "index_eventalpha_phase2",
+        "timestamp": "2026-06-27T06:01:27.525348+00:00",
+        "position_action": "hold",
+        "pnl_points": 14.0
+      }
+    }
+  ],
+  "telegram_summary": {
+    "requested": true,
+    "configured": true,
+    "entry_candidates": 2,
+    "sent_count": 2,
+    "results": [
+      {
+        "sent": true,
+        "reason": "ok",
+        "response": "{\"ok\":true,\"result\":{\"message_id\":185,\"from\":{\"id\":8421388879,\"is_bot\":true,\"first_name\":\"TY OpenClaw\",\"username\":\"tongyin_openclaw_bot\"},\"chat\":{\"id\":8670001641,\"first_name\":\"Tong\",\"last_name\":\"Yin\",\"username\":\"Tzyoo23\",\"type\":\"private\"},\"date\":1782540087,\"text\":\"EventAlpha Trade Alert\\n\\nEvent: OPEC\\nTitle: Telegram delivery validation\\nAsset: oil\\nSymbol: WTI\\nAction: enter_heavy\\nDirection: long\\nConfidence: 98.90%\\nWait: 301s\\nRisk Fraction: 0.0170\\nRank Score: 0.9949\\nReasons:\\n\\u2022 regime=mixed\\n\\u2022 severity=0.81\\n\\u2022 grade=high_conviction\\n\\u2022 posterior=0.99\\n\\u2022 execution_confidence=0.99\\n\\u2022 memory_edge=0.95\",\"entities\":[{\"offset\":0,\"length\":22,\"type\":\"bold\"},{\"offset\":24,\"length\":5,\"type\":\"bold\"},{\"offset\":36,\"length\":5,\"type\":\"bold\"},{\"offset\":72,\"length\":5,\"type\":\"bold\"},{\"offset\":83,\"length\":6,\"type\":\"bold\"},{\"offset\":95,\"length\":6,\"type\":\"bold\"},{\"offset\":115,\"length\":9,\"type\":\"bold\"},{\"offset\":131,\"length\":10,\"type\":\"bold\"},{\"offset\":150,\"length\":4,\"type\":\"bold\"},{\"offset\":161,\"length\":13,\"type\":\"bold\"},{\"offset\":183,\"length\":10,\"type\":\"bold\"},{\"offset\":202,\"length\":7,\"type\":\"bold\"}]}}",
+        "payload": {
+          "event_type": "opec",
+          "title": "Telegram delivery validation",
+          "asset": "oil",
+          "symbol": "WTI",
+          "action": "enter_heavy",
+          "direction": "long",
+          "execution_confidence": 0.9890130573694068,
+          "wait_seconds": 301,
+          "max_risk_fraction": 0.017,
+          "rank_score": 0.9949,
+          "execution_status": null,
+          "position_id": null,
+          "notional": null,
+          "reasons": [
+            "regime=mixed",
+            "severity=0.81",
+            "grade=high_conviction",
+            "posterior=0.99",
+            "execution_confidence=0.99",
+            "memory_edge=0.95",
+            "cross_asset_alignment=0.70",
+            "wait_seconds=301",
+            "macro_direction:0.64x1.00",
+            "news_semantics:0.66x0.85",
+            "price_confirmation:0.66x1.10",
+            "cross_asset_confirmation:0.70x1.15",
+            "liquidity_quality:0.71x0.75",
+            "event_memory_edge:0.95x0.65"
+          ]
+        }
+      },
+      {
+        "sent": true,
+        "reason": "ok",
+        "response": "{\"ok\":true,\"result\":{\"message_id\":186,\"from\":{\"id\":8421388879,\"is_bot\":true,\"first_name\":\"TY OpenClaw\",\"username\":\"tongyin_openclaw_bot\"},\"chat\":{\"id\":8670001641,\"first_name\":\"Tong\",\"last_name\":\"Yin\",\"username\":\"Tzyoo23\",\"type\":\"private\"},\"date\":1782540088,\"text\":\"EventAlpha Trade Alert\\n\\nEvent: OPEC\\nTitle: Telegram delivery validation\\nAsset: index\\nSymbol: ES_PROXY\\nAction: enter_heavy\\nDirection: long\\nConfidence: 98.90%\\nWait: 305s\\nRisk Fraction: 0.0170\\nRank Score: 0.7683\\nExecution: accepted\\nPosition ID: index_pos_e54fc00bd2\\nReasons:\\n\\u2022 regime=war_shock\\n\\u2022 severity=0.84\\n\\u2022 grade=high_conviction\\n\\u2022 posterior=0.99\\n\\u2022 execution_confidence=0.99\\n\\u2022 memory_edge=0.58\",\"entities\":[{\"offset\":0,\"length\":22,\"type\":\"bold\"},{\"offset\":24,\"length\":5,\"type\":\"bold\"},{\"offset\":36,\"length\":5,\"type\":\"bold\"},{\"offset\":72,\"length\":5,\"type\":\"bold\"},{\"offset\":85,\"length\":6,\"type\":\"bold\"},{\"offset\":102,\"length\":6,\"type\":\"bold\"},{\"offset\":122,\"length\":9,\"type\":\"bold\"},{\"offset\":138,\"length\":10,\"type\":\"bold\"},{\"offset\":157,\"length\":4,\"type\":\"bold\"},{\"offset\":168,\"length\":13,\"type\":\"bold\"},{\"offset\":190,\"length\":10,\"type\":\"bold\"},{\"offset\":209,\"length\":9,\"type\":\"bold\"},{\"offset\":229,\"length\":11,\"type\":\"bold\"},{\"offset\":263,\"length\":7,\"type\":\"bold\"}]}}",
+        "payload": {
+          "event_type": "opec",
+          "title": "Telegram delivery validation",
+          "asset": "index",
+          "symbol": "ES_PROXY",
+          "action": "enter_heavy",
+          "direction": "long",
+          "execution_confidence": 0.9890130573694068,
+          "wait_seconds": 305,
+          "max_risk_fraction": 0.017,
+          "rank_score": 0.7682999999999999,
+          "execution_status": "accepted",
+          "position_id": "index_pos_e54fc00bd2",
+          "notional": null,
+          "reasons": [
+            "regime=war_shock",
+            "severity=0.84",
+            "grade=high_conviction",
+            "posterior=0.99",
+            "execution_confidence=0.99",
+            "memory_edge=0.58",
+            "cross_asset_alignment=0.71",
+            "wait_seconds=305",
+            "macro_direction:0.73x1.00",
+            "news_semantics:0.55x0.85",
+            "price_confirmation:0.68x1.10",
+            "cross_asset_confirmation:0.71x1.15",
+            "liquidity_quality:0.76x0.75",
+            "event_memory_edge:0.58x0.65"
+          ]
+        }
+      }
+    ]
+  },
+  "telegram_notifications": [
+    {
+      "sent": true,
+      "reason": "ok",
+      "response": "{\"ok\":true,\"result\":{\"message_id\":185,\"from\":{\"id\":8421388879,\"is_bot\":true,\"first_name\":\"TY OpenClaw\",\"username\":\"tongyin_openclaw_bot\"},\"chat\":{\"id\":8670001641,\"first_name\":\"Tong\",\"last_name\":\"Yin\",\"username\":\"Tzyoo23\",\"type\":\"private\"},\"date\":1782540087,\"text\":\"EventAlpha Trade Alert\\n\\nEvent: OPEC\\nTitle: Telegram delivery validation\\nAsset: oil\\nSymbol: WTI\\nAction: enter_heavy\\nDirection: long\\nConfidence: 98.90%\\nWait: 301s\\nRisk Fraction: 0.0170\\nRank Score: 0.9949\\nReasons:\\n\\u2022 regime=mixed\\n\\u2022 severity=0.81\\n\\u2022 grade=high_conviction\\n\\u2022 posterior=0.99\\n\\u2022 execution_confidence=0.99\\n\\u2022 memory_edge=0.95\",\"entities\":[{\"offset\":0,\"length\":22,\"type\":\"bold\"},{\"offset\":24,\"length\":5,\"type\":\"bold\"},{\"offset\":36,\"length\":5,\"type\":\"bold\"},{\"offset\":72,\"length\":5,\"type\":\"bold\"},{\"offset\":83,\"length\":6,\"type\":\"bold\"},{\"offset\":95,\"length\":6,\"type\":\"bold\"},{\"offset\":115,\"length\":9,\"type\":\"bold\"},{\"offset\":131,\"length\":10,\"type\":\"bold\"},{\"offset\":150,\"length\":4,\"type\":\"bold\"},{\"offset\":161,\"length\":13,\"type\":\"bold\"},{\"offset\":183,\"length\":10,\"type\":\"bold\"},{\"offset\":202,\"length\":7,\"type\":\"bold\"}]}}",
+      "payload": {
+        "event_type": "opec",
+        "title": "Telegram delivery validation",
+        "asset": "oil",
+        "symbol": "WTI",
+        "action": "enter_heavy",
+        "direction": "long",
+        "execution_confidence": 0.9890130573694068,
+        "wait_seconds": 301,
+        "max_risk_fraction": 0.017,
+        "rank_score": 0.9949,
+        "execution_status": null,
+        "position_id": null,
+        "notional": null,
+        "reasons": [
+          "regime=mixed",
+          "severity=0.81",
+          "grade=high_conviction",
+          "posterior=0.99",
+          "execution_confidence=0.99",
+          "memory_edge=0.95",
+          "cross_asset_alignment=0.70",
+          "wait_seconds=301",
+          "macro_direction:0.64x1.00",
+          "news_semantics:0.66x0.85",
+          "price_confirmation:0.66x1.10",
+          "cross_asset_confirmation:0.70x1.15",
+          "liquidity_quality:0.71x0.75",
+          "event_memory_edge:0.95x0.65"
+        ]
+      }
+    },
+    {
+      "sent": true,
+      "reason": "ok",
+      "response": "{\"ok\":true,\"result\":{\"message_id\":186,\"from\":{\"id\":8421388879,\"is_bot\":true,\"first_name\":\"TY OpenClaw\",\"username\":\"tongyin_openclaw_bot\"},\"chat\":{\"id\":8670001641,\"first_name\":\"Tong\",\"last_name\":\"Yin\",\"username\":\"Tzyoo23\",\"type\":\"private\"},\"date\":1782540088,\"text\":\"EventAlpha Trade Alert\\n\\nEvent: OPEC\\nTitle: Telegram delivery validation\\nAsset: index\\nSymbol: ES_PROXY\\nAction: enter_heavy\\nDirection: long\\nConfidence: 98.90%\\nWait: 305s\\nRisk Fraction: 0.0170\\nRank Score: 0.7683\\nExecution: accepted\\nPosition ID: index_pos_e54fc00bd2\\nReasons:\\n\\u2022 regime=war_shock\\n\\u2022 severity=0.84\\n\\u2022 grade=high_conviction\\n\\u2022 posterior=0.99\\n\\u2022 execution_confidence=0.99\\n\\u2022 memory_edge=0.58\",\"entities\":[{\"offset\":0,\"length\":22,\"type\":\"bold\"},{\"offset\":24,\"length\":5,\"type\":\"bold\"},{\"offset\":36,\"length\":5,\"type\":\"bold\"},{\"offset\":72,\"length\":5,\"type\":\"bold\"},{\"offset\":85,\"length\":6,\"type\":\"bold\"},{\"offset\":102,\"length\":6,\"type\":\"bold\"},{\"offset\":122,\"length\":9,\"type\":\"bold\"},{\"offset\":138,\"length\":10,\"type\":\"bold\"},{\"offset\":157,\"length\":4,\"type\":\"bold\"},{\"offset\":168,\"length\":13,\"type\":\"bold\"},{\"offset\":190,\"length\":10,\"type\":\"bold\"},{\"offset\":209,\"length\":9,\"type\":\"bold\"},{\"offset\":229,\"length\":11,\"type\":\"bold\"},{\"offset\":263,\"length\":7,\"type\":\"bold\"}]}}",
+      "payload": {
+        "event_type": "opec",
+        "title": "Telegram delivery validation",
+        "asset": "index",
+        "symbol": "ES_PROXY",
+        "action": "enter_heavy",
+        "direction": "long",
+        "execution_confidence": 0.9890130573694068,
+        "wait_seconds": 305,
+        "max_risk_fraction": 0.017,
+        "rank_score": 0.7682999999999999,
+        "execution_status": "accepted",
+        "position_id": "index_pos_e54fc00bd2",
+        "notional": null,
+        "reasons": [
+          "regime=war_shock",
+          "severity=0.84",
+          "grade=high_conviction",
+          "posterior=0.99",
+          "execution_confidence=0.99",
+          "memory_edge=0.58",
+          "cross_asset_alignment=0.71",
+          "wait_seconds=305",
+          "macro_direction:0.73x1.00",
+          "news_semantics:0.55x0.85",
+          "price_confirmation:0.68x1.10",
+          "cross_asset_confirmation:0.71x1.15",
+          "liquidity_quality:0.76x0.75",
+          "event_memory_edge:0.58x0.65"
+        ]
+      }
+    }
+  ]
+}

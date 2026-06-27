@@ -26,27 +26,52 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def exact_objective_value(baseline: dict[str, Any] | None) -> float:
+def exact_objective_value(baseline: Any, *, asset_filter: Any = None, best_solution: dict[str, Any] | None = None) -> float:
+    if isinstance(baseline, list):
+        target_asset = str(asset_filter or (best_solution or {}).get("asset") or "").strip()
+        if target_asset:
+            for row in baseline:
+                if isinstance(row, dict) and str(row.get("asset") or "") == target_asset:
+                    for key in ("objective", "score"):
+                        value = row.get(key)
+                        if isinstance(value, (int, float)):
+                            return float(value)
+        # Fall back to the max numeric score/objective in the list if no exact asset match is available.
+        candidates: list[float] = []
+        for row in baseline:
+            if not isinstance(row, dict):
+                continue
+            for key in ("objective", "score"):
+                value = row.get(key)
+                if isinstance(value, (int, float)):
+                    candidates.append(float(value))
+        return max(candidates) if candidates else 0.0
+
     baseline = baseline or {}
-    for key in ("objective", "score"):
-        value = baseline.get(key)
-        if isinstance(value, (int, float)):
-            return float(value)
+    if isinstance(baseline, dict):
+        for key in ("objective", "score"):
+            value = baseline.get(key)
+            if isinstance(value, (int, float)):
+                return float(value)
     return 0.0
 
 
-def infer_asset_class(problem: str, asset_filter: Any, baseline: dict[str, Any], best_solution: dict[str, Any]) -> str:
+def infer_asset_class(problem: str, asset_filter: Any, baseline: Any, best_solution: dict[str, Any]) -> str:
     if asset_filter:
         return str(asset_filter)
     if problem == "asset_subset_selection":
-        selected = best_solution.get("selected") or baseline.get("selected") or baseline.get("selected_assets") or []
+        baseline_dict = baseline if isinstance(baseline, dict) else {}
+        selected = best_solution.get("selected") or baseline_dict.get("selected") or baseline_dict.get("selected_assets") or []
         return "+".join(map(str, selected)) if selected else "multi_asset"
     if problem == "risk_tier_allocation":
-        allocation = best_solution.get("allocation") or baseline.get("allocation") or {}
+        baseline_dict = baseline if isinstance(baseline, dict) else {}
+        allocation = best_solution.get("allocation") or baseline_dict.get("allocation") or {}
         if isinstance(allocation, dict) and allocation:
             return "+".join(sorted(allocation.keys()))
     if problem == "wait_bucket_optimization":
-        return str(best_solution.get("asset") or baseline.get("asset") or "single_asset")
+        if isinstance(baseline, list):
+            return str(best_solution.get("asset") or asset_filter or "single_asset")
+        return str(best_solution.get("asset") or (baseline or {}).get("asset") or "single_asset")
     return "unknown"
 
 
@@ -79,7 +104,11 @@ def build_record(path: Path) -> QuantumRunRecord:
     best_run = best_task.get("best_run") or {}
     best_solution = best_run.get("best_sampled_solution") or {}
     baseline = payload.get("baseline_exact") or {}
-    exact_obj = exact_objective_value(baseline)
+    exact_obj = exact_objective_value(
+        baseline,
+        asset_filter=payload.get("asset_filter"),
+        best_solution=best_solution,
+    )
     objective = float(best_solution.get("objective") or 0.0)
     delta = objective - exact_obj
     all_runs = best_task.get("all_runs_top3") or []

@@ -1,0 +1,34 @@
+{
+  "input_path": "/Users/tongyin/Desktop/Test/results/run_20260627T040847Z/decisions_input_snapshot.json",
+  "grid_size": 144,
+  "unique_winner_count": 2,
+  "winner_frequency": [
+    [
+      "fx_fomc_001|oil_opec_001|index_nfp_001",
+      111
+    ],
+    [
+      "fx_fomc_001|crypto_geo_001|oil_opec_001|index_nfp_001",
+      33
+    ]
+  ],
+  "robust_preferred_subset": "fx_fomc_001|oil_opec_001|index_nfp_001",
+  "robust_preferred_share": 0.7708,
+  "best_overall": {
+    "lambda_size": 0.0,
+    "lambda_corr": 0.5,
+    "lambda_risk": 0.5,
+    "lambda_marginal": 0.0,
+    "best_subset": "fx_fomc_001|crypto_geo_001|oil_opec_001|index_nfp_001",
+    "best_score": 2.849779,
+    "base_score": 3.078779,
+    "pair_penalty": 0.079,
+    "risk_used": 3.5,
+    "selected_assets": [
+      "fx",
+      "crypto",
+      "oil",
+      "index"
+    ]
+  }
+}

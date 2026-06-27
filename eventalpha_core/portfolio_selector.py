@@ -90,7 +90,7 @@ def select_portfolio_candidates(
         row_copy = dict(row)
         row_copy["portfolio_score"] = score
         row_copy["preferred_asset"] = str(row.get("asset") or "") in preferred_assets
-        row_copy["portfolio_eligible"] = action in {"enter_heavy", "enter_normal", "enter_small", "watch"}
+        row_copy["portfolio_eligible"] = action in {"enter_heavy", "enter_normal", "enter_small", "paper_trade"}
         enriched.append(row_copy)
 
     eligible = [row for row in enriched if row.get("portfolio_eligible")]
