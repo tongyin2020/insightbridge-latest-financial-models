@@ -17,5 +17,10 @@ build/
 *.p12
 credentials.json
 secrets/
+reports/eventalpha_runs/
+reports/runtime_logs/
+reports/eventalpha_telegram_alert_state.json
+*.pid
+*.log
 
 __MACOSX/

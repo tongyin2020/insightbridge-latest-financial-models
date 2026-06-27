@@ -178,6 +178,39 @@ Disable alerts explicitly with:
 python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/run_eventalpha_paper.py --event-type cpi --title "Manual CPI test" --top-n 2 --no-telegram-alerts
 ```
 
+### Continuous local runtime
+
+Start the five-model EventAlpha scan in the background:
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/manage_eventalpha_runtime.py start --interval-minutes 30 --top-n 5 --telegram-alerts
+```
+
+Run one full cycle immediately in the foreground:
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/manage_eventalpha_runtime.py once --top-n 5 --telegram-alerts
+```
+
+Check whether the background runtime is really alive:
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/check_eventalpha_runtime.py
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/manage_eventalpha_runtime.py status
+```
+
+Stop it cleanly:
+
+```bash
+python3 /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/manage_eventalpha_runtime.py stop
+```
+
+Runtime state and logs are written locally under:
+
+```bash
+/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/runtime_logs/
+```
+
 ### Full verification
 
 ```bash
