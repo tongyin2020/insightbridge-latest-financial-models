@@ -8,8 +8,10 @@ build/
 .env
 .env.*
 *.db
+*.db-*
 *.sqlite
 *.sqlite3
+*.wal
 *.pem
 *.key
 *.p12
