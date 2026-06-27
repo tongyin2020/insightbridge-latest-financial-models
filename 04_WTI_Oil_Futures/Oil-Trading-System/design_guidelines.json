@@ -1,0 +1,71 @@
+{
+  "theme": "dark",
+  "archetype": "2 (The Performance Pro)",
+  "colors": {
+    "background": "#09090B",
+    "surface": "#18181B",
+    "surface_hover": "#27272A",
+    "border": "#27272A",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#A1A1AA",
+    "accent_primary": "#007AFF",
+    "accent_success": "#10B981",
+    "accent_danger": "#EF4444",
+    "accent_warning": "#F59E0B"
+  },
+  "typography": {
+    "heading_font": "Outfit",
+    "body_font": "IBM Plex Sans",
+    "mono_font": "JetBrains Mono",
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl tracking-tight font-bold",
+      "h2": "text-2xl sm:text-3xl tracking-tight font-semibold",
+      "h3": "text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "data": "font-mono text-sm tracking-tight",
+      "label": "text-xs font-mono uppercase tracking-[0.2em] text-zinc-400"
+    }
+  },
+  "layout": {
+    "spacing_scale": "p-2, p-4, p-6",
+    "container_padding": "p-6",
+    "grid_system": "grid-cols-1 md:grid-cols-12 gap-4 md:gap-6",
+    "surface_style": "Grid Borders (Technical Look): Flat backgrounds with 1px border-zinc-800, no shadows, slightly rounded (rounded-md)"
+  },
+  "components": {
+    "cards": "Flat background (bg-zinc-900), 1px solid border (border-zinc-800), rounded-md. Avoid heavy shadows. Keep it tight and dense.",
+    "buttons": "Sharp edges (rounded-sm), high contrast. Primary CTA (e.g., set regime): bg-blue-600 hover:bg-blue-500 text-white. Danger (Kill Switch): bg-red-600 hover:bg-red-500 text-white border-2 border-red-500/50.",
+    "badges": "font-mono text-[10px] md:text-xs px-2 py-1 rounded-sm border. NORMAL: green, EVENT: amber, TREND: blue, BLOCKED: red.",
+    "charts": "Recharts. Axes in JetBrains Mono text-xs text-zinc-500. Grid lines 1px dashed zinc-800. Tooltips: backdrop-blur-md bg-zinc-950/90 border border-zinc-800.",
+    "tables": "Dense layout. font-mono for numbers. text-right for numeric values. border-b border-zinc-800 for rows."
+  },
+  "motion": {
+    "hover": "transition-colors duration-200 ease-in-out",
+    "status_pulse": "Live indicator uses animate-ping on a 6px green/red dot",
+    "chart_load": "fade-in upward translation"
+  },
+  "icons": {
+    "library": "lucide-react",
+    "style": "stroke-2"
+  },
+  "media": {
+    "image_urls": {
+      "background_texture": {
+        "url": "https://images.pexels.com/photos/16862261/pexels-photo-16862261.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Subtle oil rig background for the empty state or login overlay. Apply an 85% opacity black overlay (bg-black/85) to ensure high text contrast."
+      }
+    }
+  },
+  "instructions_to_main_agent": [
+    "Ensure you are building a dashboard optimized for Dark Mode (Theme 2: The Performance Pro).",
+    "Use 'Outfit' for headings, 'IBM Plex Sans' for body text, and 'JetBrains Mono' for ALL financial data, numbers, tables, and tickers.",
+    "Top Control Bar: Include a prominent 'Kill Switch' button (red, pulse effect), a Paper/Live mode toggle, and the Current Regime badge.",
+    "Dashboard Layout (Bento Grid Mode B): Main area uses a 12-col grid. The Main Chart (WTI Prices) should span 8 columns, while side panels (Signal Confidence, Econ Calendar) span 4 columns.",
+    "Signal Confidence: Visualize using a progress bar or circular gauge (use custom SVG or Shadcn Progress) indicating ML confidence (e.g., 87% LONG).",
+    "Risk Metrics: Display daily loss, consecutive losses, and drawdown in a compact metrics grid (col-span-1 each).",
+    "Backtesting Tab: Provide a secondary view showing an Equity Curve chart (Recharts AreaChart) and a detailed trade history table.",
+    "Economic Calendar: A vertical list feed showing upcoming events (OPEC, EIA) with impact indicators (High/Med/Low).",
+    "Use standard HTML + Tailwind for structural layouts, and customize Shadcn components (Tabs, Table, Button, Badge) heavily with dark mode colors.",
+    "Add 'data-testid' attributes to all buttons, tabs, and interactive elements for testing."
+  ]
+}

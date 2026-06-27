@@ -1,0 +1,4 @@
+date,dir,entry,exit,qty,pnl,bars,reason
+2024-01-12,long,95.8,95.85,1,46.0,13,no_momentum
+2024-01-17,long,98.79,97.82,1,-969.18,1,stop_loss
+2024-01-26,short,95.93,97.13,1,-1201.81,18,stop_loss

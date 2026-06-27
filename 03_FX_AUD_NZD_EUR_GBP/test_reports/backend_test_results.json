@@ -1,0 +1,176 @@
+{
+  "total_tests": 24,
+  "passed_tests": 24,
+  "success_rate": 100.0,
+  "test_results": [
+    {
+      "test": "Health Check",
+      "success": true,
+      "details": "Status: healthy, Source: simulated",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.152621"
+    },
+    {
+      "test": "Price Data - AUD/USD",
+      "success": true,
+      "details": "Mid: 0.63068, Regime: RANGE",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.205130"
+    },
+    {
+      "test": "Price History - AUD/USD",
+      "success": true,
+      "details": "Retrieved 50 historical bars",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.254826"
+    },
+    {
+      "test": "Price Data - NZD/USD",
+      "success": true,
+      "details": "Mid: 0.56888, Regime: RANGE",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.309826"
+    },
+    {
+      "test": "Price History - NZD/USD",
+      "success": true,
+      "details": "Retrieved 50 historical bars",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.361753"
+    },
+    {
+      "test": "Technical Indicators - SMA20",
+      "success": true,
+      "details": "Value: 0.63047",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.437659"
+    },
+    {
+      "test": "Technical Indicators - SMA50",
+      "success": true,
+      "details": "Value: 0.63061",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.437671"
+    },
+    {
+      "test": "Technical Indicators - ADX",
+      "success": true,
+      "details": "Value: 15.26537",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.437677"
+    },
+    {
+      "test": "Technical Indicators - RSI",
+      "success": true,
+      "details": "Value: 56.5419",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.437680"
+    },
+    {
+      "test": "Technical Indicators - ATR",
+      "success": true,
+      "details": "Value: 0.00016",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.437684"
+    },
+    {
+      "test": "Technical Indicators - Bollinger Bands",
+      "success": true,
+      "details": "Value: 0.62993",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.437687"
+    },
+    {
+      "test": "Event Engine - State",
+      "success": true,
+      "details": "Current state: NORMAL",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.490273"
+    },
+    {
+      "test": "Event Engine - Trigger",
+      "success": true,
+      "details": "Cooldown started, remaining: 30.0s",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.538492"
+    },
+    {
+      "test": "Event Engine - Reset",
+      "success": true,
+      "details": "Reset to state: NORMAL",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.591040"
+    },
+    {
+      "test": "Trading Signals - AUD/USD",
+      "success": true,
+      "details": "Direction: WAIT, Confidence: 0%",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.650839"
+    },
+    {
+      "test": "Trading Signals - NZD/USD",
+      "success": true,
+      "details": "Direction: WAIT, Confidence: 0%",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.650849"
+    },
+    {
+      "test": "Settings - Get",
+      "success": true,
+      "details": "Retrieved 10 settings",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.701723"
+    },
+    {
+      "test": "Kill Switch - Update",
+      "success": true,
+      "details": "Set to: true",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.762282"
+    },
+    {
+      "test": "Direction Permissions",
+      "success": true,
+      "details": "AUD/USD set to BOTH",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:16.859837"
+    },
+    {
+      "test": "AI Analysis",
+      "success": true,
+      "details": "Analysis generated for AUD/USD",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:30.451460"
+    },
+    {
+      "test": "AI History",
+      "success": true,
+      "details": "Retrieved 2 analyses",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:30.501705"
+    },
+    {
+      "test": "Broker Status",
+      "success": true,
+      "details": "Broker configurations retrieved",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:30.550674"
+    },
+    {
+      "test": "Data Sources",
+      "success": true,
+      "details": "Retrieved 4 data sources",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:30.599304"
+    },
+    {
+      "test": "Economic Calendar",
+      "success": true,
+      "details": "Retrieved 8 events",
+      "response_data": null,
+      "timestamp": "2026-03-31T05:29:30.652313"
+    }
+  ],
+  "timestamp": "2026-03-31T05:29:30.652346"
+}

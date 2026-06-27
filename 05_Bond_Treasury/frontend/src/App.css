@@ -1,0 +1,109 @@
+.App {
+  min-height: 100vh;
+}
+
+/* Kill Switch pulse animation */
+@keyframes kill-switch-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.8), 0 0 60px rgba(220, 38, 38, 0.4);
+  }
+}
+
+.kill-switch-active {
+  animation: kill-switch-pulse 1.5s ease-in-out infinite;
+}
+
+/* Chart tooltip styling */
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* Custom table styling */
+.trade-table th {
+  background-color: #18181b;
+}
+
+/* Scrollbar for dark theme in components */
+.dark-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-track {
+  background: #18181b;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 3px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+/* Status glow effects */
+.status-safe {
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.status-warning {
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.status-exit-only {
+  box-shadow: 0 0 10px rgba(234, 88, 12, 0.3);
+}
+
+.status-halt {
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
+}
+
+/* Terminal cursor blink */
+.terminal-cursor::after {
+  content: '█';
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Grid background pattern */
+.grid-pattern {
+  background-image: 
+    linear-gradient(rgba(39, 39, 42, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(39, 39, 42, 0.5) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Tracing beam effect for Risk Guard */
+@keyframes trace {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.risk-scanning {
+  background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.3), transparent);
+  background-size: 200% 100%;
+  animation: trace 2s ease-in-out infinite;
+}

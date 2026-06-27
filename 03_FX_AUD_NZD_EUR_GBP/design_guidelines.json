@@ -1,0 +1,126 @@
+{
+  "theme": "dark",
+  "archetype": "2_performance_pro",
+  "design_philosophy": "High-density, tactical 'Control Room' interface for professional Forex trading. Prioritizes data legibility, rapid execution, and visual hierarchy over decorative elements. Avoids soft aesthetics in favor of stark contrast and monospace precision.",
+  "colors": {
+    "background": {
+      "base": "#0A0A0A",
+      "surface": "#141414",
+      "surface_hover": "#1E1E1E"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A1A1AA",
+      "muted": "#71717A"
+    },
+    "trading": {
+      "buy_up": "#34C759",
+      "sell_down": "#FF3B30",
+      "buy_up_muted": "rgba(52, 199, 89, 0.2)",
+      "sell_down_muted": "rgba(255, 59, 48, 0.2)"
+    },
+    "accents": {
+      "focus": "#007AFF",
+      "warning": "#F59E0B",
+      "kill_switch": "#FF3B30"
+    },
+    "borders": {
+      "default": "rgba(255, 255, 255, 0.1)",
+      "focus": "rgba(0, 122, 255, 0.5)"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "headings": "'Barlow Condensed', sans-serif",
+      "body": "'JetBrains Mono', monospace",
+      "numbers": "'JetBrains Mono', monospace"
+    },
+    "scales": {
+      "h1": "text-3xl sm:text-4xl tracking-tighter uppercase font-bold",
+      "h2": "text-2xl sm:text-3xl tracking-tight uppercase font-semibold",
+      "h3": "text-xl uppercase font-semibold",
+      "h4": "text-sm uppercase tracking-widest font-bold",
+      "body": "text-xs sm:text-sm leading-relaxed",
+      "data_large": "text-4xl sm:text-5xl tracking-tighter font-medium tabular-nums",
+      "data_medium": "text-lg sm:text-xl font-medium tabular-nums",
+      "data_small": "text-xs font-medium tabular-nums"
+    },
+    "rules": [
+      "All numerical data MUST use tabular-nums utility for alignment during live updates.",
+      "Headings strictly use Barlow Condensed for a high-intensity, athletic/tactical feel.",
+      "Avoid using Inter or standard sans-serif; stick to the monospaced and condensed pairing."
+    ]
+  },
+  "layout_and_spacing": {
+    "grid_system": "Control Room Dense Grid",
+    "structure": "grid-cols-1 md:grid-cols-12 gap-2 md:gap-4",
+    "spacing_scale": {
+      "panel_padding": "p-3 sm:p-4",
+      "section_gap": "gap-4",
+      "component_gap": "gap-2"
+    },
+    "rules": [
+      "Zero wasted space. The entire viewport (h-screen) should be utilized if possible (Dashboard format).",
+      "Panels strictly stick to rectangular grid items. Avoid jagged bottoms by using h-full flex-col on panel contents.",
+      "Never center-align data or forms; strict left-alignment or tabular column alignment."
+    ]
+  },
+  "surfaces_and_borders": {
+    "panel_style": "Flat Solid",
+    "border_radius": "rounded-sm (max 2px-4px). No large rounded corners.",
+    "borders": "1px solid border-white/10",
+    "shadows": "none (use border contrasts instead of soft shadows to maintain tactical clarity)",
+    "glassmorphism": "FORBIDDEN. Refraction degrades data legibility. Use solid #141414."
+  },
+  "components": {
+    "path": "/app/frontend/src/components/ui/",
+    "strategy": "Shadcn highly customized for density. Override padding and rounded utility classes.",
+    "specific_overrides": {
+      "Card": "rounded-sm border-white/10 bg-[#141414] shadow-none",
+      "Button": "rounded-sm uppercase font-bold tracking-wider text-xs h-8 sm:h-9 px-3",
+      "Input": "rounded-sm border-white/10 bg-[#0A0A0A] font-mono text-xs focus:ring-1 focus:ring-blue-500",
+      "Table": "text-xs font-mono",
+      "Badge": "rounded-none text-[10px] uppercase tracking-widest px-1.5 py-0.5 border-white/20"
+    }
+  },
+  "animations": {
+    "hover": "Instant background lightening (bg-white/5). No scale transforms that cause layout shifts.",
+    "data_update": "Subtle text color flash (green/red) upon numerical change, fading back to white in 300ms.",
+    "30s_timer": "Smooth linear progress bar width reduction, turning yellow at 10s, red at 5s.",
+    "kill_switch": "Pulsing red border when armed, intense red overlay if triggered."
+  },
+  "icons": {
+    "library": "@phosphor-icons/react",
+    "style": "Regular or Bold weight. Avoid Duotone to keep the terminal/tactical vibe crisp.",
+    "installation_command": "yarn add @phosphor-icons/react"
+  },
+  "assets": {
+    "image_urls": [
+      {
+        "url": "https://images.unsplash.com/photo-1668091818168-61a18ea51275?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwxfHxmb3JleCUyMHRyYWRlciUyMHByb2ZpbGUlMjBhdmF0YXJ8ZW58MHx8fHwxNzc0OTM0MTM3fDA&ixlib=rb-4.1.0&q=85",
+        "category": "avatar",
+        "description": "Trader profile avatar for the top header."
+      },
+      {
+        "url": "https://images.pexels.com/photos/7230895/pexels-photo-7230895.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "category": "background",
+        "description": "Abstract dark geometric modern facade. Use as a very subtle background texture (opacity 5%) behind the app layout."
+      }
+    ]
+  },
+  "testing": {
+    "rules": "All interactive and key informational elements MUST include a data-testid attribute in kebab-case."
+  },
+  "instructions_to_main_agent": [
+    "Build a grid-based dashboard using grid-cols-1 md:grid-cols-12 layout. This is a high-density 'Control Room'.",
+    "Use JetBrains Mono for all numbers and charts. Use Barlow Condensed for headings.",
+    "Implement real-time charts using recharts (styled to match the dark aesthetic).",
+    "Incorporate a 30-second event confirmation countdown using a progress bar.",
+    "Build a prominent 'Kill Switch' emergency stop button (Red #FF3B30).",
+    "Design panels for: Technical Indicators (SMA, ADX, RSI, Bollinger Bands), Trading Signals, Risk Management, Economic Calendar, and AI Analysis.",
+    "Include a system log and broker connection status (e.g., Dukascopy/IB status badges).",
+    "Do not use glassmorphism or soft shadows. Stick to flat, solid backgrounds (#141414 panels on #0A0A0A background) with 1px border-white/10.",
+    "Ensure all buttons and inputs are tightly packed with rounded-sm borders.",
+    "Use Tailwind's tabular-nums class on all rapidly changing forex prices to prevent jitter."
+  ]
+}

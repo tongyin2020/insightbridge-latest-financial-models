@@ -1,0 +1,108 @@
+{
+  "theme": "dark",
+  "archetype": "Archetype 2 (The Performance Pro / Command Center)",
+  "vibe": "Tactical, Data-Dense, High-Frequency Trading Terminal",
+  "colors": {
+    "background": "zinc-950",
+    "surface": "zinc-900",
+    "surface_hover": "zinc-800",
+    "border": "zinc-800",
+    "text_primary": "zinc-50",
+    "text_secondary": "zinc-400",
+    "text_muted": "zinc-500",
+    "accents": {
+      "primary": "blue-500",
+      "success": "emerald-500",
+      "warning": "amber-500",
+      "danger": "red-600",
+      "info": "cyan-500"
+    }
+  },
+  "typography": {
+    "heading_font": "Chivo",
+    "body_font": "IBM Plex Sans",
+    "mono_font": "JetBrains Mono",
+    "hierarchy": {
+      "h1": "text-2xl sm:text-3xl font-black tracking-tight",
+      "h2": "text-xl sm:text-2xl font-bold tracking-tight",
+      "h3": "text-lg sm:text-xl font-semibold",
+      "h4": "text-base font-semibold uppercase tracking-widest",
+      "body": "text-sm leading-relaxed",
+      "data": "font-mono text-sm tracking-tight",
+      "small": "text-xs font-medium uppercase tracking-[0.2em]"
+    }
+  },
+  "spacing_and_layout": {
+    "grid_strategy": "MODE B: THE CONTROL ROOM GRID",
+    "gap": "gap-4 sm:gap-6",
+    "padding": "p-4 sm:p-6",
+    "border_radius": "rounded-none sm:rounded-sm",
+    "container_alignment": "Dense, grid-based, using flex-col and h-full for children."
+  },
+  "surface_strategy": {
+    "style": "Grid Borders (The Technical Look)",
+    "rules": [
+      "Flat backgrounds using zinc-900 or zinc-950",
+      "1px sharp borders border-zinc-800",
+      "No drop shadows. Use inner glow or border highlights for active states",
+      "Terminal Look for Execution Logs: bg-black with border-zinc-800 and JetBrains Mono text"
+    ]
+  },
+  "components": {
+    "cards": {
+      "default": "bg-zinc-900 border border-zinc-800 text-zinc-50 p-4 sm:p-6 rounded-sm",
+      "hover": "hover:border-zinc-700 transition-colors"
+    },
+    "buttons": {
+      "primary": "bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-sm transition-colors",
+      "kill_switch": "bg-red-600 hover:bg-red-500 text-white font-black px-6 py-4 rounded-sm uppercase tracking-widest border border-red-400 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all animate-pulse hover:animate-none",
+      "toggle": "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-sm border border-zinc-700 transition-colors"
+    },
+    "inputs": {
+      "default": "bg-zinc-950 border border-zinc-800 rounded-sm px-3 py-2 text-zinc-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono text-sm"
+    },
+    "charts": {
+      "library": "Recharts",
+      "style": "Minimalist, no grid lines or very faint border-zinc-800 lines. Bright accent colors for series (Cyan, Emerald, Amber)."
+    },
+    "terminal": {
+      "container": "bg-black border border-zinc-800 p-4 rounded-sm h-64 overflow-y-auto",
+      "text": "font-mono text-xs sm:text-sm text-green-400 leading-tight"
+    }
+  },
+  "media": {
+    "images": {
+      "login_background": {
+        "url": "https://images.unsplash.com/photo-1761078739436-ccee01f3d89c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmslMjB0ZXh0dXJlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzUxMzc2NDF8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Dark, moody abstract texture background for auth screen",
+        "category": "auth_background"
+      }
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "stroke-width: 1.5, angular, crisp"
+    }
+  },
+  "motion_and_interactions": {
+    "hover_states": "Border color shift and slight background brightness increase. No scaling (keep it rigid).",
+    "loading": "Use monospace ASCII loaders (e.g., [ ||||    ] ) or fast pulse.",
+    "active_indicators": "The 'Tracing Beam' effect for Risk Guard Engine when active or scanning.",
+    "alerts": "Sonner toast notifications. Slide-in from bottom right. Strict red for errors/Kill Switch, green for success."
+  },
+  "accessibility": {
+    "contrast": "Ensure all text passes APCA/WCAG standards. Do not use dark gray on black. Use zinc-400 minimum on zinc-950.",
+    "testing": "All interactive elements MUST include data-testid attribute in kebab-case (e.g., data-testid='kill-switch-btn')"
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the dark mode theme. The body background should be zinc-950.",
+    "Implement the layout as a dense 'Control Room' grid. No rounded massive padding.",
+    "For the Execution Logs Terminal, use JetBrains Mono and a pure black (#000000) background to simulate a CLI.",
+    "The Kill Switch button must be highly prominent, using red-600 with a subtle drop shadow or pulse animation to indicate critical action.",
+    "Use Shadcn UI but aggressively override any soft rounded corners (use rounded-none or rounded-sm) and drop shadows (replace with 1px borders).",
+    "Install the required fonts via Google Fonts: Chivo, IBM Plex Sans, and JetBrains Mono.",
+    "Ensure 'Real-time Market Data Charts' use dark backgrounds and high-contrast lines (e.g., bright cyan for WTI, bright purple for Bond).",
+    "Implement a clear visual distinction for the 4 system states (SAFE: green, WARNING: amber, EXIT_ONLY: orange, HALT: red).",
+    "Use lucide-react for icons.",
+    "Do not use generic dummy text; use realistic financial/trading data placeholders if real data is not connected yet."
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "summary": "Completed comprehensive testing of V6 features: Yield Curve Analytics (P3), Bond Auctions, Real Historical Backtesting (P2). All 10 requested test scenarios passed. Backend: 12/12 tests passed (100%). Frontend: All features working correctly.",
+  
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  
+  "passed_tests": [
+    "1. Login and navigate to Yield Curve page via dashboard dropdown 'Yield Curve' link - PASSED",
+    "2. Yield Curve page - Yield Curve tab: shape analysis banner (NORMAL/LOW RISK), yield curve chart with 5 tenors, tenor details panel, key spreads (10Y-3M, 30Y-10Y) - PASSED",
+    "3. Yield Curve page - Historical tab: period selector (1M/3M/6M/1Y), multi-tenor line chart, slope history chart, daily yield changes heatmap - PASSED",
+    "4. Yield Curve page - Auctions tab: calendar summary cards (This Week count, Supply, Next Major), upcoming auctions list with impact badges (HIGH/MEDIUM/LOW), recent results with demand ratings (STRONG/AVERAGE/WEAK) - PASSED",
+    "5. Backend API - GET /api/yield-curve/current returns curve data with 5 tenors and shape analysis (type, risk_level, slope_10y_3m, steepness, description) - PASSED",
+    "6. Backend API - GET /api/yield-curve/historical?period=3mo returns array of historical data points with date, tenors, slope, spread_30_10 - PASSED",
+    "7. Backend API - GET /api/auctions/upcoming returns array of upcoming auction entries with tenor, auction_date, days_away, impact_level - PASSED",
+    "8. Backend API - GET /api/auctions/calendar returns calendar summary with this_week, next_week arrays, total_supply_this_week_bn, auction_count_this_week, next_major_auction - PASSED",
+    "9. Backtest with real data - POST /api/backtest/run with AI_HYBRID strategy returns trades with real WTI/bond data (equity_curve entries have wti, bond_yield, ispread fields from Yahoo Finance) - PASSED",
+    "10. Dashboard navigation - 'Yield Curve' menu item exists in the user dropdown with data-testid='yield-curve-nav' - PASSED"
+  ],
+  
+  "test_report_links": [
+    "/app/backend/tests/test_v6_yield_curve.py",
+    "/app/test_reports/pytest/pytest_v6_results.xml"
+  ],
+  
+  "action_items": [],
+  
+  "critical_code_review_comments": [
+    "YieldCurveService correctly fetches real Yahoo Finance data for 5 tenors (3M, 2Y, 5Y, 10Y, 30Y) with fallback to simulated data",
+    "Shape analysis correctly identifies NORMAL/FLAT/INVERTED/HUMPED curves with appropriate risk levels",
+    "BondAuctionService generates realistic US Treasury auction schedule based on actual Treasury patterns",
+    "BacktestEngine now uses real historical WTI and bond yield data from Yahoo Finance instead of simulated data",
+    "Frontend YieldCurvePage has proper data-testid attributes for all interactive elements",
+    "All APIs use proper caching (5 minute cache duration) to avoid excessive Yahoo Finance calls"
+  ],
+  
+  "updated_files": [
+    "/app/backend/tests/test_v6_yield_curve.py"
+  ],
+  
+  "success_rate": {
+    "backend": "100% (12/12 tests passed)",
+    "frontend": "100% (all 10 requested scenarios passed)"
+  },
+  
+  "test_credentials": {
+    "admin": "admin@trading.com / Admin@123456"
+  },
+  
+  "seed_data_creation": "None - used existing admin account",
+  
+  "retest_needed": false,
+  
+  "should_main_agent_self_test": true,
+  
+  "context_for_next_testing_agent": "V6 features fully tested and working: (1) Yield Curve page at /yield-curve with 3 tabs - Yield Curve (current curve with shape analysis NORMAL/FLAT/INVERTED/HUMPED, 5 tenors, key spreads), Historical (multi-tenor line chart, slope history, daily yield changes heatmap with period selector), Auctions (calendar summary cards, upcoming auctions with impact badges, recent results with demand ratings). (2) Real historical backtest engine using yfinance data - equity_curve entries now include wti, bond_yield, ispread fields from real Yahoo Finance data. (3) Bond auction calendar with realistic US Treasury auction schedule. All APIs use Yahoo Finance data with 5-minute caching and fallback to simulated data. Dashboard dropdown has 'Yield Curve' nav item with data-testid='yield-curve-nav'."
+}

@@ -1,0 +1,535 @@
+/* WTI AI Trading Platform - Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #18181B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3F3F46;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52525B;
+}
+
+/* Font families */
+.font-outfit {
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-ibm {
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Base styles */
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background-color: #09090B;
+  color: #FFFFFF;
+  margin: 0;
+  padding: 0;
+}
+
+/* Animation for live indicator */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+  background-color: #27272A;
+  border-color: #3F3F46;
+}
+
+/* Button styles */
+button {
+  cursor: pointer;
+  outline: none;
+}
+
+button:focus {
+  outline: 2px solid #007AFF;
+  outline-offset: 2px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Input styles */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+input:focus,
+select:focus {
+  border-color: #007AFF;
+}
+
+/* Table styles */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+}
+
+/* Chart tooltip styles */
+.chart-tooltip {
+  background: rgba(24, 24, 27, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid #27272A;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+/* Badge animations */
+.badge-pulse {
+  animation: badge-pulse 2s infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Kill switch glow effect */
+.kill-switch-glow {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+.kill-switch-glow:hover {
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+}
+
+/* Progress bar animation */
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+}
+
+.progress-animated {
+  animation: progress-fill 1s ease-out;
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Grid pattern background */
+.grid-pattern {
+  background-image: 
+    linear-gradient(rgba(39, 39, 42, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(39, 39, 42, 0.5) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Regime badge styles */
+.regime-normal {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.regime-event {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.regime-trend {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #3B82F6;
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.regime-blocked {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* Number formatting */
+.number-positive {
+  color: #10B981;
+}
+
+.number-negative {
+  color: #EF4444;
+}
+
+/* Status indicators */
+.status-active {
+  background-color: #10B981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.status-warning {
+  background-color: #F59E0B;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.status-danger {
+  background-color: #EF4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: #27272A;
+  border: 1px solid #3F3F46;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #3F3F46;
+  border-top-color: #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-cols-12 {
+    grid-template-columns: 1fr;
+  }
+  
+  .col-span-8,
+  .col-span-4 {
+    grid-column: span 1;
+  }
+}
+
+/* Enhanced Mobile Responsive Styles */
+@media (max-width: 1024px) {
+  /* Header adjustments */
+  header {
+    padding: 12px 16px;
+  }
+  
+  header h1 {
+    font-size: 16px;
+  }
+  
+  /* Navigation tabs - scrollable on mobile */
+  nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  nav::-webkit-scrollbar {
+    display: none;
+  }
+  
+  nav .flex {
+    min-width: max-content;
+  }
+  
+  /* Main content padding */
+  main {
+    padding: 16px;
+  }
+  
+  /* Grid adjustments */
+  .grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  /* Compact header on small screens */
+  header .flex {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  /* Stack controls */
+  header > div > .flex:last-child {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  /* Hide less important elements */
+  .hidden-mobile {
+    display: none;
+  }
+  
+  /* Smaller text */
+  .font-mono {
+    font-size: 12px;
+  }
+  
+  /* Full width buttons */
+  button.px-4 {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  /* Tables horizontal scroll */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Card adjustments */
+  .bg-zinc-900.p-4 {
+    padding: 12px;
+  }
+  
+  .bg-zinc-900.p-6 {
+    padding: 16px;
+  }
+  
+  /* Grid columns on mobile */
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Kill switch smaller */
+  [data-testid="kill-switch-btn"] {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  /* Chart height on mobile */
+  svg.h-48 {
+    height: 120px;
+  }
+  
+  /* Position cards stacked */
+  .flex.items-center.justify-between {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* Landscape phone */
+@media (max-width: 640px) and (orientation: landscape) {
+  header {
+    padding: 8px 12px;
+  }
+  
+  main {
+    padding: 12px;
+  }
+  
+  svg.h-48 {
+    height: 100px;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger tap targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Remove hover effects that don't work on touch */
+  .hover\:bg-zinc-700:hover,
+  .hover\:bg-zinc-600:hover {
+    background-color: inherit;
+  }
+  
+  /* Active states for touch */
+  button:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+/* Dark mode safe area for notched phones */
+@supports (padding: max(0px)) {
+  header {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  
+  main {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Print styles */
+@media print {
+  header, nav, button {
+    display: none;
+  }
+  
+  main {
+    padding: 0;
+  }
+  
+  .bg-zinc-900 {
+    background: white;
+    border: 1px solid #ccc;
+  }
+  
+  * {
+    color: black !important;
+  }
+}
+
+
+/* Mobile-first responsive overrides */
+@media (max-width: 768px) {
+  .grid-cols-12 {
+    grid-template-columns: 1fr !important;
+  }
+  .col-span-8, .col-span-4 {
+    grid-column: span 1 !important;
+  }
+  .grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .grid-cols-5 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .grid-cols-5 > :last-child {
+    grid-column: span 2;
+  }
+  /* Mobile tab bar */
+  .mobile-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  /* Stack PvP configs vertically on mobile */
+  .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+  /* Smaller text on mobile */
+  .font-outfit.text-2xl {
+    font-size: 1.25rem !important;
+  }
+  /* Fix tables on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Touch-friendly targets for PWA */
+@media (pointer: coarse) {
+  button, a, select, input {
+    min-height: 44px;
+  }
+  /* Larger tap targets on touch devices */
+  .text-xs button, .text-sm button {
+    padding: 8px 12px;
+  }
+}
+
+/* Safe area for notch phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Pull-to-refresh feel */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
+/* Smooth scrolling on mobile */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
