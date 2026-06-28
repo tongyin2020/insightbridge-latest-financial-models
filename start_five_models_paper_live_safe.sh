@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_GitHubSync_Latest"
+BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
 PY="/opt/anaconda3/bin/python3"
 LOG_DIR="$BASE/reports/runtime"
 LOG_FILE="$LOG_DIR/five_models_paper_live.log"

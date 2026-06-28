@@ -104,6 +104,7 @@ def runtime_log_stats() -> dict:
         "symbol_counts": Counter(),
         "reason_counts": Counter(),
         "last_eval_by_symbol": {},
+        "last_reason_by_symbol": {},
     }
     if not CONTINUOUS_LOG.exists():
         return stats
@@ -139,6 +140,8 @@ def runtime_log_stats() -> dict:
                 stats["symbol_counts"][symbol] += 1
                 if ts is not None:
                     stats["last_eval_by_symbol"][symbol] = ts
+                if reason:
+                    stats["last_reason_by_symbol"][symbol] = reason
             if status == "HOLD":
                 stats["holds"] += 1
             elif status == "BUY":
@@ -154,6 +157,16 @@ def runtime_log_stats() -> dict:
         elif stage == "order_intent":
             stats["orders_ready"] += 1
     return stats
+
+
+def classify_runtime_phase(log_stats: dict) -> tuple[str, str]:
+    if log_stats["buy_signals"] > 0 or log_stats["sell_signals"] > 0 or log_stats["orders_ready"] > 0:
+        return "ACTIVE_SIGNALING", "system is producing actionable trade signals"
+    if log_stats["reason_counts"]:
+        top_reason, _ = log_stats["reason_counts"].most_common(1)[0]
+        if top_reason == "no_active_event":
+            return "WAITING_FOR_MACRO_EVENT", "healthy idle state; models are scanning normally and waiting for a configured event"
+    return "MONITORING", "runtime is alive and monitoring inputs"
 
 
 def journal_stats() -> dict:
@@ -330,6 +343,9 @@ def main() -> int:
     lines.append(f"orders_ready_for_ibkr: {log_stats['orders_ready']}")
     lines.append(f"reconnects: {log_stats['reconnects']}")
     lines.append(f"halts_logged: {log_stats['halts']}")
+    phase, phase_detail = classify_runtime_phase(log_stats)
+    lines.append(f"runtime_phase: {phase}")
+    lines.append(f"runtime_phase_detail: {phase_detail}")
     if log_stats["reason_counts"]:
         top_reason, top_count = log_stats["reason_counts"].most_common(1)[0]
         lines.append(f"top_runtime_reason: {top_reason} ({top_count})")
@@ -372,6 +388,7 @@ def main() -> int:
         lines.append(f"[{symbol}]")
         lines.append(f"  last_eval: {fmt_dt(last_eval)} | age={fmt_age(last_eval)}")
         lines.append(f"  eval_count: {log_stats['symbol_counts'].get(symbol, 0)}")
+        lines.append(f"  last_reason: {log_stats['last_reason_by_symbol'].get(symbol, 'N/A')}")
         lines.append(f"  recent_warning_count: {warnings.get(symbol, 0)}")
         lines.append(f"  closed_trades: {per_j.get('closed_trades', 0)}")
         lines.append(f"  open_trades: {per_j.get('open_trades', 0)}")

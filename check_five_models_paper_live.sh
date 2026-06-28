@@ -3,7 +3,7 @@
 set -euo pipefail
 
 LABEL="com.insightbridge.five-models.paper"
-BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_GitHubSync_Latest"
+BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
 
 echo "InsightBridge Five Models Paper Runtime Status"
 echo "============================================================"

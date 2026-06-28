@@ -59,6 +59,17 @@ def _bars_to_df(bars):
                          for b in bars])
 
 
+def _historical_what_to_show(resolved: ResolvedContract) -> str:
+    """IBKR 历史数据类型按资产切换。
+
+    FX 现货不能稳定使用 TRADES/LAST，改用 MIDPOINT，
+    否则会反复触发 FXSUBPIP / no historical market data 警告。
+    """
+    if resolved.sec_type == "CASH":
+        return "MIDPOINT"
+    return "TRADES"
+
+
 def _broker_positions(sess):
     out = {}
     for p in sess.ib.positions():
@@ -70,19 +81,10 @@ def _broker_positions(sess):
 def lock_contracts(sess: IBKRSession, resolver: IBKRContractResolver, symbols):
     for sym in symbols:
         try:
+            rc = resolver.resolve(sym, refresh=True)
             if sym in FUT_SPECS:
-                spec = FUT_SPECS[sym]
-                con = sess.resolve_front_liquid_future(sym, spec["exchange"], spec["currency"])
-                if con is not None:
-                    resolver._cache[sym] = ResolvedContract(
-                        symbol=sym, sec_type="FUT", con_id=con.conId,
-                        exchange=con.exchange or spec["exchange"], currency=con.currency,
-                        local_symbol=con.localSymbol,
-                        last_trade_date=con.lastTradeDateOrContractMonth,
-                        multiplier=str(con.multiplier), raw=con)
-                    print(f"  [{sym}] 主力锁定 {con.localSymbol} conId={con.conId}")
+                print(f"  [{sym}] 前月锁定 {rc.local_symbol} conId={rc.con_id}")
             else:
-                rc = resolver.resolve(sym)
                 print(f"  [{sym}] 解析 conId={rc.con_id} {rc.local_symbol}")
         except Exception as exc:  # noqa: BLE001
             print(f"  [{sym}] 合约解析失败（将跳过该品种）: {exc}")
@@ -216,6 +218,20 @@ def main() -> int:
             return (float(t.bid) + float(t.ask)) / 2.0
         return float(t.last or t.close or 0.0)
 
+
+    def _quote_snapshot_needed(pipe: RightSidePipeline, symbol: str) -> bool:
+        """只有在活跃事件窗口内才去拉盘口快照。
+
+        在 no_active_event 的等待态，每轮请求 futures 快照只会制造
+        订阅/延迟数据 warning，对实际交易决策没有价值。
+        """
+        state = pipe.engine.states.get(symbol)
+        if state is None or not state.active:
+            return False
+        if state.confirmed_pending:
+            return False
+        return True
+
     print(f"进入持续循环，每 {args.interval:.0f}s 扫描一次。Ctrl+C 退出。")
     try:
         while not stop_flag["stop"]:
@@ -248,7 +264,7 @@ def main() -> int:
                             continue
                         bars0 = sess.ib.reqHistoricalData(
                             rc0.raw, endDateTime="", durationStr="2 D",
-                            barSizeSetting="1 min", whatToShow="TRADES",
+                            barSizeSetting="1 min", whatToShow=_historical_what_to_show(rc0),
                             useRTH=False, formatDate=1)
                         df0 = _bars_to_df(bars0)
                         if len(df0) >= 20:
@@ -268,17 +284,20 @@ def main() -> int:
                         continue
                     bars = sess.ib.reqHistoricalData(
                         rc.raw, endDateTime="", durationStr="2 D",
-                        barSizeSetting="1 min", whatToShow="TRADES",
+                        barSizeSetting="1 min", whatToShow=_historical_what_to_show(rc),
                         useRTH=False, formatDate=1)
                     df = _bars_to_df(bars)
                     if len(df) < 40:
                         continue
 
-                    # 事件由上方日历自动触发；无活跃事件时 evaluate 返回 no_active_event
-                    tkr = sess.ib.reqMktData(rc.raw, snapshot=True)
-                    sess.ib.sleep(1.0)
-                    bid = float(tkr.bid) if tkr.bid and tkr.bid > 0 else None
-                    ask = float(tkr.ask) if tkr.ask and tkr.ask > 0 else None
+                    bid = None
+                    ask = None
+                    if _quote_snapshot_needed(pipe, sym):
+                        # 只有在可能进入真实右侧确认时才拉盘口，避免 idle 态制造 warning。
+                        tkr = sess.ib.reqMktData(rc.raw, snapshot=True)
+                        sess.ib.sleep(1.0)
+                        bid = float(tkr.bid) if tkr.bid and tkr.bid > 0 else None
+                        ask = float(tkr.ask) if tkr.ask and tkr.ask > 0 else None
 
                     res = pipe.step(sym, datetime.now(timezone.utc), df,
                                     bid=bid, ask=ask,

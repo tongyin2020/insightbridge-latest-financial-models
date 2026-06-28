@@ -47,10 +47,16 @@ def _bars_to_df(bars):
     return pd.DataFrame(rows)
 
 
-def fetch_1min(ib, contract, lookback="2 D"):
+def _historical_what_to_show(resolved: ResolvedContract) -> str:
+    if resolved.sec_type == "CASH":
+        return "MIDPOINT"
+    return "TRADES"
+
+
+def fetch_1min(ib, resolved: ResolvedContract, lookback="2 D"):
     bars = ib.reqHistoricalData(
-        contract, endDateTime="", durationStr=lookback,
-        barSizeSetting="1 min", whatToShow="TRADES",
+        resolved.raw, endDateTime="", durationStr=lookback,
+        barSizeSetting="1 min", whatToShow=_historical_what_to_show(resolved),
         useRTH=False, formatDate=1)
     return _bars_to_df(bars), bars
 
@@ -102,24 +108,15 @@ def main() -> int:
     # 用会话的 OI 选主力，写回 resolver 缓存（取代默认近月）
     resolver: IBKRContractResolver = pipe.resolver
     for sym in symbols:
-        if sym in FUT_SPECS:
-            spec = FUT_SPECS[sym]
-            con = sess.resolve_front_liquid_future(sym, spec["exchange"], spec["currency"])
-            if con is not None:
-                resolver._cache[sym] = ResolvedContract(
-                    symbol=sym, sec_type="FUT", con_id=con.conId,
-                    exchange=con.exchange or spec["exchange"], currency=con.currency,
-                    local_symbol=con.localSymbol,
-                    last_trade_date=con.lastTradeDateOrContractMonth,
-                    multiplier=str(con.multiplier), raw=con)
-                print(f"  [{sym}] 主力锁定: {con.localSymbol} "
-                      f"(conId={con.conId}, exp={con.lastTradeDateOrContractMonth})")
-        else:
-            try:
-                rc = resolver.resolve(sym)
+        try:
+            rc = resolver.resolve(sym, refresh=True)
+            if sym in FUT_SPECS:
+                print(f"  [{sym}] 前月锁定: {rc.local_symbol} "
+                      f"(conId={rc.con_id}, exp={rc.last_trade_date})")
+            else:
                 print(f"  [{sym}] 解析: conId={rc.con_id} {rc.local_symbol}")
-            except Exception as exc:  # noqa: BLE001
-                print(f"  [{sym}] 解析失败: {exc}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"  [{sym}] 解析失败: {exc}")
 
     # 对账自检
     local_positions = {}
@@ -146,7 +143,7 @@ def main() -> int:
             if rc is None or not rc.is_locked:
                 print(f"  [{sym}] 未锁定合约，跳过。")
                 continue
-            df, _ = fetch_1min(sess.ib, rc.raw)
+            df, _ = fetch_1min(sess.ib, rc)
             if len(df) < 40:
                 print(f"  [{sym}] K线不足({len(df)})，跳过。")
                 continue
