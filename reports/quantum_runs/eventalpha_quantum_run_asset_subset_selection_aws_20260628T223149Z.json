@@ -1,0 +1,139 @@
+{
+  "generated_at": "2026-06-28T22:31:49.198183+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260628T223143Z.json",
+  "problem": "asset_subset_selection",
+  "asset_filter": null,
+  "mode": "aws",
+  "shots": 512,
+  "reps": 1,
+  "grid_points": 3,
+  "result": {
+    "mode": "aws",
+    "device_arn": "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
+    "task_count": 1,
+    "submitted_tasks": [
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            0.0
+          ],
+          "beta": [
+            0.0
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/212faa2a-8504-44a3-9575-5ba47bb41f5a"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            0.0
+          ],
+          "beta": [
+            0.7853981633974483
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/c1f20d4d-190c-4da9-bfd4-8eb1fe852257"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            0.0
+          ],
+          "beta": [
+            1.5707963267948966
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/db23b9b8-3e54-4eaf-aa31-e6cd11399353"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            1.5707963267948966
+          ],
+          "beta": [
+            0.0
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/272186bf-51fd-4314-b826-6bac584c3033"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            1.5707963267948966
+          ],
+          "beta": [
+            0.7853981633974483
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/14201f5f-cb71-46ad-8265-9fb4fe0cabbd"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            1.5707963267948966
+          ],
+          "beta": [
+            1.5707963267948966
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/98487a57-1d62-47af-8ad8-027c5e916045"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            3.141592653589793
+          ],
+          "beta": [
+            0.0
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/7fa91d8f-9a09-4a7e-8f60-89103d42ec9b"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            3.141592653589793
+          ],
+          "beta": [
+            0.7853981633974483
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/edd80e9c-8788-4cdc-88c4-8e766ff97562"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "gamma": [
+            3.141592653589793
+          ],
+          "beta": [
+            1.5707963267948966
+          ]
+        },
+        "task_arn": "arn:aws:braket:us-east-1:232076153294:quantum-task/b2f7ef8e-e961-4d4b-86ca-11b00df5fbea"
+      }
+    ],
+    "waiting_for_results": true,
+    "s3_destination": {
+      "bucket": "amazon-braket-us-east-1-232076153294",
+      "prefix": "insightbridge-eventalpha-quantum"
+    }
+  }
+}

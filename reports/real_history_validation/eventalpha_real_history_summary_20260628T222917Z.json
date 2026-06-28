@@ -1,0 +1,188 @@
+{
+  "generated_at": "2026-06-28T22:29:17.231620+00:00",
+  "date_range": {
+    "start_year": 2018,
+    "end_year": 2025
+  },
+  "source_tickers": {
+    "fx": "AUDUSD=X",
+    "rates": "ZN=F",
+    "crypto": "BTC-USD",
+    "oil": "CL=F",
+    "index": "ES=F"
+  },
+  "event_case_count": 374,
+  "asset_decision_count": 1870,
+  "entry_decision_count": 35,
+  "portfolio_entry_count": 35,
+  "headline": {
+    "all_entry_win_rate_pct": 68.57142857142857,
+    "all_entry_avg_pnl_pct": 1.0458396821003866,
+    "selected_portfolio_win_rate_pct": 68.57142857142857,
+    "selected_portfolio_avg_pnl_pct": 1.0458396821003866,
+    "top_confidence_avg_pnl_pct": 1.7695902312191834,
+    "top_confidence_win_rate_pct": 61.53846153846154
+  },
+  "best_exact_subset": {
+    "subset": [
+      "oil",
+      "index"
+    ],
+    "mean_pnl_pct": 0.03806727170492339,
+    "pnl_volatility": 0.9611046908745748,
+    "win_rate": 0.045454545454545456,
+    "corr_penalty": 0.0006393749962292449,
+    "size_penalty": 0.0,
+    "objective": 0.22806541598763433
+  },
+  "top_5_exact_subsets": [
+    {
+      "subset": [
+        "oil",
+        "index"
+      ],
+      "mean_pnl_pct": 0.03806727170492339,
+      "pnl_volatility": 0.9611046908745748,
+      "win_rate": 0.045454545454545456,
+      "corr_penalty": 0.0006393749962292449,
+      "size_penalty": 0.0,
+      "objective": 0.22806541598763433
+    },
+    {
+      "subset": [
+        "fx",
+        "oil"
+      ],
+      "mean_pnl_pct": 0.028051066320408116,
+      "pnl_volatility": 0.9493574299332076,
+      "win_rate": 0.045454545454545456,
+      "corr_penalty": 0.0001134068584161074,
+      "size_penalty": 0.0,
+      "objective": 0.22068968571037828
+    },
+    {
+      "subset": [
+        "fx",
+        "oil",
+        "index"
+      ],
+      "mean_pnl_pct": 0.0389742993769068,
+      "pnl_volatility": 0.9644195243460483,
+      "win_rate": 0.053475935828877004,
+      "corr_penalty": 0.0003347998735861665,
+      "size_penalty": 0.08,
+      "objective": 0.212851471752048
+    },
+    {
+      "subset": [
+        "rates",
+        "oil"
+      ],
+      "mean_pnl_pct": 0.028056764087457362,
+      "pnl_volatility": 0.9464776596250647,
+      "win_rate": 0.0427807486631016,
+      "corr_penalty": 0.0002909487562994255,
+      "size_penalty": 0.0,
+      "objective": 0.1996458259034591
+    },
+    {
+      "subset": [
+        "rates",
+        "oil",
+        "index"
+      ],
+      "mean_pnl_pct": 0.03897999714395606,
+      "pnl_volatility": 0.9615847985818783,
+      "win_rate": 0.05080213903743316,
+      "corr_penalty": 0.00052528560351525,
+      "size_penalty": 0.08,
+      "objective": 0.19178656009516798
+    }
+  ],
+  "by_asset": [
+    {
+      "asset": "crypto",
+      "entry_count": 3,
+      "win_rate_pct": 66.66666666666666,
+      "avg_pnl_pct": 7.228880530784054,
+      "avg_r_multiple": 1.960006464465965,
+      "avg_execution_confidence": 0.8860004715412654
+    },
+    {
+      "asset": "index",
+      "entry_count": 3,
+      "win_rate_pct": 100.0,
+      "avg_pnl_pct": 1.3617630543768373,
+      "avg_r_multiple": 0.9401215487992927,
+      "avg_execution_confidence": 0.9117166947226192
+    },
+    {
+      "asset": "oil",
+      "entry_count": 22,
+      "win_rate_pct": 63.63636363636363,
+      "avg_pnl_pct": 0.46144865702321985,
+      "avg_r_multiple": 0.2820716073587579,
+      "avg_execution_confidence": 0.7931126829994636
+    },
+    {
+      "asset": "rates",
+      "entry_count": 3,
+      "win_rate_pct": 66.66666666666666,
+      "avg_pnl_pct": 0.1137864380660732,
+      "avg_r_multiple": 0.107386477912477,
+      "avg_execution_confidence": 0.946897934643386
+    },
+    {
+      "asset": "fx",
+      "entry_count": 4,
+      "win_rate_pct": 75.0,
+      "avg_pnl_pct": 0.08480708733044906,
+      "avg_r_multiple": 0.0805450512660984,
+      "avg_execution_confidence": 0.9644128543502911
+    }
+  ],
+  "by_event_type": [
+    {
+      "event_type": "fomc",
+      "entry_count": 4,
+      "win_rate_pct": 50.0,
+      "avg_pnl_pct": 5.352926749054007,
+      "avg_r_multiple": 1.6624042183206815
+    },
+    {
+      "event_type": "eia_inventory",
+      "entry_count": 18,
+      "win_rate_pct": 72.22222222222221,
+      "avg_pnl_pct": 0.5934899274561034,
+      "avg_r_multiple": 0.36085782274055833
+    },
+    {
+      "event_type": "nfp",
+      "entry_count": 8,
+      "win_rate_pct": 87.5,
+      "avg_pnl_pct": 0.5873225092993941,
+      "avg_r_multiple": 0.2806544175024058
+    },
+    {
+      "event_type": "liquidity_shock",
+      "entry_count": 1,
+      "win_rate_pct": 100.0,
+      "avg_pnl_pct": 0.3422313483915085,
+      "avg_r_multiple": 0.44987146529562433
+    },
+    {
+      "event_type": "opec",
+      "entry_count": 3,
+      "win_rate_pct": 33.33333333333333,
+      "avg_pnl_pct": -0.06893056720590485,
+      "avg_r_multiple": -0.06522591945837734
+    },
+    {
+      "event_type": "geopolitical",
+      "entry_count": 1,
+      "win_rate_pct": 0.0,
+      "avg_pnl_pct": -0.3241565380813105,
+      "avg_r_multiple": -0.09418768906224548
+    }
+  ]
+}
