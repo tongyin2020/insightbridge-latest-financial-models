@@ -38,8 +38,28 @@
 - `event_right_side_engine.py` — 右侧确认信号闸门（6 层过滤，纯判定）。
 - `ibkr_contract_resolver.py` — 合约唯一解析（禁用 CONTFUT 下单）。
 - `ibkr_order_manager.py` — marketable-limit + OCA bracket + 成交确认 + 去重，默认 dry-run。
-- `right_side_pipeline.py` — 把以上 + 共享硬风控 + 仓位计算器串成闭环，并产出 KPI。
+- `ibkr_session.py` — **TWS 会话层（第三优先）**：错误码分类（INFO/WARN/RETRY/FATAL）、
+  断线重连（指数退避，1100/1101 自动重订阅）、持仓/未结单/成交对账、按 OI/成交量选主力。
+- `right_side_pipeline.py` — 把以上 + 共享硬风控 + 仓位计算器串成闭环，含 `halt()` 停机闸，并产出 KPI。
+- `run_tws_paper.py` — **可运行的 TWS 模拟盘入口**：连接 7497 → 选主力锁 conId → 对账自检
+  → 事件评估 → dry-run/真实下单 → 成交确认 → KPI。`--live` 强制只允许 7497，误连实盘直接拒绝。
 - `test_pipeline_dryrun.py` — 离线自检（无需连 IBKR）。
+
+## 接 TWS 模拟盘（你已调通 TWS 后）
+
+```bash
+# 1) 只连接 + 解析合约 + 对账，不下单
+python3 execution_framework/run_tws_paper.py --check --symbols MNQ,MES,ZN
+
+# 2) dry-run：评估并构造下单意图，但不真实发单
+python3 execution_framework/run_tws_paper.py --dry-run --symbols MNQ
+
+# 3) 真实模拟盘下单（仅 7497，谨慎）
+python3 execution_framework/run_tws_paper.py --live --symbols MNQ
+```
+
+安全机制：致命 IBKR 错误（200 合约不明 / 201 保证金不足 / 203 权限）或启动对账失败
+会自动触发 `pipeline.halt()`，停止一切新入场；`--live` 仅允许端口 7497。
 
 ## 8 个核心品种（先跑这些，别一上来跑 26 个）
 
@@ -78,8 +98,15 @@ if res["status"] in ("BUY", "SELL"):
 
 真实发单前请把 `dry_run=False` 且对 `step(..., confirm_live=True)`，并务必先在模拟盘充分回放。
 
-## 待办（第三优先，尚未实现）
+## 已完成（第三优先）
 
-- IBKR 错误码处理（200/201/1100 等）、断线重连、`reqExecutions`/`reqOpenOrders` 对账。
-- 用真实模拟盘数据对 8 品种做 walk-forward + IS/OOS 过拟合检查后再定参。
-- 主力合约按 OI/成交量选择（当前默认近月）。
+- ✅ IBKR 错误码处理（200/201/203/1100/1101 等，四级分类）。
+- ✅ 断线重连（指数退避；1100/1101 后自动重拉未结单与持仓）。
+- ✅ `reqOpenOrders` / `fills` / `positions` 对账，持仓不一致自动 halt。
+- ✅ 主力合约按 OI/成交量选择（`resolve_front_liquid_future`，取代默认近月）。
+
+## 仍建议后续做
+
+- 用真实模拟盘数据对 8 品种做 walk-forward + `StrategyEvaluator` 的 IS/OOS 过拟合检查后再定参。
+- 持续运行守护（心跳 / dead-man's switch）与外部告警（Telegram/PagerDuty）。
+- 把成交后的真实 P&L 回写学习库（替换当前 pnl_pct=0.0 的占位）。

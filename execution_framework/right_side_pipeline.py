@@ -87,6 +87,8 @@ class RightSidePipeline:
         self.dry_run = dry_run or ib is None
         self.log_path = Path(log_path) if log_path else None
         self.shared_ok = _SHARED_OK
+        self._halted = False
+        self._halt_reason = ""
 
         if _SHARED_OK:
             self.hard_stop = HardStopController(
@@ -102,6 +104,26 @@ class RightSidePipeline:
             with self.log_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
 
+    # ── 停机闸 ──────────────────────────────────────────────────────────────
+    def halt(self, reason: str) -> None:
+        """致命错误/对账失败时调用：停止一切新入场。"""
+        self._halted = True
+        self._halt_reason = reason
+        self._log({"stage": "HALT", "reason": reason})
+        try:
+            print(f"\u26d4 PIPELINE HALTED: {reason}")
+        except Exception:  # noqa: BLE001
+            pass
+
+    @property
+    def is_halted(self) -> bool:
+        return self._halted
+
+    def attach_session(self, session) -> None:
+        """把 TWS 会话的致命错误/重连回调接到本管线。"""
+        session.on_fatal = lambda code, msg: self.halt(f"ibkr_fatal_{code}:{msg}")
+        session.on_reconnect = lambda: self._log({"stage": "reconnected"})
+
     # ── 触发事件 ──────────────────────────────────────────────────────────
     def on_event(self, symbol: str, event_name: str, event_time, df) -> None:
         self.engine.trigger_event(symbol, event_name, event_time, df)
@@ -113,6 +135,10 @@ class RightSidePipeline:
              account_state: Optional[Dict[str, Any]] = None,
              available_depth: float = 5_000_000.0,
              confirm_live: bool = False) -> Dict[str, Any]:
+        # 停机闸：致命错误/对账失败后不再新入场
+        if self._halted:
+            return {"status": "HOLD", "reason": f"halted:{self._halt_reason}", "symbol": symbol}
+
         # 单品种互斥：已有在途/持仓则不再发新单
         if self.om.has_open(symbol):
             return {"status": "HOLD", "reason": "symbol_has_open_order", "symbol": symbol}
