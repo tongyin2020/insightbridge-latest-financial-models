@@ -98,6 +98,10 @@ def main() -> int:
                     help="生成未来 N 天的默认经济日历后退出（需用官方日期校正）")
     ap.add_argument("--event-window", type=float, default=120.0,
                     help="事件触发窗口秒（事件时点后多少秒内启动冷静期）")
+    ap.add_argument("--lead-minutes", type=float, default=15.0,
+                    help="会前降温提前量（事件前 N 分钟冻结新入场并平现货持仓）")
+    ap.add_argument("--no-pre-flatten", action="store_true",
+                    help="会前只冻结新入场，不平掉现货加密持仓")
     args = ap.parse_args()
 
     if args.gen_calendar > 0:
@@ -185,14 +189,40 @@ def main() -> int:
     signal.signal(signal.SIGINT, _sig)
     signal.signal(signal.SIGTERM, _sig)
 
+    # 现货现价辅助（供软止损与会前平仓共用）
+    def _spot_price(s):
+        rcx = pipe.resolver.get_cached(s)
+        if rcx is None or not rcx.is_locked:
+            return 0.0
+        t = sess.ib.reqMktData(rcx.raw, snapshot=True)
+        sess.ib.sleep(0.8)
+        if t.bid and t.ask and t.bid > 0 and t.ask > 0:
+            return (float(t.bid) + float(t.ask)) / 2.0
+        return float(t.last or t.close or 0.0)
+
     print(f"进入持续循环，每 {args.interval:.0f}s 扫描一次。Ctrl+C 退出。")
     try:
         while not stop_flag["stop"]:
             now = datetime.now(timezone.utc)
             scanned = 0
 
-            # ① 日历到点：自动触发事件（启动各品种冷静期）
+            # ①a 会前降温：事件前 lead-minutes 内冻结新入场、平掉现货持仓
+            for ev in calendar.imminent(now, lead_minutes=args.lead_minutes):
+                affected = [s for s in ev.symbols if s in symbols]
+                if affected:
+                    rec = pipe.pre_event_cooldown(
+                        affected, ev.name,
+                        price_func=lambda s: _spot_price(s) if 'BTC' in s else 0.0,
+                        flatten=not args.no_pre_flatten)
+                    if rec["frozen"]:
+                        mins = (ev.event_time - now).total_seconds() / 60.0
+                        print(f"  ❄ 会前降温 {ev.name}（{mins:.0f}min后）：冻结 {rec['frozen']}"
+                              + (f"，平现货 {len(rec['crypto_flattened'])} 笔" if rec['crypto_flattened'] else ""))
+                        guardian.notify(f"会前降温 {ev.name}", str(rec["frozen"]))
+
+            # ①b 日历到点：自动触发事件（解除会前冻结 + 启动冷静期）
             for ev in calendar.pop_due(now, window_s=args.event_window):
+                pipe.clear_pre_event_freeze([s for s in ev.symbols if s in symbols])
                 for sym in ev.symbols:
                     if sym not in symbols:
                         continue
@@ -251,16 +281,6 @@ def main() -> int:
                     print(f"  [{sym}] 扫描异常: {exc}")
 
             # 软止损检查（现货加密专用：PAXOS 无原生 STP）
-            def _spot_price(s):
-                rcx = pipe.resolver.get_cached(s)
-                if rcx is None or not rcx.is_locked:
-                    return 0.0
-                t = sess.ib.reqMktData(rcx.raw, snapshot=True)
-                sess.ib.sleep(0.8)
-                # 现货取中价；拿不到则用 last/close
-                if t.bid and t.ask and t.bid > 0 and t.ask > 0:
-                    return (float(t.bid) + float(t.ask)) / 2.0
-                return float(t.last or t.close or 0.0)
             for trig in pipe.om.check_soft_stops(_spot_price):
                 print(f"  ⛔ 软止损触发 {trig['symbol']} @ {trig['current']} "
                       f"(止损 {trig['stop_price']}) -> {trig['exit_state']}")

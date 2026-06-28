@@ -181,7 +181,29 @@ python3 execution_framework/calibrate_params.py --symbol MNQ
 “暂用经验初值”，不硬给结论。报告写入 `reports/calibration/`。journal 已增记
 `minutes_after_event`，供后续逐冷静期切片精调。
 
+## 会前降温（重大事件前自动减仓/冻结）
+
+持续循环每轮调 `calendar.imminent(lead_minutes)`，在重大事件前 N 分钟对受影响品种：
+- **冻结新入场**（避免在会前低流动性/宽点差窗口进场）；
+- **现货加密**：若有软止损持仓 → 会前主动平仓（会前不裸持），并回写真实 P&L；
+- **期货/外汇**：撤掉该品种未成交工作单（交易所保护单不动）。
+事件到点触发时自动解除冻结，进入正常“冷静期→右侧确认”流程。
+
+```bash
+# 会前 10 分钟开始降温（默认 15）；--no-pre-flatten 只冻结不平现货
+python3 execution_framework/run_tws_continuous.py --interval 60 --lead-minutes 10
+```
+
+## 准确经济日历（2026 年 7–8 月，官方核实）
+
+`seed_calendar_2026_07.py` 已内置官方核实日期：NFP 7/2、8/7；CPI 7/14、8/12；
+PPI 7/15、8/13；FOMC 7/29（8 月无 FOMC）。运行入口会自动加载 `calendar.json`。
+
+```bash
+python3 execution_framework/seed_calendar_2026_07.py   # 生成/更新 calendar.json
+```
+
 ## 仍建议后续做
 
 - 积累足够真实成交后（建议每品 ≥ 30 笔），定期跑 `calibrate_params.py` 复核参数。
-- FOMC/ECB/BOJ 等不规则事件，用官方日历校正 `calendar.json` 的准确时点。
+- 9 月起的日历（含 9/15-16 FOMC）可按同样方式补充。

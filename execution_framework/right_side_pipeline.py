@@ -90,6 +90,7 @@ class RightSidePipeline:
         self.shared_ok = _SHARED_OK
         self._halted = False
         self._halt_reason = ""
+        self._pre_event_frozen: set = set()   # 会前冻结的品种（禁新入场）
 
         if _SHARED_OK:
             self.hard_stop = HardStopController(
@@ -116,6 +117,50 @@ class RightSidePipeline:
         except Exception:  # noqa: BLE001
             pass
 
+    # ── 会前降温：重大事件前 5-15 分钟降低/平掉现有持仓 ──────────────
+    def pre_event_cooldown(self, symbols, event_name: str,
+                           price_func=None, flatten: bool = True) -> dict:
+        """在事件前对受影响品种降温：
+          1. 冻结该品种新入场（避免在会前低流动性宽点差窗口进场）。
+          2. 现货加密：若有软止损持仓且 flatten=True，发市价/IOC 平仓（会前不裸持）。
+          3. 期货/外汇：撤掉该品种未结工作单（保护单仍在交易所，不变）。
+        返回：{frozen:[...], crypto_flattened:[...]}。会前冻结会在事件触发后自动解除。"""
+        frozen, flat = [], []
+        for sym in symbols:
+            self._pre_event_frozen.add(sym)
+            frozen.append(sym)
+            # 现货加密软止损持仓：会前主动平仓
+            for ref, ss in list(self.om.soft_stops.items()):
+                if ss.get("active") and ss["symbol"] == sym and flatten:
+                    px = 0.0
+                    if price_func:
+                        try:
+                            px = float(price_func(sym))
+                        except Exception:  # noqa: BLE001
+                            px = 0.0
+                    ss["active"] = False
+                    state = self.om._soft_stop_exit(ref, ss, px or ss["stop_price"])
+                    if self.journal is not None and px > 0:
+                        self.on_close(sym, ref, exit_price=px,
+                                      exit_reason=f"pre_event_{event_name}")
+                    flat.append({"symbol": sym, "client_ref": ref, "exit": state})
+            # 期货/外汇：撤掉该品种未成交工作单（不动交易所保护单）
+            try:
+                self.om.cancel_all_for(sym)
+            except Exception:  # noqa: BLE001
+                pass
+        rec = {"frozen": frozen, "crypto_flattened": flat, "event": event_name}
+        self._log({"stage": "pre_event_cooldown", **rec})
+        return rec
+
+    def clear_pre_event_freeze(self, symbols=None) -> None:
+        """事件触发后解除会前冻结（以便进入正常的冷静期→右侧确认流程）。"""
+        if symbols is None:
+            self._pre_event_frozen.clear()
+        else:
+            for s in symbols:
+                self._pre_event_frozen.discard(s)
+
     @property
     def is_halted(self) -> bool:
         return self._halted
@@ -139,6 +184,10 @@ class RightSidePipeline:
         # 停机闸：致命错误/对账失败后不再新入场
         if self._halted:
             return {"status": "HOLD", "reason": f"halted:{self._halt_reason}", "symbol": symbol}
+
+        # 会前冻结：重大事件前的品种不准新入场
+        if symbol in self._pre_event_frozen:
+            return {"status": "HOLD", "reason": "pre_event_frozen", "symbol": symbol}
 
         # 单品种互斥：已有在途/持仓则不再发新单
         if self.om.has_open(symbol):

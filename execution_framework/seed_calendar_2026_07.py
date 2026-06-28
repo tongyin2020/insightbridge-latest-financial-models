@@ -34,12 +34,17 @@ from enabled_symbols import ENABLED_SYMBOLS
 BASE = Path(__file__).resolve().parent.parent
 CAL = BASE / "reports" / "runtime" / "calendar.json"
 
-# (事件名, UTC 时间, 标题)  —— 已按 EDT=UTC-4 换算
+# (事件名, UTC 时间, 标题)  —— 已按 EDT=UTC-4 换算（均为官方核实日期）
 EVENTS_2026_07 = [
+    # —— 7 月 ——
     ("NFP",  datetime(2026, 7, 2,  12, 30, tzinfo=timezone.utc), "Nonfarm Payrolls (Jun) 08:30 ET"),
     ("CPI",  datetime(2026, 7, 14, 12, 30, tzinfo=timezone.utc), "CPI (Jun) 08:30 ET"),
-    ("PPI",  datetime(2026, 7, 15, 12, 30, tzinfo=timezone.utc), "PPI (Jun) 08:30 ET [次日,待官方核对]"),
+    ("PPI",  datetime(2026, 7, 15, 12, 30, tzinfo=timezone.utc), "PPI (Jun) 08:30 ET"),
     ("FOMC", datetime(2026, 7, 29, 18, 0,  tzinfo=timezone.utc), "FOMC Decision 14:00 ET"),
+    # —— 8 月（本月无 FOMC，下次 9/15-16）——
+    ("NFP",  datetime(2026, 8, 7,  12, 30, tzinfo=timezone.utc), "Nonfarm Payrolls (Jul) 08:30 ET"),
+    ("CPI",  datetime(2026, 8, 12, 12, 30, tzinfo=timezone.utc), "CPI (Jul) 08:30 ET"),
+    ("PPI",  datetime(2026, 8, 13, 12, 30, tzinfo=timezone.utc), "PPI (Jul) 08:30 ET"),
 ]
 
 

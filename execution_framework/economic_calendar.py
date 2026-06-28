@@ -138,6 +138,14 @@ class EconomicCalendar:
         return [e for e in self.events
                 if not e.triggered and now <= e.event_time <= end]
 
+    def imminent(self, now: datetime, lead_minutes: float = 15.0) -> List[CalendarEvent]:
+        """返回“未来 lead_minutes 分钟内即将发生”且尚未触发的事件。
+        用于会前降温：在重大事件前 5-15 分钟降低/平掉现有持仓。"""
+        now = now.astimezone(timezone.utc)
+        end = now + timedelta(minutes=lead_minutes)
+        return [e for e in self.events
+                if not e.triggered and now < e.event_time <= end]
+
     # ── 程序化生成（按美东发布规律的近似时间表）────────────────────────────
     def generate_default(self, days: int = 14,
                          start: Optional[datetime] = None) -> int:

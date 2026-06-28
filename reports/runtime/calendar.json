@@ -40,7 +40,7 @@
       "ZN",
       "SR3"
     ],
-    "title": "PPI (Jun) 08:30 ET [次日,待官方核对]",
+    "title": "PPI (Jun) 08:30 ET",
     "triggered": false
   },
   {
@@ -57,6 +57,50 @@
       "BTC"
     ],
     "title": "FOMC Decision 14:00 ET",
+    "triggered": false
+  },
+  {
+    "name": "NFP",
+    "event_time": "2026-08-07T12:30:00+00:00",
+    "symbols": [
+      "MES",
+      "MNQ",
+      "ZT",
+      "ZN",
+      "SR3",
+      "EURUSD",
+      "USDJPY"
+    ],
+    "title": "Nonfarm Payrolls (Jul) 08:30 ET",
+    "triggered": false
+  },
+  {
+    "name": "CPI",
+    "event_time": "2026-08-12T12:30:00+00:00",
+    "symbols": [
+      "MES",
+      "MNQ",
+      "ZT",
+      "ZN",
+      "SR3",
+      "EURUSD",
+      "USDJPY",
+      "BTC"
+    ],
+    "title": "CPI (Jul) 08:30 ET",
+    "triggered": false
+  },
+  {
+    "name": "PPI",
+    "event_time": "2026-08-13T12:30:00+00:00",
+    "symbols": [
+      "MES",
+      "MNQ",
+      "ZT",
+      "ZN",
+      "SR3"
+    ],
+    "title": "PPI (Jul) 08:30 ET",
     "triggered": false
   }
 ]
