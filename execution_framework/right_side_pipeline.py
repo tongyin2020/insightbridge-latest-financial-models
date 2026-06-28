@@ -289,5 +289,6 @@ class RightSidePipeline:
 def _asset_class_for(label: str) -> str:
     """把右侧引擎的 asset_class 映射到 shared ASSET_CONFIGS 的键。"""
     m = {"FX": "FX", "INDEX": "EQUITY_INDEX", "TREASURY": "BOND",
-         "RATES": "BOND", "CRYPTO_FUT": "CRYPTO", "COMMODITY": "COMMODITY"}
+         "RATES": "BOND", "CRYPTO_FUT": "CRYPTO", "CRYPTO_SPOT": "CRYPTO",
+         "COMMODITY": "COMMODITY"}
     return m.get(label, "CRYPTO")

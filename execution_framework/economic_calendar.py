@@ -32,8 +32,9 @@ from typing import Any, Dict, List, Optional
 
 # 事件 → 受影响品种（仅已启用品种）
 EVENT_IMPACT: Dict[str, List[str]] = {
-    "CPI":  ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY"],
-    "FOMC": ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY"],
+    # BTC 现货对宏观利率事件（CPI/FOMC）敏感，并入 CPI/FOMC 影响面
+    "CPI":  ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY", "BTC"],
+    "FOMC": ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY", "BTC"],
     "NFP":  ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY"],
     "PPI":  ["MES", "MNQ", "ZT", "ZN", "SR3"],
     "RETAIL_SALES": ["MES", "MNQ", "ZT", "ZN", "USDJPY"],

@@ -36,6 +36,8 @@ class OrderTicket:
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     fills: list = field(default_factory=list)
     note: str = ""
+    is_crypto: bool = False        # 现货加密（PAXOS）：cashQty+IOC，无原生止损
+    soft_stop: bool = False        # 是否由软止损监控器看护
 
 
 class IBKROrderManager:
@@ -59,6 +61,8 @@ class IBKROrderManager:
         self._open_symbols: Set[str] = set()          # 单品种互斥
         self._seen_refs: Set[str] = set()             # 去重
         self._tickets: Dict[str, OrderTicket] = {}
+        # 软止损登记：client_ref -> {symbol, side, stop_price, quantity, rc}
+        self.soft_stops: Dict[str, Dict[str, Any]] = {}
 
     # ── 互斥 / 去重 ───────────────────────────────────────────────────────
     def has_open(self, symbol: str) -> bool:
@@ -94,11 +98,12 @@ class IBKROrderManager:
             return OrderTicket(client_ref, symbol, action, quantity, 0, stop_loss,
                                state="REJECTED", note="symbol_already_has_open_order")
 
+        is_crypto = getattr(resolved_contract, "sec_type", "") == "CRYPTO"
         limit_price = self._marketable_limit(action, ref_price, tick_size, protect_ticks)
         ticket = OrderTicket(
             client_ref=client_ref, symbol=symbol, action=action,
             quantity=quantity, limit_price=limit_price, stop_loss=stop_loss,
-            take_profit=take_profit)
+            take_profit=take_profit, is_crypto=is_crypto, soft_stop=is_crypto)
 
         # 合约必须已锁定 conId
         if resolved_contract is None or not getattr(resolved_contract, "is_locked", False):
@@ -110,16 +115,44 @@ class IBKROrderManager:
         if self.dry_run or not confirm_live:
             ticket.state = "DRYRUN"
             ticket.note = ("dry_run=True 或 confirm_live=False；未真实发单。"
-                           "确认无误后用 dry_run=False, confirm_live=True 才会下单。")
+                           + ("（现货加密：IOC 限价 + 软止损）" if ticket.is_crypto
+                              else "确认无误后用 dry_run=False, confirm_live=True 才会下单。"))
             self._register(symbol, client_ref)
             self._tickets[client_ref] = ticket
+            if ticket.is_crypto:
+                self._register_soft_stop(ticket, resolved_contract)
             return ticket
 
-        # ── 真实发单（ib_insync）──────────────────────────────────────────
-        ticket = self._place_live_bracket(resolved_contract, ticket)
+        # 真实发单（ib_insync）：现货加密走 IOC 限价 + 软止损；其余走 OCA 括号单
+        if ticket.is_crypto:
+            ticket = self._place_live_crypto(resolved_contract, ticket)
+            if ticket.state == "SUBMITTED":
+                self._register_soft_stop(ticket, resolved_contract)
+        else:
+            ticket = self._place_live_bracket(resolved_contract, ticket)
         self._register(symbol, client_ref)
         self._tickets[client_ref] = ticket
         return ticket
+
+    # 现货加密下单：IOC 限价（PAXOS 要求）+ 软止损（无原生 STP）
+    def _place_live_crypto(self, rc, ticket: OrderTicket) -> OrderTicket:
+        from ib_insync import LimitOrder
+        order = LimitOrder(ticket.action, ticket.quantity, ticket.limit_price)
+        order.orderRef = ticket.client_ref
+        order.tif = "IOC"          # PAXOS 要求 IOC，不是 DAY
+        order.transmit = True
+        trade = self.ib.placeOrder(rc.raw, order)
+        ticket.state = "SUBMITTED"
+        ticket.parent_id = trade.order.orderId
+        ticket.note = "crypto_ioc_limit_submitted_soft_stop_armed"
+        return ticket
+
+    def _register_soft_stop(self, ticket: OrderTicket, rc) -> None:
+        side = "LONG" if ticket.action == "BUY" else "SHORT"
+        self.soft_stops[ticket.client_ref] = {
+            "symbol": ticket.symbol, "side": side,
+            "stop_price": ticket.stop_loss, "quantity": ticket.quantity,
+            "rc": rc, "active": True}
 
     def _place_live_bracket(self, rc, ticket: OrderTicket) -> OrderTicket:
         from ib_insync import LimitOrder, StopOrder
@@ -190,3 +223,44 @@ class IBKROrderManager:
             ref = tr.order.orderRef or ""
             if ref.startswith(symbol + "-"):
                 self.ib.cancelOrder(tr.order)
+
+    # ── 软止损监控（现货加密专用；现货不支持原生 STP）─────────────
+    def check_soft_stops(self, price_func) -> list:
+        """由主循环每轮调用：逐个检查软止损是否被穿越。
+        price_func(symbol) -> 现价（float）。被穿越则发市价平仓并返回触发列表。
+        返回：[{client_ref, symbol, side, stop_price, current, exit_state}]"""
+        triggered = []
+        for ref, ss in list(self.soft_stops.items()):
+            if not ss.get("active"):
+                continue
+            try:
+                px = float(price_func(ss["symbol"]))
+            except Exception:   # noqa: BLE001
+                continue
+            if px <= 0:
+                continue
+            hit = ((ss["side"] == "LONG" and px <= ss["stop_price"]) or
+                   (ss["side"] == "SHORT" and px >= ss["stop_price"]))
+            if not hit:
+                continue
+            ss["active"] = False
+            exit_state = self._soft_stop_exit(ref, ss, px)
+            triggered.append({"client_ref": ref, "symbol": ss["symbol"],
+                              "side": ss["side"], "stop_price": ss["stop_price"],
+                              "current": px, "exit_state": exit_state})
+        return triggered
+
+    def _soft_stop_exit(self, ref: str, ss: dict, px: float) -> str:
+        """触发软止损：反向 IOC 限价平仓（带最坏价保护，不是裸市价）。"""
+        if self.dry_run:
+            return "DRYRUN_SOFT_STOP"
+        from ib_insync import LimitOrder
+        exit_action = "SELL" if ss["side"] == "LONG" else "BUY"
+        # 平仓价留 0.3% 缓冲以提高成交概率，同时限住最坏成交
+        buf = px * (0.997 if exit_action == "SELL" else 1.003)
+        order = LimitOrder(exit_action, ss["quantity"], round(buf, 2))
+        order.orderRef = ref + "-SOFTSTOP"
+        order.tif = "IOC"
+        order.transmit = True
+        self.ib.placeOrder(ss["rc"].raw, order)
+        return "SOFT_STOP_EXIT_SENT"

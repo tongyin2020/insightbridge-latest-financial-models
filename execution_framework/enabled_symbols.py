@@ -21,17 +21,18 @@ from __future__ import annotations
 
 from typing import List
 
-# 当前启用（7 个，不含加密）
+# 当前启用（8 个）
 ENABLED_SYMBOLS: List[str] = [
     "MES", "MNQ",        # 股指
     "ZT", "ZN",          # 国债
     "SR3",               # 利率
     "EURUSD", "USDJPY",  # 外汇
+    "BTC",               # 现货加密（PAXOS），软止损
 ]
 
-# 已实现但因权限/选择暂不启用
+# 已实现但因选择暂不启用
 DISABLED_SYMBOLS: List[str] = [
-    "MBT",               # 无加密货币权限
+    "MBT",               # CME 微型比特币期货（现用现货 BTC代替）
 ]
 
 # 备注：用于日志/报告展示
@@ -43,7 +44,8 @@ SYMBOL_NOTES = {
     "SR3": "3M SOFR (CME)",
     "EURUSD": "EUR/USD spot (IDEALPRO)",
     "USDJPY": "USD/JPY spot (IDEALPRO)",
-    "MBT": "Micro Bitcoin (CME) — 无权限，默认禁用",
+    "BTC": "BTC/USD 现货 (PAXOS) — IOC 限价 + 软止损",
+    "MBT": "Micro Bitcoin 期货 (CME) — 现用现货 BTC 代替，默认禁用",
 }
 
 

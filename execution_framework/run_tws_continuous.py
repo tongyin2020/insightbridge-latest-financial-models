@@ -250,6 +250,25 @@ def main() -> int:
                 except Exception as exc:  # noqa: BLE001
                     print(f"  [{sym}] 扫描异常: {exc}")
 
+            # 软止损检查（现货加密专用：PAXOS 无原生 STP）
+            def _spot_price(s):
+                rcx = pipe.resolver.get_cached(s)
+                if rcx is None or not rcx.is_locked:
+                    return 0.0
+                t = sess.ib.reqMktData(rcx.raw, snapshot=True)
+                sess.ib.sleep(0.8)
+                # 现货取中价；拿不到则用 last/close
+                if t.bid and t.ask and t.bid > 0 and t.ask > 0:
+                    return (float(t.bid) + float(t.ask)) / 2.0
+                return float(t.last or t.close or 0.0)
+            for trig in pipe.om.check_soft_stops(_spot_price):
+                print(f"  ⛔ 软止损触发 {trig['symbol']} @ {trig['current']} "
+                      f"(止损 {trig['stop_price']}) -> {trig['exit_state']}")
+                guardian.notify("软止损触发", f"{trig['symbol']} @ {trig['current']}")
+                # 回写真实平仓 P&L 到学习库
+                pipe.on_close(trig["symbol"], trig["client_ref"],
+                              exit_price=trig["current"], exit_reason="soft_stop")
+
             # 每轮：心跳 + 周期性对账
             guardian.beat({"scanned": scanned, "halted": pipe.is_halted,
                            "symbols": symbols})

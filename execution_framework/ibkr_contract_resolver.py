@@ -29,6 +29,11 @@ FX_SPECS: Dict[str, Dict[str, str]] = {
 }
 
 # ── 期货：模糊模板，交给 reqContractDetails 展开到期月 ───────────────────────
+CRYPTO_SPECS: Dict[str, Dict[str, str]] = {
+    "BTC": {"symbol": "BTC", "currency": "USD", "exchange": "PAXOS"},
+    # 如需 ETH: "ETH": {"symbol": "ETH", "currency": "USD", "exchange": "PAXOS"},
+}
+
 FUT_SPECS: Dict[str, Dict[str, str]] = {
     "MES": {"symbol": "MES", "exchange": "CME", "currency": "USD"},
     "MNQ": {"symbol": "MNQ", "exchange": "CME", "currency": "USD"},
@@ -83,6 +88,8 @@ class IBKRContractResolver:
 
         if symbol in FX_SPECS:
             rc = self._resolve_fx(symbol)
+        elif symbol in CRYPTO_SPECS:
+            rc = self._resolve_crypto(symbol)
         elif symbol in FUT_SPECS:
             rc = self._resolve_future(symbol, prefer_front_month)
         else:
@@ -115,6 +122,21 @@ class IBKRContractResolver:
             local_symbol=con.localSymbol, raw=con)
 
     # ── 期货：展开到期月，选近月/主力 ─────────────────────────────────────
+    def _resolve_crypto(self, symbol: str) -> ResolvedContract:
+        spec = CRYPTO_SPECS[symbol]
+        if self.ib is None:
+            raise ContractResolutionError("未连接 IB，无法解析（拒绝在未解析状态下下单）")
+        from ib_insync import Crypto
+        c = Crypto(spec["symbol"], spec["exchange"], spec["currency"])
+        details = self.ib.reqContractDetails(c)
+        if not details:
+            raise ContractResolutionError(f"现货加密合约无返回: {symbol}")
+        con = details[0].contract
+        return ResolvedContract(
+            symbol=symbol, sec_type="CRYPTO", con_id=con.conId,
+            exchange=con.exchange or spec["exchange"], currency=con.currency,
+            local_symbol=con.localSymbol, raw=con)
+
     def _resolve_future(self, symbol: str, prefer_front_month: bool) -> ResolvedContract:
         spec = FUT_SPECS[symbol]
         if self.ib is None:

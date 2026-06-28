@@ -63,12 +63,21 @@ python3 execution_framework/run_tws_paper.py --live --symbols MNQ
 
 ## 启用品种（与盈透模拟账户权限对齐）
 
-当前账户启用 **7 个**（见 `enabled_symbols.py`）：
+当前账户启用 **8 个**（见 `enabled_symbols.py`）：
 
 FX：`EURUSD` `USDJPY` ｜ Index：`MES` `MNQ` ｜ Treasury：`ZT` `ZN` ｜ Rates：`SR3`
+｜ Crypto：`BTC`（现货，PAXOS）
 
-❌ `MBT`（Micro Bitcoin）—— **当前账户无加密货币权限，默认禁用**（代码保留，
-开通后把 `"MBT"` 加回 `ENABLED_SYMBOLS` 即可）。运行入口会自动过滤掉无权限品种。
+### 现货加密 BTC 的特殊处理（重要）
+盈透现货加密（PAXOS）与期货**不同**：
+- `secType=CRYPTO`，交易所 `PAXOS`，**无到期月/主力合约**（不需 roll）。
+- 下单用 **IOC 限价**（PAXOS 要求 IOC，不是 DAY）。
+- **不支持原生止损单（STP）** → 改用**软止损**：程序每轮监控现价，穿越止损位后
+  发反向 IOC 限价单平仓（带最坏价保护，非裸市价）。
+- 软止损风险：“程序不在=止损失效”、“有延迟滑点较大”——由**死手开关**兼底
+  （断线/卡死时紧急撤单+停机），是现货加密行业普遍做法。
+
+❌ `MBT`（CME 微型比特币**期货**）—— 现改用**现货 BTC** 代替，默认禁用（代码保留）。
 
 ## 长期无人值守跑模拟盘
 

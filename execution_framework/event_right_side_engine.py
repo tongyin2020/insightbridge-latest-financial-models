@@ -93,6 +93,11 @@ DEFAULT_RULES: Dict[str, AssetRule] = {
     # Crypto futures —— CME Micro Bitcoin，24h
     "MBT": AssetRule("MBT", "CRYPTO_FUT", 25, 90, tick_size=5.0,
                      max_spread_ticks=6.0, max_slippage_ticks=10.0),
+
+    # Crypto spot —— 盈透 PAXOS BTC/USD，24h；tick 约 0.01；软止损（无原生 STP）
+    # 点差/滑点上限用“tick 数”表达；BTC 波动大，阈值略宽（可用真实数据校准）。
+    "BTC": AssetRule("BTC", "CRYPTO_SPOT", 25, 90, tick_size=0.01,
+                     max_spread_ticks=2000.0, max_slippage_ticks=3000.0),
 }
 
 
