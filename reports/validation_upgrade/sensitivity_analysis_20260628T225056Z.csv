@@ -1,0 +1,6 @@
+risk_budget,best_subset,objective
+1.5,"['crypto', 'index', 'oil', 'rates']",9.795811584861086
+2.0,"['crypto', 'index', 'oil', 'rates']",9.805811584861088
+2.5,"['crypto', 'index', 'oil', 'rates']",9.815811584861088
+3.0,"['crypto', 'index', 'oil', 'rates']",9.825811584861087
+4.0,"['crypto', 'index', 'oil', 'rates']",9.845811584861087

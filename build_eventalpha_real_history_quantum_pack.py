@@ -17,6 +17,11 @@ import pandas as pd
 
 
 BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+import sys
+if str(BASE / "validation_upgrade") not in sys.path:
+    sys.path.insert(0, str(BASE / "validation_upgrade"))
+
+from unified_scoring_engine import YEAR_WEIGHTS, build_unified_validation_bundle, evidence_level
 DEFAULT_VALIDATION_DIR = BASE / "reports" / "real_history_validation"
 DEFAULT_OUT_DIR = BASE / "reports" / "quantum_tasks"
 ASSETS = ["fx", "rates", "crypto", "oil", "index"]
@@ -52,55 +57,58 @@ def load_inputs(args: argparse.Namespace) -> tuple[Path, Path, pd.DataFrame, pd.
     return cases_path, matrix_path, cases, matrix
 
 
-def asset_stat_block(cases: pd.DataFrame) -> dict:
+def asset_stat_block(asset_df: pd.DataFrame) -> dict:
     out = {}
     for asset in ASSETS:
-        sub = cases[cases["asset"] == asset].copy()
-        entries = sub[sub["action"].isin(["enter_small", "enter_normal", "enter_heavy"])].copy()
+        sub = asset_df[asset_df["asset"] == asset].copy()
+        if sub.empty:
+            out[asset] = {
+                "samples": 0,
+                "evidence": evidence_level(0),
+                "avg_pnl_pct": 0.0,
+                "weighted_avg_pnl_pct": 0.0,
+                "avg_wait_seconds": 120.0,
+                "memory_edge": 0.5,
+                "win_rate": 0.0,
+                "weighted_win_rate": 0.0,
+                "avg_r_multiple": 0.0,
+                "signal_strength": 0.5,
+            }
+            continue
+        row = sub.iloc[0]
         out[asset] = {
-            "samples": int(len(entries)),
-            "avg_pnl_pct": float(entries["pnl_pct"].mean()) if len(entries) else 0.0,
-            "avg_wait_seconds": float(sub["wait_seconds"].mean()) if len(sub) else 120.0,
-            "memory_edge": float(sub["execution_confidence"].mean()) if len(sub) else 0.5,
-            "win_rate": float(entries["profitable"].mean()) if len(entries) else 0.0,
-            "avg_r_multiple": float(entries["r_multiple"].mean()) if len(entries) else 0.0,
-            "signal_strength": float(sub["execution_confidence"].mean()) if len(sub) else 0.5,
+            "samples": int(row["samples"]),
+            "evidence": row["evidence"],
+            "avg_pnl_pct": float(row["avg_pnl_pct"]),
+            "weighted_avg_pnl_pct": float(row["weighted_avg_pnl_pct"]),
+            "avg_wait_seconds": float(row["avg_wait_seconds"]),
+            "memory_edge": float(row["avg_confidence"]),
+            "win_rate": float(row["win_rate"]),
+            "weighted_win_rate": float(row["weighted_win_rate"]),
+            "avg_r_multiple": float(row["avg_r_multiple"]),
+            "signal_strength": float(row["avg_confidence"]),
         }
     return out
 
 
-def solve_exact_subset(matrix: pd.DataFrame, top_k: int) -> tuple[dict, dict]:
-    frame = matrix[ASSETS].fillna(0.0).copy()
-    corr = frame.corr().fillna(0.0).abs()
-    per_asset_mean = frame.mean(axis=0).to_dict()
-    per_asset_win = (frame > 0).mean(axis=0).to_dict()
-    linear_scores = {
-        asset: round(float(per_asset_mean.get(asset, 0.0)) + float(per_asset_win.get(asset, 0.0)) * 4.0, 6)
-        for asset in ASSETS
+def solve_exact_subset(bundle, top_k: int) -> tuple[dict, dict]:
+    linear_scores = bundle.linear_scores
+    pair_penalties = bundle.pair_penalties
+    champion = bundle.champion_row
+    selected = list(champion.get("subset", []))
+    bits = [1 if asset in selected else 0 for asset in ASSETS]
+    base = sum(linear_scores.get(asset, 0.0) for asset in selected)
+    pair = sum(pair_penalties.get(f"{a}|{b}", 0.0) for a, b in itertools.combinations(selected, 2))
+    size_penalty = 0.10 * max(0, len(selected) - top_k) ** 2
+    best = {
+        "bits": bits,
+        "selected": selected,
+        "objective": round(float(champion.get("objective", 0.0)), 6),
+        "base": round(base, 6),
+        "pair_penalty": round(pair, 6),
+        "size_penalty": round(size_penalty, 6),
+        "evidence": asset_stat_block(bundle.asset_stats),
     }
-    pair_penalties = {}
-    for a, b in itertools.combinations(ASSETS, 2):
-        pair_penalties[f"{a}|{b}"] = round(float(corr.loc[a, b]) * 0.35, 6)
-
-    lam = 0.10
-    best = None
-    for bits in itertools.product([0, 1], repeat=len(ASSETS)):
-        selected = [ASSETS[i] for i, bit in enumerate(bits) if bit]
-        base = sum(linear_scores[a] for a in selected)
-        pair = sum(pair_penalties[f"{a}|{b}"] for a, b in itertools.combinations(selected, 2))
-        size_penalty = lam * (len(selected) - top_k) ** 2
-        objective = base - pair - size_penalty
-        candidate = {
-            "bits": list(bits),
-            "selected": selected,
-            "objective": round(objective, 6),
-            "base": round(base, 6),
-            "pair_penalty": round(pair, 6),
-            "size_penalty": round(size_penalty, 6),
-        }
-        if best is None or candidate["objective"] > best["objective"]:
-            best = candidate
-    assert best is not None
     problem = {
         "problem": "asset_subset_selection",
         "event_type": "multi_event_real_history",
@@ -109,23 +117,28 @@ def solve_exact_subset(matrix: pd.DataFrame, top_k: int) -> tuple[dict, dict]:
             "selection_target": top_k,
             "linear_scores": linear_scores,
             "pair_penalties": pair_penalties,
-            "cardinality_penalty_lambda": lam,
+            "cardinality_penalty_lambda": 0.10,
+            "year_weights": YEAR_WEIGHTS,
         },
         "best_exact_solution": best,
     }
-    return problem, corr.to_dict()
+    return problem, bundle.correlation_map
 
 
 def solve_wait_problem(cases: pd.DataFrame) -> dict:
+    bundle = build_unified_validation_bundle(cases, risk_budget=2.5, top_n=10)
+    wait_lookup = {
+        row["wait_bucket"]: row for row in bundle.wait_bucket_stats.to_dict(orient="records")
+    }
     per_asset = {}
     for asset in ASSETS:
-        sub = cases[cases["asset"] == asset].copy()
+        sub = bundle.asset_stats[bundle.asset_stats["asset"] == asset].copy()
         if len(sub) == 0:
             avg_wait = 120.0
             edge = 0.5
         else:
-            avg_wait = float(sub["wait_seconds"].mean())
-            edge = float(sub["execution_confidence"].mean())
+            avg_wait = float(sub.iloc[0]["avg_wait_seconds"])
+            edge = float(sub.iloc[0]["avg_confidence"])
         bucket_scores = []
         for bucket in WAIT_BUCKETS:
             distance = abs(bucket - avg_wait)
@@ -140,28 +153,10 @@ def solve_wait_problem(cases: pd.DataFrame) -> dict:
     return {"problem": "wait_bucket_optimization", "event_type": "multi_event_real_history", "per_asset": per_asset}
 
 
-def solve_risk_problem(asset_stats: dict, subset_problem: dict, risk_budget: float) -> dict:
+def solve_risk_problem(bundle, subset_problem: dict, risk_budget: float) -> dict:
     selected = subset_problem["best_exact_solution"]["selected"]
-    best = None
-    for combo in itertools.product(RISK_TIERS.items(), repeat=len(selected)):
-        risk_used = sum(weight for _, weight in combo)
-        if risk_used > risk_budget:
-            continue
-        allocation = {}
-        objective = 0.0
-        for asset, (tier_name, weight) in zip(selected, combo):
-            stat = asset_stats[asset]
-            score = stat["avg_pnl_pct"] + stat["win_rate"] * 5.0 + stat["memory_edge"]
-            objective += score * weight
-            allocation[asset] = {"tier": tier_name, "weight": weight}
-        objective -= max(0.0, risk_budget - risk_used) * 0.1
-        candidate = {
-            "allocation": allocation,
-            "risk_used": round(risk_used, 6),
-            "objective": round(objective, 6),
-        }
-        if best is None or candidate["objective"] > best["objective"]:
-            best = candidate
+    top10 = bundle.risk_tier_top10
+    best = top10[0] if top10 else {"allocation": {}, "risk_used": 0.0, "objective": 0.0}
     return {
         "problem": "risk_tier_allocation",
         "selected_assets": selected,
@@ -170,7 +165,7 @@ def solve_risk_problem(asset_stats: dict, subset_problem: dict, risk_budget: flo
             "tiers": RISK_TIERS,
             "risk_budget": risk_budget,
             "asset_scores": {
-                asset: round(asset_stats[asset]["avg_pnl_pct"] + asset_stats[asset]["win_rate"] * 5.0 + asset_stats[asset]["memory_edge"], 6)
+                asset: round(bundle.linear_scores.get(asset, 0.0), 6)
                 for asset in selected
             },
         },
@@ -197,7 +192,7 @@ def render_markdown(pack: dict) -> str:
     ]
     for asset, stat in pack["asset_stats"].items():
         lines.append(
-            f"- `{asset}`: samples={stat['samples']}, avg_pnl_pct={stat['avg_pnl_pct']:.3f}, win_rate={stat['win_rate']*100:.1f}%, avg_wait_seconds={stat['avg_wait_seconds']:.1f}, memory_edge={stat['memory_edge']:.3f}"
+            f"- `{asset}`: samples={stat['samples']}, evidence={stat['evidence']}, weighted_avg_pnl_pct={stat['weighted_avg_pnl_pct']:.3f}, weighted_win_rate={stat['weighted_win_rate']*100:.1f}%, avg_wait_seconds={stat['avg_wait_seconds']:.1f}, memory_edge={stat['memory_edge']:.3f}"
         )
     subset = pack["problems"][0]["best_exact_solution"]
     risk = pack["problems"][2]["best_exact_solution"]
@@ -221,10 +216,11 @@ def main() -> int:
     out_dir = Path(args.out_dir).expanduser()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    asset_stats = asset_stat_block(cases)
-    subset_problem, corr_map = solve_exact_subset(matrix, args.top_k)
+    bundle = build_unified_validation_bundle(cases, risk_budget=args.risk_budget, top_n=10)
+    asset_stats = asset_stat_block(bundle.asset_stats)
+    subset_problem, corr_map = solve_exact_subset(bundle, args.top_k)
     wait_problem = solve_wait_problem(cases)
-    risk_problem = solve_risk_problem(asset_stats, subset_problem, args.risk_budget)
+    risk_problem = solve_risk_problem(bundle, subset_problem, args.risk_budget)
 
     pack = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

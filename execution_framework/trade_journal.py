@@ -36,6 +36,13 @@ class TradeRecord:
     stop_loss: float
     quantity: float
     risk_per_unit: float            # |entry - stop|，用于算 R 倍数
+    model_decision: str = ""
+    signal_time: Optional[str] = None
+    submit_time: Optional[str] = None
+    fill_time: Optional[str] = None
+    signal_price: Optional[float] = None
+    fill_price: Optional[float] = None
+    slippage: Optional[float] = None
     minutes_after_event: float = 0.0   # 入场距事件时点的分钟（供冷静期校准）
     opened_at: str = field(default_factory=_utcnow)
     exit_price: Optional[float] = None
@@ -66,7 +73,15 @@ class TradeJournal:
                     symbol       TEXT NOT NULL,
                     event_name   TEXT,
                     direction    TEXT,
+                    model_decision TEXT,
+                    signal_time  TEXT,
+                    submit_time  TEXT,
+                    fill_time    TEXT,
+                    order_status TEXT,
                     entry_price  REAL,
+                    signal_price REAL,
+                    fill_price   REAL,
+                    slippage     REAL,
                     stop_loss    REAL,
                     quantity     REAL,
                     risk_per_unit REAL,
@@ -80,6 +95,20 @@ class TradeJournal:
                     exit_reason  TEXT,
                     status       TEXT
                 )""")
+            for ddl in [
+                "ALTER TABLE trades ADD COLUMN model_decision TEXT",
+                "ALTER TABLE trades ADD COLUMN signal_time TEXT",
+                "ALTER TABLE trades ADD COLUMN submit_time TEXT",
+                "ALTER TABLE trades ADD COLUMN fill_time TEXT",
+                "ALTER TABLE trades ADD COLUMN order_status TEXT",
+                "ALTER TABLE trades ADD COLUMN signal_price REAL",
+                "ALTER TABLE trades ADD COLUMN fill_price REAL",
+                "ALTER TABLE trades ADD COLUMN slippage REAL",
+            ]:
+                try:
+                    c.execute(ddl)
+                except sqlite3.OperationalError:
+                    pass
             c.execute("CREATE INDEX IF NOT EXISTS idx_symbol ON trades(symbol)")
             c.execute("CREATE INDEX IF NOT EXISTS idx_status ON trades(status)")
 
@@ -93,12 +122,44 @@ class TradeJournal:
                 return
             c.execute("""
                 INSERT INTO trades (client_ref, symbol, event_name, direction,
-                    entry_price, stop_loss, quantity, risk_per_unit,
+                    model_decision, signal_time, submit_time, fill_time,
+                    order_status,
+                    entry_price, signal_price, fill_price, slippage,
+                    stop_loss, quantity, risk_per_unit,
                     minutes_after_event, opened_at, status)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (rec.client_ref, rec.symbol, rec.event_name, rec.direction,
-                 rec.entry_price, rec.stop_loss, rec.quantity, rec.risk_per_unit,
+                 rec.model_decision, rec.signal_time, rec.submit_time, rec.fill_time,
+                 "SUBMITTED" if rec.submit_time else "SIGNAL",
+                 rec.entry_price, rec.signal_price, rec.fill_price, rec.slippage,
+                 rec.stop_loss, rec.quantity, rec.risk_per_unit,
                  rec.minutes_after_event, rec.opened_at, "OPEN"))
+
+    def record_fill(self, client_ref: str, fill_price: float, order_status: str = "FILLED",
+                    fill_time: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        with self._lock, self._conn() as c:
+            row = c.execute("SELECT * FROM trades WHERE client_ref=?", (client_ref,)).fetchone()
+            if row is None:
+                return None
+            signal_price = float(row["signal_price"] if row["signal_price"] is not None else row["entry_price"] or 0.0)
+            direction = row["direction"]
+            sign = 1.0 if direction == "LONG" else -1.0
+            slippage = ((fill_price - signal_price) * sign) if signal_price else 0.0
+            c.execute(
+                """
+                UPDATE trades
+                SET fill_price=?, fill_time=?, slippage=?, order_status=?
+                WHERE client_ref=?
+                """,
+                (fill_price, fill_time or _utcnow(), slippage, order_status, client_ref),
+            )
+            return {
+                "client_ref": client_ref,
+                "fill_price": fill_price,
+                "signal_price": signal_price,
+                "slippage": slippage,
+                "order_status": order_status,
+            }
 
     # ── 平仓：写入真实出场价并计算 R / PnL ─────────────────────────────────
     def record_close(self, client_ref: str, exit_price: float,

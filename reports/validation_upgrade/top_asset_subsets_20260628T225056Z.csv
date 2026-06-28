@@ -1,0 +1,11 @@
+subset,size,risk_budget,objective
+"['crypto', 'index', 'oil', 'rates']",4,2.5,9.815811584861088
+"['crypto', 'index', 'oil', 'rates', 'fx']",5,2.5,9.66605304650486
+"['crypto', 'index', 'oil']",3,2.5,9.662656096119688
+"['crypto', 'index', 'rates']",3,2.5,9.593527211854962
+"['crypto', 'index', 'oil', 'fx']",4,2.5,9.512669398299414
+"['crypto', 'index', 'rates', 'fx']",4,2.5,9.442022468352272
+"['crypto', 'index']",2,2.5,9.402411378333982
+"['crypto', 'index', 'fx']",3,2.5,9.289340468756928
+"['crypto', 'oil', 'rates']",3,2.5,8.19023109315962
+"['crypto', 'oil', 'rates', 'fx']",4,2.5,8.042020351623497

@@ -1,0 +1,474 @@
+{
+  "generated_at": "2026-06-28T22:51:52.870893+00:00",
+  "project_base": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest",
+  "cases_csv": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/real_history_validation/eventalpha_real_history_cases_20260628T225142Z.csv",
+  "matrix_csv": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/real_history_validation/eventalpha_real_history_matrix_20260628T225142Z.csv",
+  "event_type": "multi_event_real_history",
+  "uncertainties_best_suited_for_quantum": [
+    {
+      "name": "best_asset_subset",
+      "why_quantum_relevant": "This is now based on a real historical payoff matrix across many macro events.",
+      "current_gap": "Classical exact search still works at 5 assets, but the workflow is ready for larger baskets and more constraints."
+    },
+    {
+      "name": "wait_bucket_choice",
+      "why_quantum_relevant": "Wait selection is discrete and now grounded in real observed historical validation behavior.",
+      "current_gap": "Still approximated with bucket scoring, not global joint optimization."
+    },
+    {
+      "name": "risk_tier_allocation",
+      "why_quantum_relevant": "Cross-asset tier assignment under a budget is a natural constrained combinatorial problem.",
+      "current_gap": "Current allocation remains approximate once the basket size expands."
+    }
+  ],
+  "asset_stats": {
+    "fx": {
+      "samples": 4,
+      "evidence": "LOW",
+      "avg_pnl_pct": 0.08480708733044906,
+      "weighted_avg_pnl_pct": -0.10184946435560803,
+      "avg_wait_seconds": 133.5,
+      "memory_edge": 0.9644128543502911,
+      "win_rate": 0.75,
+      "weighted_win_rate": 0.6615384615384615,
+      "avg_r_multiple": 0.0805450512660984,
+      "signal_strength": 0.9644128543502911
+    },
+    "rates": {
+      "samples": 3,
+      "evidence": "LOW",
+      "avg_pnl_pct": 0.11378643806607319,
+      "weighted_avg_pnl_pct": 0.19915905259698682,
+      "avg_wait_seconds": 87.66666666666667,
+      "memory_edge": 0.946897934643386,
+      "win_rate": 0.6666666666666666,
+      "weighted_win_rate": 0.7868852459016396,
+      "avg_r_multiple": 0.10738647791247698,
+      "signal_strength": 0.946897934643386
+    },
+    "crypto": {
+      "samples": 3,
+      "evidence": "LOW",
+      "avg_pnl_pct": 7.228880530784056,
+      "weighted_avg_pnl_pct": 7.665112966095356,
+      "avg_wait_seconds": 354.0,
+      "memory_edge": 0.8860004715412654,
+      "win_rate": 0.6666666666666666,
+      "weighted_win_rate": 0.6363636363636364,
+      "avg_r_multiple": 1.960006464465965,
+      "signal_strength": 0.8860004715412654
+    },
+    "oil": {
+      "samples": 22,
+      "evidence": "MEDIUM",
+      "avg_pnl_pct": 0.4614486570232199,
+      "weighted_avg_pnl_pct": 0.25536011959137334,
+      "avg_wait_seconds": 390.45454545454544,
+      "memory_edge": 0.7930684690835513,
+      "win_rate": 0.6363636363636364,
+      "weighted_win_rate": 0.6047197640117994,
+      "avg_r_multiple": 0.28207160735875786,
+      "signal_strength": 0.7930684690835513
+    },
+    "index": {
+      "samples": 3,
+      "evidence": "LOW",
+      "avg_pnl_pct": 1.3617630543768373,
+      "weighted_avg_pnl_pct": 1.6744802304204431,
+      "avg_wait_seconds": 124.66666666666667,
+      "memory_edge": 0.9115788003316251,
+      "win_rate": 1.0,
+      "weighted_win_rate": 1.0,
+      "avg_r_multiple": 0.9401215487992927,
+      "signal_strength": 0.9115788003316251
+    }
+  },
+  "correlation_map": {
+    "fx": {
+      "fx": 1.0,
+      "rates": 0.006592223282093608,
+      "crypto": 0.006050715793090243,
+      "oil": 0.0019052534112950193,
+      "index": 0.008058793023928566
+    },
+    "rates": {
+      "fx": 0.006592223282093608,
+      "rates": 1.0,
+      "crypto": 0.024220286131640015,
+      "oil": 0.007626499798180204,
+      "index": 0.03225837728787588
+    },
+    "crypto": {
+      "fx": 0.006050715793090243,
+      "rates": 0.024220286131640015,
+      "crypto": 1.0,
+      "oil": 0.007000033342346562,
+      "index": 0.029608565208250278
+    },
+    "oil": {
+      "fx": 0.0019052534112950193,
+      "rates": 0.007626499798180204,
+      "crypto": 0.007000033342346562,
+      "oil": 1.0,
+      "index": 0.009323164695818403
+    },
+    "index": {
+      "fx": 0.008058793023928566,
+      "rates": 0.03225837728787588,
+      "crypto": 0.029608565208250278,
+      "oil": 0.009323164695818403,
+      "index": 1.0
+    }
+  },
+  "problems": [
+    {
+      "problem": "asset_subset_selection",
+      "event_type": "multi_event_real_history",
+      "qubo_like": {
+        "variables": [
+          "fx",
+          "rates",
+          "crypto",
+          "oil",
+          "index"
+        ],
+        "selection_target": 3,
+        "linear_scores": {
+          "fx": -0.031696,
+          "rates": 0.280848,
+          "crypto": 7.731749,
+          "oil": 0.337832,
+          "index": 1.77748
+        },
+        "pair_penalties": {
+          "fx|rates": 0.002307,
+          "fx|crypto": 0.002118,
+          "fx|oil": 0.000667,
+          "fx|index": 0.002821,
+          "rates|crypto": 0.008477,
+          "rates|oil": 0.002669,
+          "rates|index": 0.01129,
+          "crypto|oil": 0.00245,
+          "crypto|index": 0.010363,
+          "oil|index": 0.003263
+        },
+        "cardinality_penalty_lambda": 0.1,
+        "year_weights": {
+          "2025": 1.5,
+          "2024": 1.3,
+          "2023": 1.1,
+          "2022": 1.0,
+          "2021": 0.85,
+          "2020": 0.75,
+          "2019": 0.65,
+          "2018": 0.55
+        }
+      },
+      "best_exact_solution": {
+        "bits": [
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "selected": [
+          "crypto",
+          "index",
+          "oil",
+          "rates"
+        ],
+        "objective": 9.815812,
+        "base": 10.127909,
+        "pair_penalty": 0.012813,
+        "size_penalty": 0.1,
+        "evidence": {
+          "fx": {
+            "samples": 4,
+            "evidence": "LOW",
+            "avg_pnl_pct": 0.08480708733044906,
+            "weighted_avg_pnl_pct": -0.10184946435560803,
+            "avg_wait_seconds": 133.5,
+            "memory_edge": 0.9644128543502911,
+            "win_rate": 0.75,
+            "weighted_win_rate": 0.6615384615384615,
+            "avg_r_multiple": 0.0805450512660984,
+            "signal_strength": 0.9644128543502911
+          },
+          "rates": {
+            "samples": 3,
+            "evidence": "LOW",
+            "avg_pnl_pct": 0.11378643806607319,
+            "weighted_avg_pnl_pct": 0.19915905259698682,
+            "avg_wait_seconds": 87.66666666666667,
+            "memory_edge": 0.946897934643386,
+            "win_rate": 0.6666666666666666,
+            "weighted_win_rate": 0.7868852459016396,
+            "avg_r_multiple": 0.10738647791247698,
+            "signal_strength": 0.946897934643386
+          },
+          "crypto": {
+            "samples": 3,
+            "evidence": "LOW",
+            "avg_pnl_pct": 7.228880530784056,
+            "weighted_avg_pnl_pct": 7.665112966095356,
+            "avg_wait_seconds": 354.0,
+            "memory_edge": 0.8860004715412654,
+            "win_rate": 0.6666666666666666,
+            "weighted_win_rate": 0.6363636363636364,
+            "avg_r_multiple": 1.960006464465965,
+            "signal_strength": 0.8860004715412654
+          },
+          "oil": {
+            "samples": 22,
+            "evidence": "MEDIUM",
+            "avg_pnl_pct": 0.4614486570232199,
+            "weighted_avg_pnl_pct": 0.25536011959137334,
+            "avg_wait_seconds": 390.45454545454544,
+            "memory_edge": 0.7930684690835513,
+            "win_rate": 0.6363636363636364,
+            "weighted_win_rate": 0.6047197640117994,
+            "avg_r_multiple": 0.28207160735875786,
+            "signal_strength": 0.7930684690835513
+          },
+          "index": {
+            "samples": 3,
+            "evidence": "LOW",
+            "avg_pnl_pct": 1.3617630543768373,
+            "weighted_avg_pnl_pct": 1.6744802304204431,
+            "avg_wait_seconds": 124.66666666666667,
+            "memory_edge": 0.9115788003316251,
+            "win_rate": 1.0,
+            "weighted_win_rate": 1.0,
+            "avg_r_multiple": 0.9401215487992927,
+            "signal_strength": 0.9115788003316251
+          }
+        }
+      }
+    },
+    {
+      "problem": "wait_bucket_optimization",
+      "event_type": "multi_event_real_history",
+      "per_asset": {
+        "fx": {
+          "target_wait_estimate": 133.5,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.787206
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.987206
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.187206
+            },
+            {
+              "wait_seconds": 180,
+              "score": 1.077206
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.877206
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.677206
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 120,
+            "score": 1.187206
+          }
+        },
+        "rates": {
+          "target_wait_estimate": 87.67,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.931227
+            },
+            {
+              "wait_seconds": 60,
+              "score": 1.131227
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.115671
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.915671
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.715671
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.515671
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 60,
+            "score": 1.131227
+          }
+        },
+        "crypto": {
+          "target_wait_estimate": 354.0,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.193
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.213
+            },
+            {
+              "wait_seconds": 120,
+              "score": 0.413
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.613
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.813
+            },
+            {
+              "wait_seconds": 300,
+              "score": 1.013
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 300,
+            "score": 1.013
+          }
+        },
+        "oil": {
+          "target_wait_estimate": 390.45,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.146534
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.146534
+            },
+            {
+              "wait_seconds": 120,
+              "score": 0.245019
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.445019
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.645019
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.845019
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 300,
+            "score": 0.845019
+          }
+        },
+        "index": {
+          "target_wait_estimate": 124.67,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.790234
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.990234
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.190234
+            },
+            {
+              "wait_seconds": 180,
+              "score": 1.021345
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.821345
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.621345
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 120,
+            "score": 1.190234
+          }
+        }
+      }
+    },
+    {
+      "problem": "risk_tier_allocation",
+      "selected_assets": [
+        "crypto",
+        "index",
+        "oil",
+        "rates"
+      ],
+      "qubo_like": {
+        "selected_assets": [
+          "crypto",
+          "index",
+          "oil",
+          "rates"
+        ],
+        "tiers": {
+          "skip": 0.0,
+          "small": 0.5,
+          "normal": 1.0,
+          "heavy": 1.5
+        },
+        "risk_budget": 2.5,
+        "asset_scores": {
+          "crypto": 7.731749,
+          "index": 1.77748,
+          "oil": 0.337832,
+          "rates": 0.280848
+        }
+      },
+      "best_exact_solution": {
+        "allocation": {
+          "crypto": {
+            "tier": "heavy",
+            "weight": 1.5
+          },
+          "index": {
+            "tier": "normal",
+            "weight": 1.0
+          },
+          "oil": {
+            "tier": "skip",
+            "weight": 0.0
+          },
+          "rates": {
+            "tier": "skip",
+            "weight": 0.0
+          }
+        },
+        "objective": 13.369854225018022,
+        "total_weight": 2.5
+      }
+    }
+  ],
+  "safety_note": "This pack contains only abstract optimization inputs derived from real historical validation. It places no orders and touches no broker."
+}

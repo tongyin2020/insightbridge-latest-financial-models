@@ -1,0 +1,557 @@
+{
+  "generated_at": "2026-06-28T22:50:56.259973+00:00",
+  "cases_source": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/real_history_validation/eventalpha_real_history_cases_20260628T223142Z.csv",
+  "year_weights": {
+    "2025": 1.5,
+    "2024": 1.3,
+    "2023": 1.1,
+    "2022": 1.0,
+    "2021": 0.85,
+    "2020": 0.75,
+    "2019": 0.65,
+    "2018": 0.55
+  },
+  "champion_subset": [
+    "crypto",
+    "index",
+    "oil",
+    "rates"
+  ],
+  "top_subsets": [
+    {
+      "subset": [
+        "crypto",
+        "index",
+        "oil",
+        "rates"
+      ],
+      "size": 4,
+      "risk_budget": 2.5,
+      "objective": 9.815811584861088
+    },
+    {
+      "subset": [
+        "crypto",
+        "index",
+        "oil",
+        "rates",
+        "fx"
+      ],
+      "size": 5,
+      "risk_budget": 2.5,
+      "objective": 9.66605304650486
+    },
+    {
+      "subset": [
+        "crypto",
+        "index",
+        "oil"
+      ],
+      "size": 3,
+      "risk_budget": 2.5,
+      "objective": 9.662656096119688
+    },
+    {
+      "subset": [
+        "crypto",
+        "index",
+        "rates"
+      ],
+      "size": 3,
+      "risk_budget": 2.5,
+      "objective": 9.593527211854962
+    },
+    {
+      "subset": [
+        "crypto",
+        "index",
+        "oil",
+        "fx"
+      ],
+      "size": 4,
+      "risk_budget": 2.5,
+      "objective": 9.512669398299414
+    },
+    {
+      "subset": [
+        "crypto",
+        "index",
+        "rates",
+        "fx"
+      ],
+      "size": 4,
+      "risk_budget": 2.5,
+      "objective": 9.442022468352272
+    },
+    {
+      "subset": [
+        "crypto",
+        "index"
+      ],
+      "size": 2,
+      "risk_budget": 2.5,
+      "objective": 9.402411378333982
+    },
+    {
+      "subset": [
+        "crypto",
+        "index",
+        "fx"
+      ],
+      "size": 3,
+      "risk_budget": 2.5,
+      "objective": 9.289340468756928
+    },
+    {
+      "subset": [
+        "crypto",
+        "oil",
+        "rates"
+      ],
+      "size": 3,
+      "risk_budget": 2.5,
+      "objective": 8.19023109315962
+    },
+    {
+      "subset": [
+        "crypto",
+        "oil",
+        "rates",
+        "fx"
+      ],
+      "size": 4,
+      "risk_budget": 2.5,
+      "objective": 8.042020351623497
+    }
+  ],
+  "sensitivity_analysis": [
+    {
+      "risk_budget": 1.5,
+      "best_subset": [
+        "crypto",
+        "index",
+        "oil",
+        "rates"
+      ],
+      "objective": 9.795811584861086
+    },
+    {
+      "risk_budget": 2.0,
+      "best_subset": [
+        "crypto",
+        "index",
+        "oil",
+        "rates"
+      ],
+      "objective": 9.805811584861088
+    },
+    {
+      "risk_budget": 2.5,
+      "best_subset": [
+        "crypto",
+        "index",
+        "oil",
+        "rates"
+      ],
+      "objective": 9.815811584861088
+    },
+    {
+      "risk_budget": 3.0,
+      "best_subset": [
+        "crypto",
+        "index",
+        "oil",
+        "rates"
+      ],
+      "objective": 9.825811584861087
+    },
+    {
+      "risk_budget": 4.0,
+      "best_subset": [
+        "crypto",
+        "index",
+        "oil",
+        "rates"
+      ],
+      "objective": 9.845811584861087
+    }
+  ],
+  "wait_bucket_optimization": [
+    {
+      "wait_bucket": "5_10m",
+      "samples": 22,
+      "evidence": "MEDIUM",
+      "weighted_avg_pnl_pct": 1.3366350128819526,
+      "weighted_win_rate": 0.599439775910364,
+      "avg_confidence": 0.8016939769629345
+    },
+    {
+      "wait_bucket": "0_3m",
+      "samples": 10,
+      "evidence": "LOW",
+      "weighted_avg_pnl_pct": 0.9292102123909389,
+      "weighted_win_rate": 0.9269662921348314,
+      "avg_confidence": 0.9284457548014755
+    },
+    {
+      "wait_bucket": "3_5m",
+      "samples": 3,
+      "evidence": "LOW",
+      "weighted_avg_pnl_pct": -0.6842500706276428,
+      "weighted_win_rate": 0.25,
+      "avg_confidence": 0.8727502349706205
+    }
+  ],
+  "risk_tier_allocation_top10": [
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "normal",
+          "weight": 1.0
+        },
+        "oil": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "rates": {
+          "tier": "skip",
+          "weight": 0.0
+        }
+      },
+      "objective": 13.369854225018022,
+      "total_weight": 2.5
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "small",
+          "weight": 0.5
+        },
+        "oil": {
+          "tier": "small",
+          "weight": 0.5
+        },
+        "rates": {
+          "tier": "skip",
+          "weight": 0.0
+        }
+      },
+      "objective": 12.643380157804076,
+      "total_weight": 2.5
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "small",
+          "weight": 0.5
+        },
+        "oil": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "rates": {
+          "tier": "small",
+          "weight": 0.5
+        }
+      },
+      "objective": 12.621537898401375,
+      "total_weight": 2.5
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "small",
+          "weight": 0.5
+        },
+        "oil": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "rates": {
+          "tier": "skip",
+          "weight": 0.0
+        }
+      },
+      "objective": 12.4821641098078,
+      "total_weight": 2.0
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "oil": {
+          "tier": "normal",
+          "weight": 1.0
+        },
+        "rates": {
+          "tier": "skip",
+          "weight": 0.0
+        }
+      },
+      "objective": 11.916906090590132,
+      "total_weight": 2.5
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "oil": {
+          "tier": "small",
+          "weight": 0.5
+        },
+        "rates": {
+          "tier": "small",
+          "weight": 0.5
+        }
+      },
+      "objective": 11.89506383118743,
+      "total_weight": 2.5
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "oil": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "rates": {
+          "tier": "normal",
+          "weight": 1.0
+        }
+      },
+      "objective": 11.873221571784729,
+      "total_weight": 2.5
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "oil": {
+          "tier": "small",
+          "weight": 0.5
+        },
+        "rates": {
+          "tier": "skip",
+          "weight": 0.0
+        }
+      },
+      "objective": 11.755690042593855,
+      "total_weight": 2.0
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "oil": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "rates": {
+          "tier": "small",
+          "weight": 0.5
+        }
+      },
+      "objective": 11.733847783191154,
+      "total_weight": 2.0
+    },
+    {
+      "allocation": {
+        "crypto": {
+          "tier": "heavy",
+          "weight": 1.5
+        },
+        "index": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "oil": {
+          "tier": "skip",
+          "weight": 0.0
+        },
+        "rates": {
+          "tier": "skip",
+          "weight": 0.0
+        }
+      },
+      "objective": 11.594473994597578,
+      "total_weight": 1.5
+    }
+  ],
+  "asset_stats": [
+    {
+      "asset": "crypto",
+      "samples": 3,
+      "evidence": "LOW",
+      "avg_pnl_pct": 7.228880530784056,
+      "weighted_avg_pnl_pct": 7.665112966095356,
+      "win_rate": 0.6666666666666666,
+      "weighted_win_rate": 0.6363636363636364,
+      "avg_confidence": 0.8860004715412654,
+      "avg_wait_seconds": 354.0,
+      "avg_r_multiple": 1.960006464465965
+    },
+    {
+      "asset": "index",
+      "samples": 3,
+      "evidence": "LOW",
+      "avg_pnl_pct": 1.3617630543768373,
+      "weighted_avg_pnl_pct": 1.6744802304204431,
+      "win_rate": 1.0,
+      "weighted_win_rate": 1.0,
+      "avg_confidence": 0.9117166947226192,
+      "avg_wait_seconds": 124.66666666666667,
+      "avg_r_multiple": 0.9401215487992927
+    },
+    {
+      "asset": "oil",
+      "samples": 22,
+      "evidence": "MEDIUM",
+      "avg_pnl_pct": 0.4614486570232199,
+      "weighted_avg_pnl_pct": 0.25536011959137334,
+      "win_rate": 0.6363636363636364,
+      "weighted_win_rate": 0.6047197640117994,
+      "avg_confidence": 0.7931126829994636,
+      "avg_wait_seconds": 390.45454545454544,
+      "avg_r_multiple": 0.28207160735875786
+    },
+    {
+      "asset": "rates",
+      "samples": 3,
+      "evidence": "LOW",
+      "avg_pnl_pct": 0.11378643806607319,
+      "weighted_avg_pnl_pct": 0.19915905259698682,
+      "win_rate": 0.6666666666666666,
+      "weighted_win_rate": 0.7868852459016396,
+      "avg_confidence": 0.946897934643386,
+      "avg_wait_seconds": 87.66666666666667,
+      "avg_r_multiple": 0.10738647791247698
+    },
+    {
+      "asset": "fx",
+      "samples": 4,
+      "evidence": "LOW",
+      "avg_pnl_pct": 0.08480708733044906,
+      "weighted_avg_pnl_pct": -0.10184946435560803,
+      "win_rate": 0.75,
+      "weighted_win_rate": 0.6615384615384615,
+      "avg_confidence": 0.9644128543502911,
+      "avg_wait_seconds": 133.5,
+      "avg_r_multiple": 0.0805450512660984
+    }
+  ],
+  "event_stats": [
+    {
+      "event_type": "fomc",
+      "samples": 4,
+      "evidence": "LOW",
+      "avg_pnl_pct": 5.352926749054007,
+      "weighted_avg_pnl_pct": 5.064126761279391,
+      "win_rate": 0.5,
+      "weighted_win_rate": 0.5227272727272726
+    },
+    {
+      "event_type": "nfp",
+      "samples": 8,
+      "evidence": "LOW",
+      "avg_pnl_pct": 0.5873225092993941,
+      "weighted_avg_pnl_pct": 0.559475300755021,
+      "win_rate": 0.875,
+      "weighted_win_rate": 0.8999999999999999
+    },
+    {
+      "event_type": "eia_inventory",
+      "samples": 18,
+      "evidence": "LOW",
+      "avg_pnl_pct": 0.5934899274561034,
+      "weighted_avg_pnl_pct": 0.40661061607508786,
+      "win_rate": 0.7222222222222222,
+      "weighted_win_rate": 0.7349397590361446
+    },
+    {
+      "event_type": "liquidity_shock",
+      "samples": 1,
+      "evidence": "LOW",
+      "avg_pnl_pct": 0.3422313483915085,
+      "weighted_avg_pnl_pct": 0.3422313483915085,
+      "win_rate": 1.0,
+      "weighted_win_rate": 1.0
+    },
+    {
+      "event_type": "opec",
+      "samples": 3,
+      "evidence": "LOW",
+      "avg_pnl_pct": -0.06893056720590485,
+      "weighted_avg_pnl_pct": -0.11099292681518362,
+      "win_rate": 0.3333333333333333,
+      "weighted_win_rate": 0.3235294117647059
+    },
+    {
+      "event_type": "geopolitical",
+      "samples": 1,
+      "evidence": "LOW",
+      "avg_pnl_pct": -0.3241565380813105,
+      "weighted_avg_pnl_pct": -0.3241565380813105,
+      "win_rate": 0.0,
+      "weighted_win_rate": 0.0
+    }
+  ],
+  "recommendation": {
+    "current_champion_basket": [
+      "crypto",
+      "index",
+      "oil",
+      "rates"
+    ],
+    "use_recent_year_weighting": true,
+    "use_evidence_score": true,
+    "next_quantum_task": "wait_bucket_optimization",
+    "ibkr_stage": "paper_trading_shadow_or_micro_contract"
+  }
+}

@@ -31,6 +31,7 @@ import sys
 
 if str(BASE) not in sys.path:
     sys.path.insert(0, str(BASE))
+sys.path.insert(0, str(BASE / "validation_upgrade"))
 
 from eventalpha_core import (  # noqa: E402
     AssetClass,
@@ -44,6 +45,7 @@ from eventalpha_core import (  # noqa: E402
     load_preferred_assets,
     select_portfolio_candidates,
 )
+from unified_scoring_engine import YEAR_WEIGHTS, build_unified_validation_bundle  # noqa: E402
 
 
 ENTRY_ACTIONS = {"enter_small", "enter_normal", "enter_heavy"}
@@ -487,20 +489,27 @@ def build_markdown(summary: dict) -> str:
         "",
         f"- subset: **{', '.join(summary['best_exact_subset']['subset'])}**",
         f"- objective: `{summary['best_exact_subset']['objective']:.3f}`",
-        f"- mean pnl per case: `{summary['best_exact_subset']['mean_pnl_pct']:.2f}%`",
-        f"- win rate: `{summary['best_exact_subset']['win_rate'] * 100:.1f}%`",
+        f"- weighted mean pnl per case: `{summary['best_exact_subset'].get('weighted_mean_pnl_pct', 0.0):.2f}%`",
+        f"- weighted win rate: `{summary['best_exact_subset'].get('weighted_win_rate', 0.0) * 100:.1f}%`",
+        "",
+        "## Year Weights",
+        "",
+    ]
+    for year, weight in YEAR_WEIGHTS.items():
+        lines.append(f"- `{year}`: {weight}")
+    lines.extend([
         "",
         "## By Asset",
         "",
-    ]
+    ])
     for row in summary["by_asset"]:
         lines.append(
-            f"- `{row['asset']}`: entries={row['entry_count']}, win_rate={row['win_rate_pct']:.1f}%, avg_pnl={row['avg_pnl_pct']:.2f}%, avg_conf={row['avg_execution_confidence']:.3f}"
+            f"- `{row['asset']}`: samples={row['samples']}, evidence={row['evidence']}, weighted_win_rate={row['weighted_win_rate'] * 100:.1f}%, weighted_avg_pnl={row['weighted_avg_pnl_pct']:.2f}%, avg_conf={row['avg_confidence']:.3f}"
         )
     lines.extend(["", "## By Event Type", ""])
     for row in summary["by_event_type"]:
         lines.append(
-            f"- `{row['event_type']}`: entries={row['entry_count']}, win_rate={row['win_rate_pct']:.1f}%, avg_pnl={row['avg_pnl_pct']:.2f}%"
+            f"- `{row['event_type']}`: samples={row['samples']}, evidence={row['evidence']}, weighted_win_rate={row['weighted_win_rate'] * 100:.1f}%, weighted_avg_pnl={row['weighted_avg_pnl_pct']:.2f}%"
         )
     lines.extend(
         [
@@ -668,42 +677,22 @@ def main() -> None:
     selected_entry_df = entry_df[entry_df["selected_by_portfolio"]].copy()
     top_conf_df = entry_df[entry_df["execution_confidence"] >= entry_df["execution_confidence"].quantile(0.75)].copy()
 
-    by_asset = (
-        entry_df.groupby("asset", as_index=False)
-        .agg(
-            entry_count=("asset", "size"),
-            win_rate_pct=("profitable", lambda s: float(np.mean(s) * 100.0)),
-            avg_pnl_pct=("pnl_pct", "mean"),
-            avg_r_multiple=("r_multiple", "mean"),
-            avg_execution_confidence=("execution_confidence", "mean"),
-        )
-        .sort_values("avg_pnl_pct", ascending=False)
-    )
-    by_event = (
-        entry_df.groupby("event_type", as_index=False)
-        .agg(
-            entry_count=("event_type", "size"),
-            win_rate_pct=("profitable", lambda s: float(np.mean(s) * 100.0)),
-            avg_pnl_pct=("pnl_pct", "mean"),
-            avg_r_multiple=("r_multiple", "mean"),
-        )
-        .sort_values("avg_pnl_pct", ascending=False)
-    )
-
-    asset_cols = [a.value for a in AssetClass]
-    subset_results = []
-    pnl_matrix = matrix_df[asset_cols].copy()
-    for r in range(1, len(asset_cols) + 1):
-        for subset in itertools.combinations(asset_cols, r):
-            subset_results.append(subset_objective(pnl_matrix, subset))
-    subset_results.sort(key=lambda x: x["objective"], reverse=True)
-    best_subset = subset_results[0]
+    bundle = build_unified_validation_bundle(cases_df, risk_budget=2.5, top_n=10)
+    selected_stats = bundle.asset_stats[bundle.asset_stats["asset"].isin(bundle.champion_subset)].copy()
+    best_subset = {
+        "subset": bundle.champion_subset,
+        "objective": float(bundle.champion_row.get("objective", 0.0)),
+        "weighted_mean_pnl_pct": float(selected_stats["weighted_avg_pnl_pct"].sum()) if not selected_stats.empty else 0.0,
+        "weighted_win_rate": float(selected_stats["weighted_win_rate"].mean()) if not selected_stats.empty else 0.0,
+        "evidence": selected_stats["evidence"].tolist() if not selected_stats.empty else [],
+    }
 
     generated_at = datetime.now(timezone.utc).isoformat()
     summary = {
         "generated_at": generated_at,
         "date_range": {"start_year": args.start_year, "end_year": args.end_year},
         "source_tickers": source_meta,
+        "year_weights": YEAR_WEIGHTS,
         "event_case_count": int(matrix_df["case_id"].nunique()),
         "asset_decision_count": int(len(cases_df)),
         "entry_decision_count": int(len(entry_df)),
@@ -717,9 +706,13 @@ def main() -> None:
             "top_confidence_win_rate_pct": float(top_conf_df["profitable"].mean() * 100.0) if len(top_conf_df) else 0.0,
         },
         "best_exact_subset": best_subset,
-        "top_5_exact_subsets": subset_results[:5],
-        "by_asset": by_asset.to_dict(orient="records"),
-        "by_event_type": by_event.to_dict(orient="records"),
+        "top_5_exact_subsets": bundle.top_subsets.head(5).to_dict(orient="records"),
+        "by_asset": bundle.asset_stats.to_dict(orient="records"),
+        "by_event_type": bundle.event_stats.to_dict(orient="records"),
+        "wait_bucket_optimization": bundle.wait_bucket_stats.to_dict(orient="records"),
+        "sensitivity_analysis": bundle.sensitivity_analysis.to_dict(orient="records"),
+        "risk_tier_allocation_top10": bundle.risk_tier_top10,
+        "unified_scoring_engine": True,
     }
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")

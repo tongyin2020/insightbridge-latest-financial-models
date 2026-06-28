@@ -277,7 +277,11 @@ class RightSidePipeline:
                     event_name=signal.get("event", ""),
                     direction="LONG" if action == "BUY" else "SHORT",
                     entry_price=entry, stop_loss=stop, quantity=ticket.quantity,
-                    risk_per_unit=abs(entry - stop), minutes_after_event=mins))
+                    risk_per_unit=abs(entry - stop), minutes_after_event=mins,
+                    model_decision=signal["status"],
+                    signal_time=now.isoformat() if hasattr(now, "isoformat") else str(now),
+                    submit_time=datetime.now(timezone.utc).isoformat(),
+                    signal_price=entry))
         result = {"status": signal["status"], "symbol": symbol,
                   "action": action, "quantity": ticket.quantity,
                   "limit_price": ticket.limit_price, "stop_loss": stop,
@@ -290,6 +294,16 @@ class RightSidePipeline:
     def confirm_fill(self, symbol: str, client_ref: str) -> str:
         ticket = self.om.poll_fill(client_ref)
         if ticket.state == "FILLED":
+            if self.journal is not None and ticket.fills:
+                avg_fill = float(ticket.fills[-1].get("avg") or 0.0)
+                if avg_fill > 0:
+                    result = self.journal.record_fill(
+                        client_ref,
+                        fill_price=avg_fill,
+                        order_status="FILLED",
+                    )
+                    if result:
+                        self._log({"stage": "trade_filled", "symbol": symbol, **result})
             self.engine.mark_filled(symbol)       # 成交后才关闭事件
         elif ticket.state in ("REJECTED", "CANCELLED"):
             self.engine.mark_abandoned(symbol, ticket.state)
