@@ -61,9 +61,30 @@ python3 execution_framework/run_tws_paper.py --live --symbols MNQ
 安全机制：致命 IBKR 错误（200 合约不明 / 201 保证金不足 / 203 权限）或启动对账失败
 会自动触发 `pipeline.halt()`，停止一切新入场；`--live` 仅允许端口 7497。
 
-## 8 个核心品种（先跑这些，别一上来跑 26 个）
+## 启用品种（与盈透模拟账户权限对齐）
 
-FX：`EURUSD` `USDJPY` ｜ Index：`MES` `MNQ` ｜ Treasury：`ZT` `ZN` ｜ Rates：`SR3` ｜ Crypto：`MBT`
+当前账户启用 **7 个**（见 `enabled_symbols.py`）：
+
+FX：`EURUSD` `USDJPY` ｜ Index：`MES` `MNQ` ｜ Treasury：`ZT` `ZN` ｜ Rates：`SR3`
+
+❌ `MBT`（Micro Bitcoin）—— **当前账户无加密货币权限，默认禁用**（代码保留，
+开通后把 `"MBT"` 加回 `ENABLED_SYMBOLS` 即可）。运行入口会自动过滤掉无权限品种。
+
+## 长期无人值守跑模拟盘
+
+```bash
+# 推荐：先持续 dry-run 跑一两天，观察日志与 KPI
+python3 execution_framework/run_tws_continuous.py --interval 60
+
+# 真实模拟盘持续运行（仅 7497）+ Telegram 告警
+python3 execution_framework/run_tws_continuous.py --live --interval 60 --telegram
+
+# 外部巡检主进程是否存活（可放进 cron）
+python3 execution_framework/run_tws_continuous.py --check-heartbeat
+```
+
+含：心跳 + 死手开关（主循环卡死→自动撤单+停机+告警）、成交后真实 P&L 回写
+学习库（`data.db`）、周期性持仓对账（不一致自动停机）。
 
 每个品种的冷静期、ATR 衰减阈值、实体/影线比等都是**经验先验初值**，
 **必须用 IBKR 模拟盘拉到的真实 1 分钟/tick 数据做 walk-forward 校准**，
@@ -105,8 +126,22 @@ if res["status"] in ("BUY", "SELL"):
 - ✅ `reqOpenOrders` / `fills` / `positions` 对账，持仓不一致自动 halt。
 - ✅ 主力合约按 OI/成交量选择（`resolve_front_liquid_future`，取代默认近月）。
 
+## 新增模块（无人值守）
+
+- `enabled_symbols.py` — 启用品种清单（MBT 无权限默认禁用）。
+- `trade_journal.py` — 成交后真实 P&L 回写学习库（SQLite），记录真实 R 倍数/胜率/连亏。
+- `runtime_guardian.py` — 心跳 + 死手开关，超时自动紧急处置；可选 Telegram 告警。
+- `run_tws_continuous.py` — 长期运行入口（整合以上全部）。
+- `test_journal_guardian.py` — 离线自检（学习库/死手开关/品种过滤）。
+
+## 已完成（无人值守）
+
+- ✅ 心跳 + 死手开关（dead-man's switch）+ 可选 Telegram 告警。
+- ✅ 成交后真实 P&L 回写学习库（替换历史的 pnl_pct=0.0 占位）。
+- ✅ 品种权限对齐：7 个启用，MBT 加密默认禁用。
+
 ## 仍建议后续做
 
-- 用真实模拟盘数据对 8 品种做 walk-forward + `StrategyEvaluator` 的 IS/OOS 过拟合检查后再定参。
-- 持续运行守护（心跳 / dead-man's switch）与外部告警（Telegram/PagerDuty）。
-- 把成交后的真实 P&L 回写学习库（替换当前 pnl_pct=0.0 的占位）。
+- 用 `data.db` 里的真实成交记录对 7 品种做 walk-forward + `StrategyEvaluator` 的
+  IS/OOS 过拟合检查后再定参（冷静期/ATR 阈值/实体比等仍是经验初值）。
+- 把你的新闻/经济日历源接到 `pipe.on_event(...)`（当前事件识别是接口位）。

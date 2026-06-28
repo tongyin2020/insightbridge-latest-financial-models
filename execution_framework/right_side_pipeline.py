@@ -236,6 +236,20 @@ class RightSidePipeline:
             self.om.release(symbol)
         return ticket.state
 
+    # ── 平仓：回写真实 P&L 到学习库（替换 pnl_pct=0.0 占位）──────────────
+    def on_close(self, symbol: str, client_ref: str, exit_price: float,
+                 exit_reason: str = "") -> Optional[Dict[str, Any]]:
+        result = None
+        if self.journal is not None:
+            result = self.journal.record_close(client_ref, exit_price, exit_reason)
+            if result:
+                self._log({"stage": "trade_closed", "symbol": symbol, **result})
+        self.om.release(symbol)
+        return result
+
+    def journal_stats(self, symbol: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        return self.journal.stats(symbol) if self.journal is not None else None
+
     # ── KPI 计数 ──────────────────────────────────────────────────────────
     def _tally(self, signal: Dict[str, Any]) -> None:
         reason = signal.get("reason", "")

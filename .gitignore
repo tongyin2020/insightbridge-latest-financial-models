@@ -30,3 +30,4 @@ ibkr_runtime/
 .env.ibkr_paper.local
 
 __MACOSX/
+data.db
