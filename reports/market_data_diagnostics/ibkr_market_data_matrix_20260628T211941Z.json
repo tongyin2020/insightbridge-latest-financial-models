@@ -1,0 +1,486 @@
+{
+  "generated_at": "2026-06-28T21:19:41.454222+00:00",
+  "project": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest",
+  "account": "DUP620424",
+  "weekday_utc": "Sunday",
+  "results": [
+    {
+      "symbol": "BTC",
+      "contract": {
+        "secType": "CRYPTO",
+        "exchange": "PAXOS",
+        "localSymbol": "BTC.USD",
+        "conId": 479624278,
+        "expiry": ""
+      },
+      "realtime": {
+        "market_data_type": 1,
+        "price": 59586.25,
+        "bid": NaN,
+        "ask": NaN,
+        "last": 59586.25,
+        "close": 59683.5,
+        "statuses": [
+          "subscription_limited",
+          "has_price"
+        ],
+        "details": [
+          "市场数据订阅不足或品种权限不完整",
+          "虽然有错误提示，但仍返回了价格"
+        ],
+        "errors": [
+          {
+            "reqId": 49,
+            "errorCode": 10090,
+            "errorString": "Part of requested market data is not subscribed. Subscription-independent ticks are still active.BTC Crypto/TOP/BID_ASK"
+          }
+        ]
+      },
+      "delayed": {
+        "market_data_type": 4,
+        "price": 59586.25,
+        "bid": NaN,
+        "ask": NaN,
+        "last": 59586.25,
+        "close": 59683.5,
+        "statuses": [
+          "subscription_limited",
+          "has_price"
+        ],
+        "details": [
+          "市场数据订阅不足或品种权限不完整",
+          "虽然有错误提示，但仍返回了价格"
+        ],
+        "errors": [
+          {
+            "reqId": 50,
+            "errorCode": 10090,
+            "errorString": "Part of requested market data is not subscribed. Subscription-independent ticks are still active.BTC Crypto/TOP/BID_ASK"
+          }
+        ]
+      },
+      "diagnosis": {
+        "primary_cause_code": "subscription_missing",
+        "primary_cause": "订阅不足，尤其是该品种的实时行情权限不完整",
+        "weekend_factor": false,
+        "has_any_price": true
+      }
+    },
+    {
+      "symbol": "ETH",
+      "contract": {
+        "secType": "CRYPTO",
+        "exchange": "PAXOS",
+        "localSymbol": "ETH.USD",
+        "conId": 495759171,
+        "expiry": ""
+      },
+      "realtime": {
+        "market_data_type": 1,
+        "price": null,
+        "bid": NaN,
+        "ask": NaN,
+        "last": NaN,
+        "close": NaN,
+        "statuses": [
+          "subscription_limited",
+          "subscription_limited"
+        ],
+        "details": [
+          "市场数据订阅不足或品种权限不完整",
+          "没有该合约所需的市场数据订阅"
+        ],
+        "errors": [
+          {
+            "reqId": 51,
+            "errorCode": 10090,
+            "errorString": "Part of requested market data is not subscribed. Subscription-independent ticks are still active.ETH Crypto/TOP/BID_ASK"
+          },
+          {
+            "reqId": 51,
+            "errorCode": 354,
+            "errorString": "Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Error&PAXOS/CRYPTO/Top"
+          }
+        ]
+      },
+      "delayed": {
+        "market_data_type": 4,
+        "price": null,
+        "bid": NaN,
+        "ask": NaN,
+        "last": NaN,
+        "close": NaN,
+        "statuses": [
+          "subscription_limited",
+          "subscription_limited"
+        ],
+        "details": [
+          "市场数据订阅不足或品种权限不完整",
+          "没有该合约所需的市场数据订阅"
+        ],
+        "errors": [
+          {
+            "reqId": 52,
+            "errorCode": 10090,
+            "errorString": "Part of requested market data is not subscribed. Subscription-independent ticks are still active.ETH Crypto/TOP/BID_ASK"
+          },
+          {
+            "reqId": 52,
+            "errorCode": 354,
+            "errorString": "Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Error&PAXOS/CRYPTO/Top"
+          }
+        ]
+      },
+      "diagnosis": {
+        "primary_cause_code": "subscription_missing",
+        "primary_cause": "订阅不足，尤其是该品种的实时行情权限不完整",
+        "weekend_factor": false,
+        "has_any_price": false
+      }
+    },
+    {
+      "symbol": "SOL",
+      "contract": {
+        "secType": "CRYPTO",
+        "exchange": "PAXOS",
+        "localSymbol": "SOL.USD",
+        "conId": 766137558,
+        "expiry": ""
+      },
+      "realtime": {
+        "market_data_type": 1,
+        "price": null,
+        "bid": NaN,
+        "ask": NaN,
+        "last": NaN,
+        "close": NaN,
+        "statuses": [
+          "subscription_limited",
+          "subscription_limited"
+        ],
+        "details": [
+          "市场数据订阅不足或品种权限不完整",
+          "没有该合约所需的市场数据订阅"
+        ],
+        "errors": [
+          {
+            "reqId": 53,
+            "errorCode": 10090,
+            "errorString": "Part of requested market data is not subscribed. Subscription-independent ticks are still active.SOL Crypto/TOP/BID_ASK"
+          },
+          {
+            "reqId": 53,
+            "errorCode": 354,
+            "errorString": "Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Error&PAXOS/CRYPTO/Top"
+          }
+        ]
+      },
+      "delayed": {
+        "market_data_type": 4,
+        "price": null,
+        "bid": NaN,
+        "ask": NaN,
+        "last": NaN,
+        "close": NaN,
+        "statuses": [
+          "subscription_limited",
+          "subscription_limited"
+        ],
+        "details": [
+          "市场数据订阅不足或品种权限不完整",
+          "没有该合约所需的市场数据订阅"
+        ],
+        "errors": [
+          {
+            "reqId": 54,
+            "errorCode": 10090,
+            "errorString": "Part of requested market data is not subscribed. Subscription-independent ticks are still active.SOL Crypto/TOP/BID_ASK"
+          },
+          {
+            "reqId": 54,
+            "errorCode": 354,
+            "errorString": "Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Error&PAXOS/CRYPTO/Top"
+          }
+        ]
+      },
+      "diagnosis": {
+        "primary_cause_code": "subscription_missing",
+        "primary_cause": "订阅不足，尤其是该品种的实时行情权限不完整",
+        "weekend_factor": false,
+        "has_any_price": false
+      }
+    },
+    {
+      "symbol": "AUDUSD",
+      "contract": {
+        "secType": "CASH",
+        "exchange": "IDEALPRO",
+        "localSymbol": "AUD.USD",
+        "conId": 14433401,
+        "expiry": ""
+      },
+      "realtime": {
+        "market_data_type": 1,
+        "price": 0.68925,
+        "bid": 0.68909,
+        "ask": 0.68942,
+        "last": 0.68925,
+        "close": 0.6896,
+        "statuses": [
+          "ok"
+        ],
+        "details": [
+          "拿到了价格，且没有权限/会话错误"
+        ],
+        "errors": []
+      },
+      "delayed": {
+        "market_data_type": 4,
+        "price": 0.68925,
+        "bid": 0.68909,
+        "ask": 0.68942,
+        "last": 0.68925,
+        "close": 0.6896,
+        "statuses": [
+          "ok"
+        ],
+        "details": [
+          "拿到了价格，且没有权限/会话错误"
+        ],
+        "errors": []
+      },
+      "diagnosis": {
+        "primary_cause_code": "ok",
+        "primary_cause": "行情可用",
+        "weekend_factor": false,
+        "has_any_price": true
+      }
+    },
+    {
+      "symbol": "NZDUSD",
+      "contract": {
+        "secType": "CASH",
+        "exchange": "IDEALPRO",
+        "localSymbol": "NZD.USD",
+        "conId": 39453441,
+        "expiry": ""
+      },
+      "realtime": {
+        "market_data_type": 1,
+        "price": 0.56425,
+        "bid": 0.56373,
+        "ask": 0.56477,
+        "last": 0.56425,
+        "close": 0.56405,
+        "statuses": [
+          "ok"
+        ],
+        "details": [
+          "拿到了价格，且没有权限/会话错误"
+        ],
+        "errors": []
+      },
+      "delayed": {
+        "market_data_type": 4,
+        "price": 0.56425,
+        "bid": 0.56373,
+        "ask": 0.56477,
+        "last": 0.56425,
+        "close": 0.56405,
+        "statuses": [
+          "ok"
+        ],
+        "details": [
+          "拿到了价格，且没有权限/会话错误"
+        ],
+        "errors": []
+      },
+      "diagnosis": {
+        "primary_cause_code": "ok",
+        "primary_cause": "行情可用",
+        "weekend_factor": false,
+        "has_any_price": true
+      }
+    },
+    {
+      "symbol": "ZN",
+      "contract": {
+        "secType": "FUT",
+        "exchange": "CBOT",
+        "localSymbol": "ZNU6",
+        "conId": 840227361,
+        "expiry": "20260921"
+      },
+      "realtime": {
+        "market_data_type": 1,
+        "price": null,
+        "bid": NaN,
+        "ask": NaN,
+        "last": NaN,
+        "close": NaN,
+        "statuses": [
+          "subscription_limited"
+        ],
+        "details": [
+          "没有该合约所需的市场数据订阅"
+        ],
+        "errors": [
+          {
+            "reqId": 59,
+            "errorCode": 354,
+            "errorString": "Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Delayed market data is available.ZN SEP'26/TOP/ALL"
+          }
+        ]
+      },
+      "delayed": {
+        "market_data_type": 4,
+        "price": 110.28125,
+        "bid": 110.265625,
+        "ask": 110.28125,
+        "last": 110.28125,
+        "close": 110.09375,
+        "statuses": [
+          "delayed_only",
+          "has_price"
+        ],
+        "details": [
+          "当前只有延迟/冻结行情，没有实时订阅",
+          "虽然有错误提示，但仍返回了价格"
+        ],
+        "errors": [
+          {
+            "reqId": 60,
+            "errorCode": 10167,
+            "errorString": "Requested market data is not subscribed. Displaying delayed market data."
+          }
+        ]
+      },
+      "diagnosis": {
+        "primary_cause_code": "subscription_missing",
+        "primary_cause": "订阅不足，尤其是该品种的实时行情权限不完整",
+        "weekend_factor": true,
+        "has_any_price": true
+      }
+    },
+    {
+      "symbol": "CL",
+      "contract": {
+        "secType": "FUT",
+        "exchange": "NYMEX",
+        "localSymbol": "CLQ6",
+        "conId": 304037475,
+        "expiry": "20260721"
+      },
+      "realtime": {
+        "market_data_type": 1,
+        "price": null,
+        "bid": NaN,
+        "ask": NaN,
+        "last": NaN,
+        "close": NaN,
+        "statuses": [
+          "subscription_limited"
+        ],
+        "details": [
+          "没有该合约所需的市场数据订阅"
+        ],
+        "errors": [
+          {
+            "reqId": 61,
+            "errorCode": 354,
+            "errorString": "Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Delayed market data is available.CL AUG'26/TOP/ALL"
+          }
+        ]
+      },
+      "delayed": {
+        "market_data_type": 4,
+        "price": 70.24,
+        "bid": 70.48,
+        "ask": 70.48,
+        "last": 70.24,
+        "close": 71.92,
+        "statuses": [
+          "delayed_only",
+          "has_price"
+        ],
+        "details": [
+          "当前只有延迟/冻结行情，没有实时订阅",
+          "虽然有错误提示，但仍返回了价格"
+        ],
+        "errors": [
+          {
+            "reqId": 62,
+            "errorCode": 10167,
+            "errorString": "Requested market data is not subscribed. Displaying delayed market data."
+          }
+        ]
+      },
+      "diagnosis": {
+        "primary_cause_code": "subscription_missing",
+        "primary_cause": "订阅不足，尤其是该品种的实时行情权限不完整",
+        "weekend_factor": true,
+        "has_any_price": true
+      }
+    },
+    {
+      "symbol": "MES",
+      "contract": {
+        "secType": "FUT",
+        "exchange": "CME",
+        "localSymbol": "MESU6",
+        "conId": 793356217,
+        "expiry": "20260918"
+      },
+      "realtime": {
+        "market_data_type": 1,
+        "price": null,
+        "bid": NaN,
+        "ask": NaN,
+        "last": NaN,
+        "close": NaN,
+        "statuses": [
+          "subscription_limited"
+        ],
+        "details": [
+          "没有该合约所需的市场数据订阅"
+        ],
+        "errors": [
+          {
+            "reqId": 63,
+            "errorCode": 354,
+            "errorString": "Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Delayed market data is available.MES SEP'26/TOP/ALL"
+          }
+        ]
+      },
+      "delayed": {
+        "market_data_type": 4,
+        "price": 7397.75,
+        "bid": 7397.75,
+        "ask": 7397.75,
+        "last": 7397.75,
+        "close": 7423.25,
+        "statuses": [
+          "delayed_only",
+          "has_price"
+        ],
+        "details": [
+          "当前只有延迟/冻结行情，没有实时订阅",
+          "虽然有错误提示，但仍返回了价格"
+        ],
+        "errors": [
+          {
+            "reqId": 64,
+            "errorCode": 10167,
+            "errorString": "Requested market data is not subscribed. Displaying delayed market data."
+          }
+        ]
+      },
+      "diagnosis": {
+        "primary_cause_code": "subscription_missing",
+        "primary_cause": "订阅不足，尤其是该品种的实时行情权限不完整",
+        "weekend_factor": true,
+        "has_any_price": true
+      }
+    }
+  ]
+}
