@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.insightbridge.five-models.paper</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/anaconda3/bin/python3</string>
+    <string>-u</string>
+    <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_GitHubSync_Latest/execution_framework/run_tws_continuous.py</string>
+    <string>--live</string>
+    <string>--symbols</string>
+    <string>EURUSD,USDJPY,MES,MNQ,ZT,ZN</string>
+    <string>--interval</string>
+    <string>60</string>
+    <string>--broker-source-of-truth</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_GitHubSync_Latest</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_GitHubSync_Latest/reports/runtime/launchd_stdout.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_GitHubSync_Latest/reports/runtime/launchd_stderr.log</string>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>

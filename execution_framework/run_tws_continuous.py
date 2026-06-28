@@ -59,6 +59,14 @@ def _bars_to_df(bars):
                          for b in bars])
 
 
+def _broker_positions(sess):
+    out = {}
+    for p in sess.ib.positions():
+        sym = p.contract.localSymbol or p.contract.symbol
+        out[sym] = out.get(sym, 0.0) + float(p.position)
+    return out
+
+
 def lock_contracts(sess: IBKRSession, resolver: IBKRContractResolver, symbols):
     for sym in symbols:
         try:
@@ -102,6 +110,8 @@ def main() -> int:
                     help="会前降温提前量（事件前 N 分钟冻结新入场并平现货持仓）")
     ap.add_argument("--no-pre-flatten", action="store_true",
                     help="会前只冻结新入场，不平掉现货加密持仓")
+    ap.add_argument("--broker-source-of-truth", action="store_true",
+                    help="对账时以券商当前持仓为准，适合已有 paper 持仓时接管持续运行")
     args = ap.parse_args()
 
     if args.gen_calendar > 0:
@@ -148,7 +158,13 @@ def main() -> int:
     lock_contracts(sess, pipe.resolver, symbols)
 
     # 启动对账
-    recon = sess.reconcile(local_positions={})
+    local_positions = {}
+    if args.broker_source_of_truth:
+        local_positions = _broker_positions(sess)
+        if local_positions:
+            print(f"已接管券商当前持仓作为本地基准: {local_positions}")
+
+    recon = sess.reconcile(local_positions=local_positions)
     print(f"启动对账 in_sync={recon.in_sync} 券商持仓={recon.broker_positions}")
     if not recon.in_sync:
         pipe.halt("startup_position_desync")
@@ -292,7 +308,9 @@ def main() -> int:
             # 每轮：心跳 + 周期性对账
             guardian.beat({"scanned": scanned, "halted": pipe.is_halted,
                            "symbols": symbols})
-            recon = sess.reconcile(local_positions={})
+            if args.broker_source_of_truth:
+                local_positions = _broker_positions(sess)
+            recon = sess.reconcile(local_positions=local_positions)
             if not recon.in_sync:
                 pipe.halt("periodic_position_desync")
 

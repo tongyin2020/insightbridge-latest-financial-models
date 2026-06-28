@@ -55,6 +55,14 @@ def fetch_1min(ib, contract, lookback="2 D"):
     return _bars_to_df(bars), bars
 
 
+def _broker_positions(sess):
+    out = {}
+    for p in sess.ib.positions():
+        sym = p.contract.localSymbol or p.contract.symbol
+        out[sym] = out.get(sym, 0.0) + float(p.position)
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
@@ -66,6 +74,8 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="评估并构造下单意图，不真实发单")
     ap.add_argument("--live", action="store_true", help="真实模拟盘下单（仅 7497）")
     ap.add_argument("--event", default="CPI")
+    ap.add_argument("--broker-source-of-truth", action="store_true",
+                    help="对账时以券商当前持仓为基准，适合已有 paper 持仓时接管运行")
     args = ap.parse_args()
 
     # 安全闸：真实发单只允许 7497 模拟盘
@@ -112,7 +122,13 @@ def main() -> int:
                 print(f"  [{sym}] 解析失败: {exc}")
 
     # 对账自检
-    recon = sess.reconcile(local_positions={})
+    local_positions = {}
+    if args.broker_source_of_truth:
+        local_positions = _broker_positions(sess)
+        if local_positions:
+            print(f"已接管券商当前持仓作为本地基准: {local_positions}")
+
+    recon = sess.reconcile(local_positions=local_positions)
     print(f"对账: in_sync={recon.in_sync}, 券商持仓={recon.broker_positions}, "
           f"未结单={len(recon.open_orders)}")
     if not recon.in_sync:
