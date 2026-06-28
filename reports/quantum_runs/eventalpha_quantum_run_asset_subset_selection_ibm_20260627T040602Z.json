@@ -1,0 +1,83 @@
+{
+  "generated_at": "2026-06-27T04:06:02.756748+00:00",
+  "pack_path": "/Users/tongyin/Desktop/Test/results/run_20260627T040553Z/quantum_pack.json",
+  "event_type": "mixed_uploaded_cases",
+  "problem": "asset_subset_selection",
+  "asset_filter": null,
+  "result": {
+    "mode": "ibm",
+    "backend": "ibm_fez",
+    "task_count": 1,
+    "grid_size": 4,
+    "submitted_jobs": [
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vko9propqc738cjagg"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vkoa6mvj5c73ei1n50"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vkoa8pknjs73a17ef0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vkoahropqc738cjaig"
+      }
+    ],
+    "waiting_for_results": true
+  },
+  "baseline_exact": {
+    "selected_case_ids": [
+      "fx_fomc_001",
+      "oil_opec_001"
+    ],
+    "selected_assets": [
+      "fx",
+      "oil"
+    ],
+    "risk_used": 2.5,
+    "objective": 1.92834,
+    "base_score": 1.94834,
+    "pair_penalty": 0.02
+  },
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}

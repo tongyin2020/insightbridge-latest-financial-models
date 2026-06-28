@@ -1,0 +1,77 @@
+{
+  "generated_at": "2026-06-27T03:06:26.813481+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_opec_20260627T025713Z.json",
+  "event_type": "opec",
+  "problem": "asset_subset_selection",
+  "result": {
+    "mode": "ibm",
+    "backend": "ibm_fez",
+    "ising_offset": -0.31700000000000006,
+    "grid_size": 4,
+    "submitted_jobs": [
+      {
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vjsc06c68s73agt26g"
+      },
+      {
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vjsc0pknjs73a16fag"
+      },
+      {
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vjsc9ropqc738cibrg"
+      },
+      {
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vjscmmvj5c73ei0of0"
+      }
+    ],
+    "waiting_for_results": true
+  },
+  "baseline_exact": {
+    "bits": [
+      0,
+      0,
+      0,
+      1,
+      1
+    ],
+    "selected": [
+      "oil",
+      "index"
+    ],
+    "objective": 2.114,
+    "base": 2.314,
+    "pair_penalty": 0.2,
+    "size_penalty": 0.0
+  },
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}

@@ -1,0 +1,148 @@
+{
+  "generated_at": "2026-06-27T03:51:01.426816+00:00",
+  "pack_path": "/Users/tongyin/Desktop/Test/results/run_20260627T035049Z/quantum_pack.json",
+  "event_type": "mixed_uploaded_cases",
+  "problem": "asset_subset_selection",
+  "asset_filter": null,
+  "result": {
+    "mode": "ibm",
+    "backend": "ibm_fez",
+    "task_count": 1,
+    "grid_size": 9,
+    "submitted_jobs": [
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vkh7hropqc738cj1q0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.7853981633974483
+          ]
+        },
+        "job_id": "d8vkh7propqc738cj1r0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vkh81ropqc738cj1rg"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            1.5707963267948966
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vkh89ropqc738cj1sg"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            1.5707963267948966
+          ],
+          "β": [
+            0.7853981633974483
+          ]
+        },
+        "job_id": "d8vkh8gpknjs73a175og"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            1.5707963267948966
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vkh8propqc738cj1tg"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vkh8propqc738cj1ug"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.7853981633974483
+          ]
+        },
+        "job_id": "d8vkh906c68s73agto80"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vkh9emvj5c73ei1eq0"
+      }
+    ],
+    "waiting_for_results": true
+  },
+  "baseline_exact": {
+    "selected_case_ids": [
+      "fx_fomc_001",
+      "oil_opec_001"
+    ],
+    "selected_assets": [
+      "fx",
+      "oil"
+    ],
+    "risk_used": 2.5,
+    "objective": 1.92834,
+    "base_score": 1.94834,
+    "pair_penalty": 0.02
+  },
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}

@@ -1,0 +1,439 @@
+{
+  "generated_at": "2026-06-27T03:49:30.262826+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_opec_20260627T025713Z.json",
+  "event_type": "opec",
+  "problem": "asset_subset_selection",
+  "asset_filter": null,
+  "result": {
+    "mode": "local",
+    "task_count": 1,
+    "tasks": [
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "ising_offset": -0.31700000000000006,
+        "grid_size": 4,
+        "best_run": {
+          "subject": null,
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "11000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              1
+            ],
+            "shots": 6,
+            "objective": 2.114,
+            "selected": [
+              "oil",
+              "index"
+            ]
+          },
+          "top_counts": [
+            [
+              "11000",
+              6
+            ],
+            [
+              "01110",
+              5
+            ],
+            [
+              "00100",
+              5
+            ],
+            [
+              "10101",
+              5
+            ],
+            [
+              "11010",
+              4
+            ]
+          ]
+        },
+        "all_runs_top3": [
+          {
+            "subject": null,
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "11000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                1
+              ],
+              "shots": 6,
+              "objective": 2.114,
+              "selected": [
+                "oil",
+                "index"
+              ]
+            },
+            "top_counts": [
+              [
+                "11000",
+                6
+              ],
+              [
+                "01110",
+                5
+              ],
+              [
+                "00100",
+                5
+              ],
+              [
+                "10101",
+                5
+              ],
+              [
+                "11010",
+                4
+              ]
+            ]
+          },
+          {
+            "subject": null,
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "11000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                1
+              ],
+              "shots": 6,
+              "objective": 2.114,
+              "selected": [
+                "oil",
+                "index"
+              ]
+            },
+            "top_counts": [
+              [
+                "11000",
+                6
+              ],
+              [
+                "01110",
+                5
+              ],
+              [
+                "00100",
+                5
+              ],
+              [
+                "10101",
+                5
+              ],
+              [
+                "11010",
+                4
+              ]
+            ]
+          },
+          {
+            "subject": null,
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "11000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                1
+              ],
+              "shots": 6,
+              "objective": 2.114,
+              "selected": [
+                "oil",
+                "index"
+              ]
+            },
+            "top_counts": [
+              [
+                "11000",
+                6
+              ],
+              [
+                "01110",
+                5
+              ],
+              [
+                "00100",
+                5
+              ],
+              [
+                "10101",
+                5
+              ],
+              [
+                "11010",
+                4
+              ]
+            ]
+          }
+        ]
+      }
+    ],
+    "best_task": {
+      "subject": null,
+      "label": "asset_subset_selection",
+      "ising_offset": -0.31700000000000006,
+      "grid_size": 4,
+      "best_run": {
+        "subject": null,
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "best_sampled_solution": {
+          "bitstring": "11000",
+          "decoded_bits": [
+            0,
+            0,
+            0,
+            1,
+            1
+          ],
+          "shots": 6,
+          "objective": 2.114,
+          "selected": [
+            "oil",
+            "index"
+          ]
+        },
+        "top_counts": [
+          [
+            "11000",
+            6
+          ],
+          [
+            "01110",
+            5
+          ],
+          [
+            "00100",
+            5
+          ],
+          [
+            "10101",
+            5
+          ],
+          [
+            "11010",
+            4
+          ]
+        ]
+      },
+      "all_runs_top3": [
+        {
+          "subject": null,
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "11000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              1
+            ],
+            "shots": 6,
+            "objective": 2.114,
+            "selected": [
+              "oil",
+              "index"
+            ]
+          },
+          "top_counts": [
+            [
+              "11000",
+              6
+            ],
+            [
+              "01110",
+              5
+            ],
+            [
+              "00100",
+              5
+            ],
+            [
+              "10101",
+              5
+            ],
+            [
+              "11010",
+              4
+            ]
+          ]
+        },
+        {
+          "subject": null,
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              1.5707963267948966
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "11000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              1
+            ],
+            "shots": 6,
+            "objective": 2.114,
+            "selected": [
+              "oil",
+              "index"
+            ]
+          },
+          "top_counts": [
+            [
+              "11000",
+              6
+            ],
+            [
+              "01110",
+              5
+            ],
+            [
+              "00100",
+              5
+            ],
+            [
+              "10101",
+              5
+            ],
+            [
+              "11010",
+              4
+            ]
+          ]
+        },
+        {
+          "subject": null,
+          "params": {
+            "γ": [
+              3.141592653589793
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "11000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              1
+            ],
+            "shots": 6,
+            "objective": 2.114,
+            "selected": [
+              "oil",
+              "index"
+            ]
+          },
+          "top_counts": [
+            [
+              "11000",
+              6
+            ],
+            [
+              "01110",
+              5
+            ],
+            [
+              "00100",
+              5
+            ],
+            [
+              "10101",
+              5
+            ],
+            [
+              "11010",
+              4
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "baseline_exact": {
+    "bits": [
+      0,
+      0,
+      0,
+      1,
+      1
+    ],
+    "selected": [
+      "oil",
+      "index"
+    ],
+    "objective": 2.114,
+    "base": 2.314,
+    "pair_penalty": 0.2,
+    "size_penalty": 0.0
+  },
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}

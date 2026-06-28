@@ -6,6 +6,7 @@ Streams real-time market data from IBKR (using your free subscriptions):
   • IDEALPRO FX                 → AUD/USD / NZD/USD
   • US & EU Bond Quotes (L1)    → ZN Treasury futures
   • CME Event Contracts         → CL WTI Crude futures
+  • CME Equity Index Futures    → MES Micro E-mini S&P 500
 
 Flow:
   IBKR Real-Time Prices → Signal Engines → SignalRouter → Paper Orders → TWS
@@ -23,6 +24,7 @@ import asyncio
 import logging
 import sys
 import os
+import math
 from datetime import datetime, timezone
 from typing import Dict, Optional
 
@@ -33,7 +35,7 @@ from ib_insync import util
 from ibkr_connector import IBKRConnector, SignalRouter, CONTRACTS
 from signal_engines import (
     CryptoSignalEngine, FXSignalEngine,
-    BondSignalEngine, OilSignalEngine,
+    BondSignalEngine, OilSignalEngine, IndexSignalEngine,
     Signal
 )
 
@@ -56,6 +58,7 @@ POSITION_SIZES = {
     "NZDUSD": 25000,
     "ZN":     1,        # 1 contract (~$111K notional)
     "CL":     1,        # 1 contract (~$70K notional)
+    "MES":    1,        # 1 micro equity index contract
 }
 
 # How often to check prices and run signal logic (seconds)
@@ -65,7 +68,7 @@ SCAN_INTERVAL = 60   # every 60 seconds
 class LiveTrader:
     """
     Orchestrates real-time data streaming and signal routing
-    for all four financial models simultaneously.
+    for all five financial models simultaneously.
     """
 
     def __init__(self):
@@ -82,13 +85,17 @@ class LiveTrader:
             "NZDUSD": FXSignalEngine("NZDUSD",     POSITION_SIZES["NZDUSD"]),
             "ZN":     BondSignalEngine(             POSITION_SIZES["ZN"]),
             "CL":     OilSignalEngine(              POSITION_SIZES["CL"]),
+            "MES":    IndexSignalEngine(            POSITION_SIZES["MES"]),
         }
 
         self.tickers: Dict[str, object] = {}
+        self.market_state: Dict[str, dict] = {}
+        self.contract_symbol_map: Dict[str, str] = {}
         self.running  = False
         self.scan_count = 0
         self.total_signals = 0
         self.total_orders  = 0
+        self.ib.errorEvent += self._on_ib_error
 
     # ── Startup ────────────────────────────────────────────────────────────────
 
@@ -130,9 +137,9 @@ class LiveTrader:
 
     async def _subscribe_market_data(self):
         logger.info("📡 Subscribing to real-time market data...")
-        for symbol, contract in CONTRACTS.items():
+        for symbol in self.engines.keys():
             try:
-                self.ib.qualifyContracts(contract)
+                contract = await self.connector.get_contract(symbol)
                 # genericTickList="": standard ticks
                 # snapshot=False: streaming
                 # regulatorySnapshot=False
@@ -140,29 +147,88 @@ class LiveTrader:
                 self.ib.reqMarketDataType(4)   # 4 = delayed-frozen (works even with live session)
                 ticker = self.ib.reqMktData(contract, "", False, False)
                 self.tickers[symbol] = ticker
-                logger.info(f"   ✅ {symbol}")
+                self.market_state[symbol] = {
+                    "status": "subscribed",
+                    "detail": (
+                        f"waiting_for_first_tick | localSymbol={getattr(contract, 'localSymbol', '')} "
+                        f"| conId={getattr(contract, 'conId', 0)}"
+                    ),
+                }
+                self._index_contract(symbol, contract)
+                logger.info(
+                    f"   ✅ {symbol} -> {getattr(contract, 'localSymbol', symbol)} "
+                    f"(conId={getattr(contract, 'conId', 0)})"
+                )
             except Exception as e:
                 logger.warning(f"   ⚠️  {symbol}: {e}")
+                self.market_state[symbol] = {
+                    "status": "subscription_error",
+                    "detail": str(e),
+                }
 
     def _unsubscribe_market_data(self):
-        for symbol, contract in CONTRACTS.items():
+        for symbol, contract in self.connector.resolved_contracts.items():
             try:
                 self.ib.cancelMktData(contract)
             except Exception:
                 pass
 
+    def _index_contract(self, symbol: str, contract) -> None:
+        for key in {
+            symbol,
+            getattr(contract, "symbol", None),
+            getattr(contract, "localSymbol", None),
+            getattr(contract, "tradingClass", None),
+        }:
+            if key:
+                self.contract_symbol_map[str(key)] = symbol
+
+    def _resolve_symbol_from_contract(self, contract) -> Optional[str]:
+        for key in (
+            getattr(contract, "localSymbol", None),
+            getattr(contract, "tradingClass", None),
+            getattr(contract, "symbol", None),
+        ):
+            if key and str(key) in self.contract_symbol_map:
+                return self.contract_symbol_map[str(key)]
+        return None
+
+    def _on_ib_error(self, reqId, errorCode, errorString, contract=None):
+        symbol = self._resolve_symbol_from_contract(contract) if contract is not None else None
+        if errorCode == 10197:
+            detail = "competing_live_session_blocked"
+            if symbol:
+                self.market_state[symbol] = {"status": "competing_session", "detail": detail}
+        elif errorCode == 10167:
+            detail = "delayed_market_data"
+            if symbol:
+                self.market_state[symbol] = {"status": "delayed", "detail": detail}
+        elif errorCode in {354, 10090}:
+            detail = "subscription_missing_or_partial"
+            if symbol:
+                self.market_state[symbol] = {"status": "subscription_limited", "detail": detail}
+
+    def _is_valid_number(self, value) -> bool:
+        return value is not None and isinstance(value, (int, float)) and not math.isnan(value) and not math.isinf(value)
+
     def _get_price(self, symbol: str) -> Optional[float]:
         ticker = self.tickers.get(symbol)
         if not ticker:
             return None
-        return ticker.last or ticker.bid or ticker.close or None
+        for field in ("last", "bid", "close", "ask"):
+            value = getattr(ticker, field, None)
+            if self._is_valid_number(value) and value > 0:
+                return float(value)
+        return None
 
     def _get_high_low(self, symbol: str, price: float):
         ticker = self.tickers.get(symbol)
         if not ticker:
             return price, price
-        high = getattr(ticker, "high", None) or price
-        low  = getattr(ticker, "low",  None) or price
+        high = getattr(ticker, "high", None)
+        low = getattr(ticker, "low", None)
+        high = float(high) if self._is_valid_number(high) else price
+        low = float(low) if self._is_valid_number(low) else price
         # Fallback: use realistic spread if high==low
         if high == low:
             if symbol in ["BTC", "ETH", "SOL"]:
@@ -173,6 +239,8 @@ class LiveTrader:
                 high, low = price + 0.125, price - 0.125
             elif symbol == "CL":
                 high, low = price + 0.50,  price - 0.50
+            elif symbol == "MES":
+                high, low = price + 8.0, price - 8.0
         return high, low
 
     # ── Core Scan Loop ─────────────────────────────────────────────────────────
@@ -189,8 +257,14 @@ class LiveTrader:
         for symbol, engine in self.engines.items():
             price = self._get_price(symbol)
             if price is None or price <= 0:
-                logger.info(f"  {symbol:8s}: no price yet (waiting for market data)")
+                state = self.market_state.get(symbol, {})
+                status = state.get("status", "waiting")
+                detail = state.get("detail", "no_price_yet")
+                logger.info(f"  {symbol:8s}: no valid price | status={status} | detail={detail}")
                 continue
+
+            if symbol not in self.market_state or self.market_state[symbol]["status"] == "subscribed":
+                self.market_state[symbol] = {"status": "live_or_delayed_tick", "detail": "price_available"}
 
             high, low = self._get_high_low(symbol, price)
 
@@ -206,11 +280,11 @@ class LiveTrader:
 
             # Log price
             if symbol in ["BTC", "ETH", "SOL"]:
-                logger.info(f"  {symbol:8s}: ${price:>12,.2f}  H=${high:,.2f} L=${low:,.2f}")
+                logger.info(f"  {symbol:8s}: ${price:>12,.2f}  H=${high:,.2f} L=${low:,.2f} [{self.market_state.get(symbol, {}).get('status', 'ok')}]")
             elif symbol in ["AUDUSD", "NZDUSD"]:
-                logger.info(f"  {symbol:8s}:  {price:.5f}    H={high:.5f} L={low:.5f}")
+                logger.info(f"  {symbol:8s}:  {price:.5f}    H={high:.5f} L={low:.5f} [{self.market_state.get(symbol, {}).get('status', 'ok')}]")
             else:
-                logger.info(f"  {symbol:8s}: {price:>8.4f}     H={high:.4f} L={low:.4f}")
+                logger.info(f"  {symbol:8s}: {price:>8.4f}     H={high:.4f} L={low:.4f} [{self.market_state.get(symbol, {}).get('status', 'ok')}]")
 
             if signal:
                 signals_this_scan.append(signal)
@@ -223,6 +297,9 @@ class LiveTrader:
                 await self._execute_signal(sig)
         else:
             logger.info("\n  ─ No signals this scan (waiting for crossovers / confirmations)")
+        blocked = {k: v for k, v in self.market_state.items() if v.get("status") in {"competing_session", "subscription_limited"}}
+        if blocked:
+            logger.info(f"  Market data issues: {blocked}")
 
         # Account snapshot every 5 scans
         if self.scan_count % 5 == 0:
@@ -243,6 +320,11 @@ class LiveTrader:
             "price":      sig.price,
             "confidence": sig.confidence,
             "reason":     sig.reason,
+            "latest_price": self._get_price(sig.symbol),
+            "high": self._get_high_low(sig.symbol, self._get_price(sig.symbol) or 0.0)[0],
+            "low": self._get_high_low(sig.symbol, self._get_price(sig.symbol) or 0.0)[1],
+            "market_status": self.market_state.get(sig.symbol, {}).get("status", "unknown"),
+            "detected_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
             result = await self.router.process_signal(signal_dict)
@@ -302,9 +384,10 @@ async def main():
     print("    • IDEALPRO FX      → AUD/USD / NZD/USD")
     print("    • Bond Quotes L1   → ZN Treasury Futures")
     print("    • CME Contracts    → CL WTI Crude Futures")
+    print("    • CME Equity Index → MES Micro E-mini S&P 500")
     print("=" * 60)
     print(f"  Scan interval : every {SCAN_INTERVAL} seconds")
-    print(f"  Position sizes: BTC/ETH/SOL=$100 | FX=25K | ZN/CL=1 contract")
+    print(f"  Position sizes: BTC/ETH/SOL=$100 | FX=25K | ZN/CL/MES=1 contract")
     print("  Press Ctrl+C to stop\n")
 
     trader = LiveTrader()

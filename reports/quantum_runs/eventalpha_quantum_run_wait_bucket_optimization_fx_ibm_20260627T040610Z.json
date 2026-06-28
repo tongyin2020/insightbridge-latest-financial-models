@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-06-27T04:06:10.497489+00:00",
+  "pack_path": "/Users/tongyin/Desktop/Test/results/run_20260627T040553Z/quantum_pack.json",
+  "event_type": "mixed_uploaded_cases",
+  "problem": "wait_bucket_optimization",
+  "asset_filter": "fx",
+  "result": {
+    "mode": "ibm",
+    "backend": "ibm_fez",
+    "task_count": 1,
+    "grid_size": 4,
+    "submitted_jobs": [
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vkoc06c68s73agu0r0"
+      },
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vkoc06c68s73agu0sg"
+      },
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vkocemvj5c73ei1nag"
+      },
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vkocmmvj5c73ei1nbg"
+      }
+    ],
+    "waiting_for_results": true
+  },
+  "baseline_exact": {
+    "asset": "fx",
+    "wait_seconds": 420,
+    "score": 1.211365
+  },
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}

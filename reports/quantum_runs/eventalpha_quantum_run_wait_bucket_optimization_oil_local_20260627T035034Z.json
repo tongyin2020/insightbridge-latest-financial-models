@@ -1,0 +1,471 @@
+{
+  "generated_at": "2026-06-27T03:50:34.273096+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_opec_20260627T025713Z.json",
+  "event_type": "opec",
+  "problem": "wait_bucket_optimization",
+  "asset_filter": "oil",
+  "result": {
+    "mode": "local",
+    "task_count": 1,
+    "tasks": [
+      {
+        "subject": {
+          "asset": "oil"
+        },
+        "label": "wait_bucket_optimization:oil",
+        "ising_offset": 4.17,
+        "grid_size": 4,
+        "best_run": {
+          "subject": {
+            "asset": "oil"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "001000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "shots": 4,
+            "objective": 0.9575,
+            "asset": "oil",
+            "selected_waits": [
+              180
+            ],
+            "chosen_wait_seconds": 180,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "001000",
+              4
+            ],
+            [
+              "110001",
+              3
+            ],
+            [
+              "011100",
+              3
+            ],
+            [
+              "110000",
+              3
+            ],
+            [
+              "001100",
+              3
+            ]
+          ]
+        },
+        "all_runs_top3": [
+          {
+            "subject": {
+              "asset": "oil"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "001000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              "shots": 4,
+              "objective": 0.9575,
+              "asset": "oil",
+              "selected_waits": [
+                180
+              ],
+              "chosen_wait_seconds": 180,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "001000",
+                4
+              ],
+              [
+                "110001",
+                3
+              ],
+              [
+                "011100",
+                3
+              ],
+              [
+                "110000",
+                3
+              ],
+              [
+                "001100",
+                3
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "oil"
+            },
+            "params": {
+              "γ": [
+                0.0
+              ],
+              "β": [
+                1.5707963267948966
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "001000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              "shots": 4,
+              "objective": 0.9575,
+              "asset": "oil",
+              "selected_waits": [
+                180
+              ],
+              "chosen_wait_seconds": 180,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "001000",
+                4
+              ],
+              [
+                "110001",
+                3
+              ],
+              [
+                "011100",
+                3
+              ],
+              [
+                "110000",
+                3
+              ],
+              [
+                "001100",
+                3
+              ]
+            ]
+          },
+          {
+            "subject": {
+              "asset": "oil"
+            },
+            "params": {
+              "γ": [
+                3.141592653589793
+              ],
+              "β": [
+                0.0
+              ]
+            },
+            "best_sampled_solution": {
+              "bitstring": "001000",
+              "decoded_bits": [
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              "shots": 4,
+              "objective": 0.9575,
+              "asset": "oil",
+              "selected_waits": [
+                180
+              ],
+              "chosen_wait_seconds": 180,
+              "one_hot_valid": true
+            },
+            "top_counts": [
+              [
+                "001000",
+                4
+              ],
+              [
+                "110001",
+                3
+              ],
+              [
+                "011100",
+                3
+              ],
+              [
+                "110000",
+                3
+              ],
+              [
+                "001100",
+                3
+              ]
+            ]
+          }
+        ]
+      }
+    ],
+    "best_task": {
+      "subject": {
+        "asset": "oil"
+      },
+      "label": "wait_bucket_optimization:oil",
+      "ising_offset": 4.17,
+      "grid_size": 4,
+      "best_run": {
+        "subject": {
+          "asset": "oil"
+        },
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "best_sampled_solution": {
+          "bitstring": "001000",
+          "decoded_bits": [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          "shots": 4,
+          "objective": 0.9575,
+          "asset": "oil",
+          "selected_waits": [
+            180
+          ],
+          "chosen_wait_seconds": 180,
+          "one_hot_valid": true
+        },
+        "top_counts": [
+          [
+            "001000",
+            4
+          ],
+          [
+            "110001",
+            3
+          ],
+          [
+            "011100",
+            3
+          ],
+          [
+            "110000",
+            3
+          ],
+          [
+            "001100",
+            3
+          ]
+        ]
+      },
+      "all_runs_top3": [
+        {
+          "subject": {
+            "asset": "oil"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "001000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "shots": 4,
+            "objective": 0.9575,
+            "asset": "oil",
+            "selected_waits": [
+              180
+            ],
+            "chosen_wait_seconds": 180,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "001000",
+              4
+            ],
+            [
+              "110001",
+              3
+            ],
+            [
+              "011100",
+              3
+            ],
+            [
+              "110000",
+              3
+            ],
+            [
+              "001100",
+              3
+            ]
+          ]
+        },
+        {
+          "subject": {
+            "asset": "oil"
+          },
+          "params": {
+            "γ": [
+              0.0
+            ],
+            "β": [
+              1.5707963267948966
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "001000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "shots": 4,
+            "objective": 0.9575,
+            "asset": "oil",
+            "selected_waits": [
+              180
+            ],
+            "chosen_wait_seconds": 180,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "001000",
+              4
+            ],
+            [
+              "110001",
+              3
+            ],
+            [
+              "011100",
+              3
+            ],
+            [
+              "110000",
+              3
+            ],
+            [
+              "001100",
+              3
+            ]
+          ]
+        },
+        {
+          "subject": {
+            "asset": "oil"
+          },
+          "params": {
+            "γ": [
+              3.141592653589793
+            ],
+            "β": [
+              0.0
+            ]
+          },
+          "best_sampled_solution": {
+            "bitstring": "001000",
+            "decoded_bits": [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "shots": 4,
+            "objective": 0.9575,
+            "asset": "oil",
+            "selected_waits": [
+              180
+            ],
+            "chosen_wait_seconds": 180,
+            "one_hot_valid": true
+          },
+          "top_counts": [
+            [
+              "001000",
+              4
+            ],
+            [
+              "110001",
+              3
+            ],
+            [
+              "011100",
+              3
+            ],
+            [
+              "110000",
+              3
+            ],
+            [
+              "001100",
+              3
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "baseline_exact": {
+    "asset": "oil",
+    "wait_seconds": 300,
+    "score": 1.2525
+  },
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}

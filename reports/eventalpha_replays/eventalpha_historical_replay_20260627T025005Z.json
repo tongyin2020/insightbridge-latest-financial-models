@@ -1,0 +1,194 @@
+{
+  "generated_at": "2026-06-27T02:50:05.090917+00:00",
+  "scenario_count": 15,
+  "coverage": {
+    "cpi:fx": 1,
+    "cpi:rates": 1,
+    "cpi:index": 1,
+    "fomc:fx": 1,
+    "fomc:rates": 1,
+    "fomc:crypto": 1,
+    "nfp:fx": 1,
+    "nfp:index": 1,
+    "opec:oil": 1,
+    "opec:index": 1,
+    "eia_inventory:oil": 1,
+    "eia_inventory:rates": 1,
+    "geopolitical:oil": 1,
+    "geopolitical:crypto": 1,
+    "liquidity_shock:rates": 1
+  },
+  "learning_updates": [
+    {
+      "event_type": "cpi",
+      "asset": "fx",
+      "symbol": "AUD/USD",
+      "memory_edge_delta": 0.03,
+      "wait_seconds_delta": 15,
+      "risk_multiplier_delta": 0.02,
+      "lessons": [
+        "event_asset_pair_has_positive_edge",
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "cpi",
+      "asset": "rates",
+      "symbol": "ZN",
+      "memory_edge_delta": 0.03,
+      "wait_seconds_delta": 11,
+      "risk_multiplier_delta": 0.02,
+      "lessons": [
+        "event_asset_pair_has_positive_edge",
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "cpi",
+      "asset": "index",
+      "symbol": "ES_PROXY",
+      "memory_edge_delta": -0.05,
+      "wait_seconds_delta": 60,
+      "risk_multiplier_delta": -0.04,
+      "lessons": [
+        "reduce_future_risk_for_similar_event",
+        "false_breakout_detected_increase_minimum_wait",
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "fomc",
+      "asset": "fx",
+      "symbol": "AUD/USD",
+      "memory_edge_delta": 0.0,
+      "wait_seconds_delta": 15,
+      "risk_multiplier_delta": 0.0,
+      "lessons": [
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "fomc",
+      "asset": "rates",
+      "symbol": "ZN",
+      "memory_edge_delta": 0.03,
+      "wait_seconds_delta": 7,
+      "risk_multiplier_delta": 0.02,
+      "lessons": [
+        "event_asset_pair_has_positive_edge"
+      ]
+    },
+    {
+      "event_type": "fomc",
+      "asset": "crypto",
+      "symbol": "BTC",
+      "memory_edge_delta": 0.0,
+      "wait_seconds_delta": 60,
+      "risk_multiplier_delta": 0.0,
+      "lessons": [
+        "false_breakout_detected_increase_minimum_wait",
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "nfp",
+      "asset": "fx",
+      "symbol": "AUD/USD",
+      "memory_edge_delta": 0.0,
+      "wait_seconds_delta": 8,
+      "risk_multiplier_delta": 0.0,
+      "lessons": []
+    },
+    {
+      "event_type": "nfp",
+      "asset": "index",
+      "symbol": "ES_PROXY",
+      "memory_edge_delta": 0.03,
+      "wait_seconds_delta": 10,
+      "risk_multiplier_delta": 0.02,
+      "lessons": [
+        "event_asset_pair_has_positive_edge",
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "opec",
+      "asset": "oil",
+      "symbol": "WTI",
+      "memory_edge_delta": 0.03,
+      "wait_seconds_delta": 5,
+      "risk_multiplier_delta": 0.02,
+      "lessons": [
+        "event_asset_pair_has_positive_edge",
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "opec",
+      "asset": "index",
+      "symbol": "ES_PROXY",
+      "memory_edge_delta": 0.0,
+      "wait_seconds_delta": 15,
+      "risk_multiplier_delta": 0.0,
+      "lessons": [
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "eia_inventory",
+      "asset": "oil",
+      "symbol": "WTI",
+      "memory_edge_delta": -0.05,
+      "wait_seconds_delta": 60,
+      "risk_multiplier_delta": -0.04,
+      "lessons": [
+        "reduce_future_risk_for_similar_event",
+        "false_breakout_detected_increase_minimum_wait",
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "eia_inventory",
+      "asset": "rates",
+      "symbol": "ZN",
+      "memory_edge_delta": 0.0,
+      "wait_seconds_delta": 0,
+      "risk_multiplier_delta": 0.0,
+      "lessons": []
+    },
+    {
+      "event_type": "geopolitical",
+      "asset": "oil",
+      "symbol": "WTI",
+      "memory_edge_delta": 0.03,
+      "wait_seconds_delta": 15,
+      "risk_multiplier_delta": 0.02,
+      "lessons": [
+        "event_asset_pair_has_positive_edge"
+      ]
+    },
+    {
+      "event_type": "geopolitical",
+      "asset": "crypto",
+      "symbol": "BTC",
+      "memory_edge_delta": 0.0,
+      "wait_seconds_delta": 60,
+      "risk_multiplier_delta": 0.0,
+      "lessons": [
+        "false_breakout_detected_increase_minimum_wait",
+        "confidence_decay_was_predictive_of_exit"
+      ]
+    },
+    {
+      "event_type": "liquidity_shock",
+      "asset": "rates",
+      "symbol": "ZN",
+      "memory_edge_delta": 0.03,
+      "wait_seconds_delta": 7,
+      "risk_multiplier_delta": 0.02,
+      "lessons": [
+        "event_asset_pair_has_positive_edge"
+      ]
+    }
+  ]
+}

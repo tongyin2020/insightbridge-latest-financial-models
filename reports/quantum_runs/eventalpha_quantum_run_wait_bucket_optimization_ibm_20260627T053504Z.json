@@ -1,0 +1,344 @@
+{
+  "generated_at": "2026-06-27T05:35:04.567700+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T052848Z.json",
+  "event_type": "multi_event_real_history",
+  "problem": "wait_bucket_optimization",
+  "asset_filter": null,
+  "result": {
+    "mode": "ibm",
+    "backend": "ibm_fez",
+    "task_count": 5,
+    "grid_size": 4,
+    "submitted_jobs": [
+      {
+        "subject": {
+          "asset": "crypto"
+        },
+        "label": "wait_bucket_optimization:crypto",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm1u6mvj5c73ei3dpg"
+      },
+      {
+        "subject": {
+          "asset": "crypto"
+        },
+        "label": "wait_bucket_optimization:crypto",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm1u86c68s73agvogg"
+      },
+      {
+        "subject": {
+          "asset": "crypto"
+        },
+        "label": "wait_bucket_optimization:crypto",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm1u86c68s73agvoh0"
+      },
+      {
+        "subject": {
+          "asset": "crypto"
+        },
+        "label": "wait_bucket_optimization:crypto",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm1ummvj5c73ei3dq0"
+      },
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm1uumvj5c73ei3dr0"
+      },
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm1v0pknjs73a19510"
+      },
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm1v86c68s73agvoj0"
+      },
+      {
+        "subject": {
+          "asset": "fx"
+        },
+        "label": "wait_bucket_optimization:fx",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm1vg6c68s73agvokg"
+      },
+      {
+        "subject": {
+          "asset": "index"
+        },
+        "label": "wait_bucket_optimization:index",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm1vopknjs73a1951g"
+      },
+      {
+        "subject": {
+          "asset": "index"
+        },
+        "label": "wait_bucket_optimization:index",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm206mvj5c73ei3dtg"
+      },
+      {
+        "subject": {
+          "asset": "index"
+        },
+        "label": "wait_bucket_optimization:index",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm209ropqc738cl1vg"
+      },
+      {
+        "subject": {
+          "asset": "index"
+        },
+        "label": "wait_bucket_optimization:index",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm20mmvj5c73ei3dvg"
+      },
+      {
+        "subject": {
+          "asset": "oil"
+        },
+        "label": "wait_bucket_optimization:oil",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm20mmvj5c73ei3e0g"
+      },
+      {
+        "subject": {
+          "asset": "oil"
+        },
+        "label": "wait_bucket_optimization:oil",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm20o6c68s73agvom0"
+      },
+      {
+        "subject": {
+          "asset": "oil"
+        },
+        "label": "wait_bucket_optimization:oil",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm210pknjs73a1953g"
+      },
+      {
+        "subject": {
+          "asset": "oil"
+        },
+        "label": "wait_bucket_optimization:oil",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm2186c68s73agvon0"
+      },
+      {
+        "subject": {
+          "asset": "rates"
+        },
+        "label": "wait_bucket_optimization:rates",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm21mmvj5c73ei3e2g"
+      },
+      {
+        "subject": {
+          "asset": "rates"
+        },
+        "label": "wait_bucket_optimization:rates",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm21umvj5c73ei3e30"
+      },
+      {
+        "subject": {
+          "asset": "rates"
+        },
+        "label": "wait_bucket_optimization:rates",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm21umvj5c73ei3e40"
+      },
+      {
+        "subject": {
+          "asset": "rates"
+        },
+        "label": "wait_bucket_optimization:rates",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm220pknjs73a1954g"
+      }
+    ],
+    "waiting_for_results": true
+  },
+  "baseline_exact": [
+    {
+      "asset": "crypto",
+      "wait_seconds": 180,
+      "score": 1.133572
+    },
+    {
+      "asset": "fx",
+      "wait_seconds": 120,
+      "score": 1.166316
+    },
+    {
+      "asset": "index",
+      "wait_seconds": 120,
+      "score": 1.10764
+    },
+    {
+      "asset": "oil",
+      "wait_seconds": 240,
+      "score": 0.98038
+    },
+    {
+      "asset": "rates",
+      "wait_seconds": 120,
+      "score": 1.152372
+    }
+  ],
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}

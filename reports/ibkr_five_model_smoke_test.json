@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-06-28T20:16:14.253551+00:00",
+  "host": "",
+  "symbols": {
+    "BTC": {
+      "ok": true,
+      "contract": "Crypto(conId=479624278, symbol='BTC', exchange='PAXOS', currency='USD', localSymbol='BTC.USD', tradingClass='BTC')",
+      "conId": 479624278,
+      "localSymbol": "BTC.USD",
+      "expiry": ""
+    },
+    "ETH": {
+      "ok": true,
+      "contract": "Crypto(conId=495759171, symbol='ETH', exchange='PAXOS', currency='USD', localSymbol='ETH.USD', tradingClass='ETH')",
+      "conId": 495759171,
+      "localSymbol": "ETH.USD",
+      "expiry": ""
+    },
+    "SOL": {
+      "ok": true,
+      "contract": "Crypto(conId=766137558, symbol='SOL', exchange='PAXOS', currency='USD', localSymbol='SOL.USD', tradingClass='SOL')",
+      "conId": 766137558,
+      "localSymbol": "SOL.USD",
+      "expiry": ""
+    },
+    "AUDUSD": {
+      "ok": true,
+      "contract": "Forex('AUDUSD', conId=14433401, exchange='IDEALPRO', localSymbol='AUD.USD', tradingClass='AUD.USD')",
+      "conId": 14433401,
+      "localSymbol": "AUD.USD",
+      "expiry": ""
+    },
+    "NZDUSD": {
+      "ok": true,
+      "contract": "Forex('NZDUSD', conId=39453441, exchange='IDEALPRO', localSymbol='NZD.USD', tradingClass='NZD.USD')",
+      "conId": 39453441,
+      "localSymbol": "NZD.USD",
+      "expiry": ""
+    },
+    "ZN": {
+      "ok": true,
+      "contract": "Contract(secType='FUT', conId=840227361, symbol='ZN', lastTradeDateOrContractMonth='20260921', multiplier='1000', exchange='CBOT', currency='USD', localSymbol='ZNU6', tradingClass='ZN')",
+      "conId": 840227361,
+      "localSymbol": "ZNU6",
+      "expiry": "20260921"
+    },
+    "CL": {
+      "ok": true,
+      "contract": "Contract(secType='FUT', conId=304037475, symbol='CL', lastTradeDateOrContractMonth='20260721', multiplier='1000', exchange='NYMEX', currency='USD', localSymbol='CLQ6', tradingClass='CL')",
+      "conId": 304037475,
+      "localSymbol": "CLQ6",
+      "expiry": "20260721"
+    },
+    "MES": {
+      "ok": true,
+      "contract": "Contract(secType='FUT', conId=793356217, symbol='MES', lastTradeDateOrContractMonth='20260918', multiplier='5', exchange='CME', currency='USD', localSymbol='MESU6', tradingClass='MES')",
+      "conId": 793356217,
+      "localSymbol": "MESU6",
+      "expiry": "20260918"
+    },
+    "ES_PROXY": {
+      "ok": true,
+      "contract": "Contract(secType='FUT', conId=793356217, symbol='MES', lastTradeDateOrContractMonth='20260918', multiplier='5', exchange='CME', currency='USD', localSymbol='MESU6', tradingClass='MES')",
+      "conId": 793356217,
+      "localSymbol": "MESU6",
+      "expiry": "20260918"
+    }
+  }
+}

@@ -1,0 +1,379 @@
+{
+  "generated_at": "2026-06-27T05:26:40.588396+00:00",
+  "project_base": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest",
+  "cases_csv": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/real_history_validation/eventalpha_real_history_cases_20260627T052151Z.csv",
+  "matrix_csv": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/real_history_validation/eventalpha_real_history_matrix_20260627T052151Z.csv",
+  "event_type": "multi_event_real_history",
+  "uncertainties_best_suited_for_quantum": [
+    {
+      "name": "best_asset_subset",
+      "why_quantum_relevant": "This is now based on a real historical payoff matrix across many macro events.",
+      "current_gap": "Classical exact search still works at 5 assets, but the workflow is ready for larger baskets and more constraints."
+    },
+    {
+      "name": "wait_bucket_choice",
+      "why_quantum_relevant": "Wait selection is discrete and now grounded in real observed historical validation behavior.",
+      "current_gap": "Still approximated with bucket scoring, not global joint optimization."
+    },
+    {
+      "name": "risk_tier_allocation",
+      "why_quantum_relevant": "Cross-asset tier assignment under a budget is a natural constrained combinatorial problem.",
+      "current_gap": "Current allocation remains approximate once the basket size expands."
+    }
+  ],
+  "asset_stats": {
+    "fx": {
+      "samples": 1,
+      "avg_pnl_pct": -1.119170047731055,
+      "avg_wait_seconds": 153.34328358208955,
+      "memory_edge": 0.8869050661402098,
+      "win_rate": 0.0,
+      "avg_r_multiple": -1.0198950419960022,
+      "signal_strength": 0.8869050661402098
+    },
+    "rates": {
+      "samples": 2,
+      "avg_pnl_pct": 0.3492290968232836,
+      "avg_wait_seconds": 121.45522388059702,
+      "memory_edge": 0.9680029416512592,
+      "win_rate": 1.0,
+      "avg_r_multiple": 0.561474194186274,
+      "signal_strength": 0.9680029416512592
+    },
+    "crypto": {
+      "samples": 2,
+      "avg_pnl_pct": 9.628158924996212,
+      "avg_wait_seconds": 212.53731343283582,
+      "memory_edge": 0.8368664075203236,
+      "win_rate": 0.5,
+      "avg_r_multiple": 2.725965705245978,
+      "signal_strength": 0.8368664075203236
+    },
+    "oil": {
+      "samples": 6,
+      "avg_pnl_pct": 0.6951579865727272,
+      "avg_wait_seconds": 242.51492537313433,
+      "memory_edge": 0.6436014040842281,
+      "win_rate": 0.5,
+      "avg_r_multiple": 0.19184255472422376,
+      "signal_strength": 0.6436014040842281
+    },
+    "index": {
+      "samples": 2,
+      "avg_pnl_pct": 1.859872807884394,
+      "avg_wait_seconds": 162.43283582089552,
+      "memory_edge": 0.875826835128738,
+      "win_rate": 1.0,
+      "avg_r_multiple": 1.189785334834808,
+      "signal_strength": 0.875826835128738
+    }
+  },
+  "correlation_map": {
+    "fx": {
+      "fx": 1.0,
+      "rates": 0.010671211365408868,
+      "crypto": 0.006001468310035088,
+      "oil": 0.008194280955005937,
+      "index": 0.008471652429002894
+    },
+    "rates": {
+      "fx": 0.010671211365408868,
+      "rates": 1.0,
+      "crypto": 0.008517710599611952,
+      "oil": 0.0116299062397689,
+      "index": 0.012023571559994535
+    },
+    "crypto": {
+      "fx": 0.006001468310035088,
+      "rates": 0.008517710599611952,
+      "crypto": 1.0,
+      "oil": 0.006540636424173967,
+      "index": 0.006762033026976932
+    },
+    "oil": {
+      "fx": 0.008194280955005937,
+      "rates": 0.0116299062397689,
+      "crypto": 0.006540636424173967,
+      "oil": 1.0,
+      "index": 0.009232740320802298
+    },
+    "index": {
+      "fx": 0.008471652429002894,
+      "rates": 0.012023571559994535,
+      "crypto": 0.006762033026976932,
+      "oil": 0.009232740320802298,
+      "index": 1.0
+    }
+  },
+  "problems": [
+    {
+      "problem": "asset_subset_selection",
+      "event_type": "multi_event_real_history",
+      "qubo_like": {
+        "variables": [
+          "fx",
+          "rates",
+          "crypto",
+          "oil",
+          "index"
+        ],
+        "selection_target": 3,
+        "linear_scores": {
+          "fx": -0.008352,
+          "rates": 0.064914,
+          "crypto": 0.173555,
+          "oil": 0.120679,
+          "index": 0.087461
+        },
+        "pair_penalties": {
+          "fx|rates": 0.003735,
+          "fx|crypto": 0.002101,
+          "fx|oil": 0.002868,
+          "fx|index": 0.002965,
+          "rates|crypto": 0.002981,
+          "rates|oil": 0.00407,
+          "rates|index": 0.004208,
+          "crypto|oil": 0.002289,
+          "crypto|index": 0.002367,
+          "oil|index": 0.003231
+        },
+        "cardinality_penalty_lambda": 0.1
+      },
+      "best_exact_solution": {
+        "bits": [
+          0,
+          0,
+          1,
+          1,
+          1
+        ],
+        "selected": [
+          "crypto",
+          "oil",
+          "index"
+        ],
+        "objective": 0.373808,
+        "base": 0.381695,
+        "pair_penalty": 0.007887,
+        "size_penalty": 0.0
+      }
+    },
+    {
+      "problem": "wait_bucket_optimization",
+      "event_type": "multi_event_real_history",
+      "per_asset": {
+        "fx": {
+          "target_wait_estimate": 153.34,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.682308
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.882308
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.082308
+            },
+            {
+              "wait_seconds": 180,
+              "score": 1.104597
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.904597
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.704597
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 180,
+            "score": 1.104597
+          }
+        },
+        "rates": {
+          "target_wait_estimate": 121.46,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.829151
+            },
+            {
+              "wait_seconds": 60,
+              "score": 1.029151
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.229151
+            },
+            {
+              "wait_seconds": 180,
+              "score": 1.038852
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.838852
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.638852
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 120,
+            "score": 1.229151
+          }
+        },
+        "crypto": {
+          "target_wait_estimate": 212.54,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.459975
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.659975
+            },
+            {
+              "wait_seconds": 120,
+              "score": 0.859975
+            },
+            {
+              "wait_seconds": 180,
+              "score": 1.059975
+            },
+            {
+              "wait_seconds": 240,
+              "score": 1.076891
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.876891
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 240,
+            "score": 1.076891
+          }
+        },
+        "oil": {
+          "target_wait_estimate": 242.51,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.263418
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.463418
+            },
+            {
+              "wait_seconds": 120,
+              "score": 0.663418
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.863418
+            },
+            {
+              "wait_seconds": 240,
+              "score": 1.063418
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.880184
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 240,
+            "score": 1.063418
+          }
+        },
+        "index": {
+          "target_wait_estimate": 162.43,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.646471
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.846471
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.046471
+            },
+            {
+              "wait_seconds": 180,
+              "score": 1.129356
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.929356
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.729356
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 180,
+            "score": 1.129356
+          }
+        }
+      }
+    },
+    {
+      "problem": "risk_tier_allocation",
+      "selected_assets": [
+        "crypto",
+        "oil",
+        "index"
+      ],
+      "qubo_like": {
+        "selected_assets": [
+          "crypto",
+          "oil",
+          "index"
+        ],
+        "tiers": {
+          "skip": 0.0,
+          "small": 0.5,
+          "normal": 1.0,
+          "heavy": 1.5
+        },
+        "risk_budget": 2.5,
+        "asset_scores": {
+          "crypto": 12.965025,
+          "oil": 3.838759,
+          "index": 7.7357
+        }
+      },
+      "best_exact_solution": {
+        "allocation": {
+          "crypto": {
+            "tier": "heavy",
+            "weight": 1.5
+          },
+          "oil": {
+            "tier": "skip",
+            "weight": 0.0
+          },
+          "index": {
+            "tier": "normal",
+            "weight": 1.0
+          }
+        },
+        "risk_used": 2.5,
+        "objective": 27.183238
+      }
+    }
+  ],
+  "safety_note": "This pack contains only abstract optimization inputs derived from real historical validation. It places no orders and touches no broker."
+}

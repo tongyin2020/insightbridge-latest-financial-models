@@ -1,0 +1,334 @@
+{
+  "generated_at": "2026-06-27T02:54:50.340093+00:00",
+  "tool_base": "/Users/tongyin/Desktop/Anaconda_Local_Tools",
+  "project_base": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest",
+  "db_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/eventalpha_memory.sqlite",
+  "event_type": "opec",
+  "uncertainties_best_suited_for_quantum": [
+    {
+      "name": "best_asset_subset",
+      "why_quantum_relevant": "This is a discrete combinatorial selection problem with pairwise interaction penalties.",
+      "current_gap": "We still use heuristic ranking plus manual top-N cutoffs."
+    },
+    {
+      "name": "wait_bucket_choice",
+      "why_quantum_relevant": "The best wait bucket is discrete and event/regime-specific, not a smooth single formula.",
+      "current_gap": "Current wait logic is good but still partly heuristic and sample-light."
+    },
+    {
+      "name": "risk_tier_allocation",
+      "why_quantum_relevant": "Risk tiers across multiple chosen assets form a constrained allocation problem under a strict budget.",
+      "current_gap": "Current sizing logic is strong per asset, but cross-asset tier allocation is still approximate."
+    }
+  ],
+  "asset_stats": {
+    "fx": {
+      "samples": 0,
+      "avg_pnl_pct": 0.0,
+      "avg_wait_seconds": 120.0,
+      "memory_edge": 0.5,
+      "wait_bias": 0,
+      "risk_bias": 0.0,
+      "learning_updates": 0
+    },
+    "rates": {
+      "samples": 0,
+      "avg_pnl_pct": 0.0,
+      "avg_wait_seconds": 120.0,
+      "memory_edge": 0.5,
+      "wait_bias": 0,
+      "risk_bias": 0.0,
+      "learning_updates": 0
+    },
+    "crypto": {
+      "samples": 0,
+      "avg_pnl_pct": 0.0,
+      "avg_wait_seconds": 120.0,
+      "memory_edge": 0.5,
+      "wait_bias": 0,
+      "risk_bias": 0.0,
+      "learning_updates": 0
+    },
+    "oil": {
+      "samples": 4,
+      "avg_pnl_pct": 95.0,
+      "avg_wait_seconds": 274.25,
+      "memory_edge": 0.95,
+      "wait_bias": 10,
+      "risk_bias": 0.04,
+      "learning_updates": 2
+    },
+    "index": {
+      "samples": 4,
+      "avg_pnl_pct": 25.0,
+      "avg_wait_seconds": 222.75,
+      "memory_edge": 0.625,
+      "wait_bias": 30,
+      "risk_bias": 0.0,
+      "learning_updates": 2
+    }
+  },
+  "problems": [
+    {
+      "problem": "asset_subset_selection",
+      "event_type": "opec",
+      "qubo_like": {
+        "variables": [
+          "fx",
+          "rates",
+          "crypto",
+          "oil",
+          "index"
+        ],
+        "selection_target": 2,
+        "linear_scores": {
+          "fx": 0.0,
+          "rates": 0.0,
+          "crypto": 0.0,
+          "oil": 1.714,
+          "index": 0.6
+        },
+        "pair_penalties": {
+          "fx|rates": 0.08,
+          "fx|crypto": 0.02,
+          "fx|oil": 0.02,
+          "fx|index": 0.04,
+          "rates|crypto": 0.02,
+          "rates|oil": 0.03,
+          "rates|index": 0.02,
+          "crypto|oil": 0.13,
+          "crypto|index": 0.1,
+          "oil|index": 0.2
+        },
+        "cardinality_penalty_lambda": 0.45
+      },
+      "best_exact_solution": {
+        "bits": [
+          0,
+          0,
+          0,
+          1,
+          1
+        ],
+        "selected": [
+          "oil",
+          "index"
+        ],
+        "objective": 2.114,
+        "base": 2.314,
+        "pair_penalty": 0.2,
+        "size_penalty": 0.0
+      }
+    },
+    {
+      "problem": "wait_bucket_optimization",
+      "event_type": "opec",
+      "per_asset": {
+        "fx": {
+          "target_wait_estimate": 120.0,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.5
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.88
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.08
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.88
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.68
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.48
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 120,
+            "score": 1.08
+          }
+        },
+        "rates": {
+          "target_wait_estimate": 120.0,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.5
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.88
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.08
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.88
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.68
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.48
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 120,
+            "score": 1.08
+          }
+        },
+        "crypto": {
+          "target_wait_estimate": 120.0,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.5
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.88
+            },
+            {
+              "wait_seconds": 120,
+              "score": 1.08
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.88
+            },
+            {
+              "wait_seconds": 240,
+              "score": 0.68
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.48
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 120,
+            "score": 1.08
+          }
+        },
+        "oil": {
+          "target_wait_estimate": 284.25,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.1775
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.5575
+            },
+            {
+              "wait_seconds": 120,
+              "score": 0.7575
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.9575
+            },
+            {
+              "wait_seconds": 240,
+              "score": 1.1575
+            },
+            {
+              "wait_seconds": 300,
+              "score": 1.2525
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 300,
+            "score": 1.2525
+          }
+        },
+        "index": {
+          "target_wait_estimate": 252.75,
+          "bucket_scores": [
+            {
+              "wait_seconds": 0,
+              "score": 0.12
+            },
+            {
+              "wait_seconds": 60,
+              "score": 0.5
+            },
+            {
+              "wait_seconds": 120,
+              "score": 0.7
+            },
+            {
+              "wait_seconds": 180,
+              "score": 0.9
+            },
+            {
+              "wait_seconds": 240,
+              "score": 1.1
+            },
+            {
+              "wait_seconds": 300,
+              "score": 0.985
+            }
+          ],
+          "best_exact_solution": {
+            "wait_seconds": 240,
+            "score": 1.1
+          }
+        }
+      }
+    },
+    {
+      "problem": "risk_tier_allocation",
+      "selected_assets": [
+        "oil",
+        "index"
+      ],
+      "qubo_like": {
+        "selected_assets": [
+          "oil",
+          "index"
+        ],
+        "tiers": {
+          "skip": 0.0,
+          "small": 0.5,
+          "normal": 1.0,
+          "heavy": 1.5
+        },
+        "risk_budget": 2.5,
+        "asset_scores": {
+          "oil": 1.714,
+          "index": 0.6
+        }
+      },
+      "best_exact_solution": {
+        "allocation": {
+          "oil": {
+            "tier": "heavy",
+            "weight": 1.5
+          },
+          "index": {
+            "tier": "normal",
+            "weight": 1.0
+          }
+        },
+        "risk_used": 2.5,
+        "objective": 3.171
+      }
+    }
+  ],
+  "safety_note": "This pack contains only abstract optimization inputs and local replay summaries. It places no orders and touches no broker."
+}

@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-06-27T05:31:16.840882+00:00",
+  "pack_path": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks/eventalpha_quantum_pack_real_history_20260627T052656Z.json",
+  "event_type": "multi_event_real_history",
+  "problem": "asset_subset_selection",
+  "asset_filter": null,
+  "result": {
+    "mode": "ibm",
+    "backend": "ibm_fez",
+    "task_count": 1,
+    "grid_size": 4,
+    "submitted_jobs": [
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm0886c68s73agvm6g"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            0.0
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm08g6c68s73agvm7g"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            0.0
+          ]
+        },
+        "job_id": "d8vm08umvj5c73ei3bi0"
+      },
+      {
+        "subject": null,
+        "label": "asset_subset_selection",
+        "params": {
+          "γ": [
+            3.141592653589793
+          ],
+          "β": [
+            1.5707963267948966
+          ]
+        },
+        "job_id": "d8vm090pknjs73a192q0"
+      }
+    ],
+    "waiting_for_results": true
+  },
+  "baseline_exact": {
+    "bits": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "selected": [
+      "crypto",
+      "oil",
+      "index"
+    ],
+    "objective": 0.310834,
+    "base": 0.314603,
+    "pair_penalty": 0.003769,
+    "size_penalty": 0.0
+  },
+  "note": "This runner only evaluates abstract optimization circuits. It does not execute finance logic or place orders."
+}

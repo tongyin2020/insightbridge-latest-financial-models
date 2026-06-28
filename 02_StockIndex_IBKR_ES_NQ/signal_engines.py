@@ -7,6 +7,7 @@ Models:
   FXSignalEngine      → AUD/USD NZD/USD  (EMA + ADX trend filter)
   BondSignalEngine    → ZN Treasury      (Mean reversion + trend)
   OilSignalEngine     → CL WTI Crude     (EMA + ATR + ADX)
+  IndexSignalEngine   → MES S&P micro    (EMA + RSI breakout filter)
 """
 
 from dataclasses import dataclass
@@ -329,6 +330,58 @@ class OilSignalEngine:
                 model="oil", symbol="CL",
                 direction=direction, order_type="limit",
                 quantity=self.quantity, price=lp,
+                confidence=confidence, reason=" + ".join(reasons)
+            )
+        return None
+
+
+class IndexSignalEngine:
+    """
+    MES Micro E-mini S&P 500
+    Strategy: EMA(9/21) crossover + RSI breakout confirmation
+    Order type: Market
+    """
+
+    def __init__(self, quantity: int = 1):
+        self.quantity = quantity
+        self.closes: List[float] = []
+        self.highs: List[float] = []
+        self.lows: List[float] = []
+        self.last_signal: Optional[str] = None
+
+    def update(self, price: float,
+               high: float = None, low: float = None) -> Optional[Signal]:
+        self.closes.append(price)
+        self.highs.append(high or price + 8.0)
+        self.lows.append(low or price - 8.0)
+
+        if len(self.closes) < 30:
+            return None
+
+        cl = self.closes[-80:]
+        ema9 = calc_ema(cl, 9)
+        ema21 = calc_ema(cl, 21)
+        rsi_val = calc_rsi(cl, 14)
+
+        cross_up = ema9[-2] <= ema21[-2] and ema9[-1] > ema21[-1]
+        cross_down = ema9[-2] >= ema21[-2] and ema9[-1] < ema21[-1]
+
+        direction, confidence, reasons = None, 0.0, []
+        if cross_up and rsi_val < 68:
+            direction, confidence = "BUY", 0.69 + (0.05 if rsi_val < 55 else 0.0)
+            reasons = [f"EMA9/21 crossover UP", f"RSI={rsi_val:.1f}"]
+        elif cross_down and rsi_val > 32:
+            direction, confidence = "SELL", 0.69 + (0.05 if rsi_val > 45 else 0.0)
+            reasons = [f"EMA9/21 crossover DOWN", f"RSI={rsi_val:.1f}"]
+
+        if direction and confidence >= 0.60:
+            if direction == self.last_signal:
+                return None
+            self.last_signal = direction
+            return Signal(
+                model="index", symbol="MES",
+                direction=direction, order_type="market",
+                quantity=self.quantity, price=None,
                 confidence=confidence, reason=" + ".join(reasons)
             )
         return None

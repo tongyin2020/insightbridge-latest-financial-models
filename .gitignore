@@ -23,5 +23,10 @@ reports/eventalpha_telegram_alert_state.json
 reports/quantum_research/
 *.pid
 *.log
+ibc_runtime/private/
+ibc_runtime/logs/
+ibc_runtime/ib_settings/
+ibkr_runtime/
+.env.ibkr_paper.local
 
 __MACOSX/

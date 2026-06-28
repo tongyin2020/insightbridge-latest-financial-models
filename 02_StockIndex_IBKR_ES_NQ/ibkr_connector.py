@@ -1,6 +1,6 @@
 """
 IBKR Paper Trading Connector
-Connects all four financial models to Interactive Brokers Paper Trading
+Connects all five financial models to Interactive Brokers Paper Trading
 via TWS API (port 7497)
 
 Requirements:
@@ -12,9 +12,11 @@ Requirements:
 
 import asyncio
 import logging
+import os
 from datetime import datetime, timezone
-from typing import Optional
-from ib_insync import IB, Stock, Forex, Future, Contract, Crypto, MarketOrder, LimitOrder, util
+from typing import Dict, Optional
+from ib_insync import IB, Forex, Future, Crypto, MarketOrder, LimitOrder, util
+from right_side_engine import RightSideDecisionEngine
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,35 +25,31 @@ logging.basicConfig(
 logger = logging.getLogger("IBKR_Connector")
 
 # ─── Connection Settings ───────────────────────────────────────────────────────
-TWS_HOST      = "127.0.0.1"
-TWS_PORT      = 7497          # Paper Trading port (live = 7496)
-CLIENT_ID     = 1
+TWS_HOST      = os.getenv("IB_HOST", "127.0.0.1")
+TWS_PORT      = int(os.getenv("IB_PORT", "7497"))          # Paper Trading port (live = 7496)
+CLIENT_ID     = int(os.getenv("IB_CLIENT_ID", "1"))
 
 # ─── Contract Definitions ──────────────────────────────────────────────────────
-# Crypto: use ib_insync Crypto contract (PAXOS exchange, USD currency)
-# FX:     Forex pair contracts
-# Futures: active front-month as of Q2 2026 (Jun-2026 = 202606)
+# Futures are intentionally defined as templates without fixed expiry.
+# We resolve them via contractDetails -> choose front/near month -> lock conId.
 CONTRACTS = {
-    # Crypto Model — IBKR Crypto contracts (not Forex)
-    "BTC":  Crypto("BTC", "PAXOS", "USD"),
-    "ETH":  Crypto("ETH", "PAXOS", "USD"),
-    "SOL":  Crypto("SOL", "PAXOS", "USD"),
-
-    # FX Model
+    "BTC": Crypto("BTC", "PAXOS", "USD"),
+    "ETH": Crypto("ETH", "PAXOS", "USD"),
+    "SOL": Crypto("SOL", "PAXOS", "USD"),
     "AUDUSD": Forex("AUDUSD"),
     "NZDUSD": Forex("NZDUSD"),
-
-    # Bond Model (10Y Treasury Note Future — Jun 2026 front month)
-    "ZN":   Future("ZN", "202606", "CBOT"),
-
-    # Oil Model (WTI Crude Future — Jun 2026 front month)
-    "CL":   Future("CL", "202606", "NYMEX"),
+    "ZN": Future(symbol="ZN", exchange="CBOT", currency="USD", tradingClass="ZN"),
+    "CL": Future(symbol="CL", exchange="NYMEX", currency="USD", tradingClass="CL"),
+    "MES": Future(symbol="MES", exchange="CME", currency="USD", tradingClass="MES", multiplier="5"),
+    "ES_PROXY": Future(symbol="MES", exchange="CME", currency="USD", tradingClass="MES", multiplier="5"),
 }
+
+FUTURE_SYMBOLS = {"ZN", "CL", "MES", "ES_PROXY"}
 
 
 class IBKRConnector:
     """
-    Central connector between four financial models and IBKR Paper Trading.
+    Central connector between five financial models and IBKR Paper Trading.
     Receives signals from models and executes paper trades.
     """
 
@@ -59,6 +57,8 @@ class IBKRConnector:
         self.ib = IB()
         self.connected = False
         self.account = None
+        self.resolved_contracts: Dict[str, object] = {}
+        self.contract_resolution: Dict[str, dict] = {}
 
     # ── Connection ─────────────────────────────────────────────────────────────
 
@@ -68,17 +68,97 @@ class IBKRConnector:
             await self.ib.connectAsync(TWS_HOST, TWS_PORT, clientId=CLIENT_ID)
             self.connected = True
             self.account = self.ib.managedAccounts()[0]
+            await self.resolve_all_contracts()
             logger.info(f"✅ Connected to IBKR Paper Trading | Account: {self.account}")
             return True
         except Exception as e:
             logger.error(f"❌ Connection failed: {e}")
-            logger.error("Make sure TWS is running and Paper Trading API is enabled (port 7497)")
+            logger.error(f"Make sure TWS is running and Paper Trading API is enabled (host={TWS_HOST}, port={TWS_PORT})")
             return False
 
     async def disconnect(self):
         self.ib.disconnect()
         self.connected = False
         logger.info("Disconnected from IBKR")
+
+    # ── Contract Resolution ───────────────────────────────────────────────────
+
+    def _is_future_symbol(self, symbol: str) -> bool:
+        return symbol in FUTURE_SYMBOLS
+
+    def _expiry_key(self, contract) -> str:
+        raw = getattr(contract, "lastTradeDateOrContractMonth", "") or ""
+        return "".join(ch for ch in str(raw) if ch.isdigit())[:8]
+
+    async def resolve_contract(self, symbol: str, refresh: bool = False):
+        if not refresh and symbol in self.resolved_contracts:
+            return self.resolved_contracts[symbol]
+
+        template = CONTRACTS.get(symbol)
+        if template is None:
+            raise ValueError(f"Unknown symbol: {symbol}")
+
+        if not self._is_future_symbol(symbol):
+            qualified = await self.ib.qualifyContractsAsync(template)
+            contract = qualified[0] if qualified else template
+            self.resolved_contracts[symbol] = contract
+            self.contract_resolution[symbol] = {
+                "symbol": symbol,
+                "asset_type": contract.secType,
+                "exchange": getattr(contract, "exchange", ""),
+                "localSymbol": getattr(contract, "localSymbol", ""),
+                "conId": getattr(contract, "conId", 0),
+                "resolver": "qualify_spot",
+            }
+            return contract
+
+        details = await self.ib.reqContractDetailsAsync(template)
+        if not details:
+            raise RuntimeError(f"No contractDetails returned for {symbol}")
+
+        today_key = datetime.now(timezone.utc).strftime("%Y%m")
+        filtered = []
+        for detail in details:
+            contract = detail.contract
+            expiry_key = self._expiry_key(contract)
+            if expiry_key and expiry_key[:6] >= today_key:
+                filtered.append(contract)
+
+        candidates = filtered or [detail.contract for detail in details]
+        candidates.sort(key=lambda contract: (self._expiry_key(contract) or "99999999", getattr(contract, "localSymbol", "")))
+        contract = candidates[0]
+        qualified = await self.ib.qualifyContractsAsync(contract)
+        contract = qualified[0] if qualified else contract
+
+        self.resolved_contracts[symbol] = contract
+        self.contract_resolution[symbol] = {
+            "symbol": symbol,
+            "asset_type": contract.secType,
+            "exchange": getattr(contract, "exchange", ""),
+            "tradingClass": getattr(contract, "tradingClass", ""),
+            "localSymbol": getattr(contract, "localSymbol", ""),
+            "expiry": getattr(contract, "lastTradeDateOrContractMonth", ""),
+            "multiplier": getattr(contract, "multiplier", ""),
+            "conId": getattr(contract, "conId", 0),
+            "resolver": "contractDetails_front_month",
+        }
+        return contract
+
+    async def resolve_all_contracts(self) -> Dict[str, dict]:
+        for symbol in CONTRACTS:
+            try:
+                await self.resolve_contract(symbol, refresh=True)
+            except Exception as exc:
+                self.contract_resolution[symbol] = {
+                    "symbol": symbol,
+                    "resolver": "error",
+                    "error": str(exc),
+                }
+                logger.warning(f"⚠️ Contract resolution failed for {symbol}: {exc}")
+        return self.contract_resolution
+
+    async def get_contract(self, symbol: str):
+        return await self.resolve_contract(symbol)
 
     # ── Account Info ───────────────────────────────────────────────────────────
 
@@ -111,12 +191,12 @@ class IBKRConnector:
 
     async def get_market_price(self, symbol: str) -> Optional[float]:
         """Get real-time price for a symbol"""
-        contract = CONTRACTS.get(symbol)
-        if not contract:
-            logger.warning(f"Unknown symbol: {symbol}")
+        try:
+            contract = await self.get_contract(symbol)
+        except Exception as exc:
+            logger.warning(f"Could not resolve {symbol}: {exc}")
             return None
 
-        self.ib.qualifyContracts(contract)
         ticker = self.ib.reqMktData(contract, "", False, False)
         await asyncio.sleep(2)  # wait for data
 
@@ -134,11 +214,11 @@ class IBKRConnector:
         direction: 'BUY' or 'SELL'
         model: 'crypto' | 'fx' | 'bond' | 'oil'
         """
-        contract = CONTRACTS.get(symbol)
-        if not contract:
-            return {"error": f"Unknown symbol: {symbol}"}
+        try:
+            contract = await self.get_contract(symbol)
+        except Exception as exc:
+            return {"error": f"Could not resolve {symbol}: {exc}"}
 
-        self.ib.qualifyContracts(contract)
         order = MarketOrder(direction.upper(), quantity)
         # IBKR crypto contracts (PAXOS) require cashQty + IOC time-in-force
         if isinstance(contract, Crypto):
@@ -153,6 +233,8 @@ class IBKRConnector:
         result = {
             "model":     model,
             "symbol":    symbol,
+            "contract_local_symbol": getattr(contract, "localSymbol", ""),
+            "contract_conId": getattr(contract, "conId", 0),
             "direction": direction,
             "quantity":  quantity,
             "order_id":  trade.order.orderId,
@@ -166,12 +248,16 @@ class IBKRConnector:
     async def place_limit_order(self, symbol: str, direction: str,
                                  quantity: float, limit_price: float, model: str) -> dict:
         """Place a paper limit order"""
-        contract = CONTRACTS.get(symbol)
-        if not contract:
-            return {"error": f"Unknown symbol: {symbol}"}
+        try:
+            contract = await self.get_contract(symbol)
+        except Exception as exc:
+            return {"error": f"Could not resolve {symbol}: {exc}"}
 
-        self.ib.qualifyContracts(contract)
         order = LimitOrder(direction.upper(), quantity, limit_price)
+        if isinstance(contract, Crypto):
+            order.totalQuantity = 0
+            order.cashQty = quantity
+            order.tif = "IOC"
         order.orderRef = f"{model}_{symbol}_{datetime.now(timezone.utc).strftime('%H%M%S')}"
 
         trade = self.ib.placeOrder(contract, order)
@@ -180,6 +266,8 @@ class IBKRConnector:
         result = {
             "model":       model,
             "symbol":      symbol,
+            "contract_local_symbol": getattr(contract, "localSymbol", ""),
+            "contract_conId": getattr(contract, "conId", 0),
             "direction":   direction,
             "quantity":    quantity,
             "limit_price": limit_price,
@@ -226,6 +314,7 @@ class SignalRouter:
     def __init__(self, connector: IBKRConnector):
         self.connector = connector
         self.trade_log = []
+        self.right_side = RightSideDecisionEngine()
 
     async def process_signal(self, signal: dict) -> dict:
         """
@@ -234,7 +323,7 @@ class SignalRouter:
         Signal format:
         {
             "model":      "crypto" | "fx" | "bond" | "oil",
-            "symbol":     "BTC" | "AUDUSD" | "ZN" | "CL",
+            "symbol":     "BTC" | "AUDUSD" | "ZN" | "CL" | "MES",
             "direction":  "BUY" | "SELL",
             "quantity":   1,
             "order_type": "market" | "limit",
@@ -255,6 +344,21 @@ class SignalRouter:
             logger.info(f"[{model}] Signal rejected: confidence {confidence:.0%} < 60%")
             return {"status": "rejected", "reason": "low_confidence"}
 
+        right_side = self.right_side.evaluate(signal)
+        if not right_side.allowed:
+            logger.info(
+                f"[{model}] Signal held: {right_side.status} | {right_side.reason} | "
+                f"strength={right_side.signal_strength} | health={right_side.market_health}"
+            )
+            return {
+                "status": "rejected",
+                "reason": right_side.status,
+                "detail": right_side.reason,
+                "signal_strength": right_side.signal_strength,
+                "market_health": right_side.market_health,
+                "metrics": right_side.metrics,
+            }
+
         logger.info(f"🔔 Signal from {model.upper()}: {direction} {symbol} "
                     f"(confidence={confidence:.0%})")
 
@@ -269,6 +373,9 @@ class SignalRouter:
             )
 
         self.trade_log.append(result)
+        result["signal_strength"] = right_side.signal_strength
+        result["market_health"] = right_side.market_health
+        result["right_side_metrics"] = right_side.metrics
         return result
 
 
@@ -334,6 +441,12 @@ async def main():
             "order_type": "limit", "price": 74.50,
             "confidence": 0.71,
             "reason": "FragilityEngine LOW + RegimeService trend + EIA draw bullish"
+        },
+        {
+            "model": "index", "symbol": "MES",
+            "direction": "BUY", "quantity": 1,
+            "order_type": "market", "confidence": 0.69,
+            "reason": "Index crossover path enabled through MES paper contract"
         },
     ]
 
