@@ -22,7 +22,6 @@ right_side_pipeline.py
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -30,6 +29,7 @@ from typing import Any, Dict, Optional
 from event_right_side_engine import RightSideEventEngine, DEFAULT_RULES
 from ibkr_contract_resolver import IBKRContractResolver, ContractResolutionError
 from ibkr_order_manager import IBKROrderManager
+from trade_journal import TradeJournal, TradeRecord
 
 # 共享风控/仓位（容错导入：缺失时降级为安全默认，但会在日志里标记）
 _SHARED_OK = True

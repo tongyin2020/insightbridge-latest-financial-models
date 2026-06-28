@@ -67,10 +67,25 @@ def test_symbol_filter():
     print("✓ 品种过滤正确（MBT 被拒）: 启用", enabled, "| 拒绝", rej)
 
 
+def test_pipeline_with_journal():
+    """回归防护：带 journal_db 初始化 pipeline（run_tws_continuous 的真实路径）。
+    曾因缺失 TradeJournal/TradeRecord import 而在此崩溃。"""
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from right_side_pipeline import RightSidePipeline
+    db = tempfile.mktemp(suffix=".db")
+    pipe = RightSidePipeline(ib=None, dry_run=True, equity=50000.0, journal_db=db)
+    assert pipe.journal is not None, "journal 未初始化"
+    stats = pipe.journal_stats()
+    assert stats is not None and stats["closed_trades"] == 0, stats
+    print("✓ 带学习库初始化 pipeline 正常（TradeJournal/TradeRecord import 完整）")
+
+
 def main() -> int:
     test_journal()
     test_guardian()
     test_symbol_filter()
+    test_pipeline_with_journal()
     print("\n✅ 全部自检通过。")
     return 0
 
