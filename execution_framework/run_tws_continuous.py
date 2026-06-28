@@ -41,12 +41,14 @@ from ibkr_session import IBKRSession
 from ibkr_contract_resolver import IBKRContractResolver, ResolvedContract, FUT_SPECS
 from right_side_pipeline import RightSidePipeline
 from runtime_guardian import RuntimeGuardian, check_heartbeat
+from economic_calendar import EconomicCalendar
 
 
 BASE = Path(__file__).resolve().parent.parent
 RUNTIME_DIR = BASE / "reports" / "runtime"
 RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
 HEARTBEAT = RUNTIME_DIR / "heartbeat.json"
+CALENDAR_FILE = RUNTIME_DIR / "calendar.json"
 JOURNAL_DB = str(BASE / "data.db")          # data.db 便于持久化
 
 
@@ -92,7 +94,19 @@ def main() -> int:
     ap.add_argument("--telegram", action="store_true", help="启用 Telegram 告警")
     ap.add_argument("--check-heartbeat", action="store_true",
                     help="只检查主进程是否存活后退出")
+    ap.add_argument("--gen-calendar", type=int, default=0, metavar="DAYS",
+                    help="生成未来 N 天的默认经济日历后退出（需用官方日期校正）")
+    ap.add_argument("--event-window", type=float, default=120.0,
+                    help="事件触发窗口秒（事件时点后多少秒内启动冷静期）")
     args = ap.parse_args()
+
+    if args.gen_calendar > 0:
+        cal = EconomicCalendar(str(CALENDAR_FILE), enabled_symbols=ENABLED_SYMBOLS)
+        cal.load()
+        n = cal.generate_default(days=args.gen_calendar)
+        print(f"已生成 {n} 个默认事件 -> {CALENDAR_FILE}")
+        print("⚠ FOMC/ECB/BOJ 日期不规则，请用官方日历手动校正。")
+        return 0
 
     if args.check_heartbeat:
         print(check_heartbeat(str(HEARTBEAT), args.heartbeat_timeout))
@@ -151,6 +165,18 @@ def main() -> int:
         telegram=args.telegram)
     guardian.start()
 
+    # 经济日历：加载已有事件表（由 --gen-calendar 生成或外部写入）
+    calendar = EconomicCalendar(str(CALENDAR_FILE), enabled_symbols=symbols)
+    loaded = calendar.load()
+    print(f"经济日历: 已加载 {loaded} 个事件")
+    up = calendar.upcoming(datetime.now(timezone.utc), horizon_h=24)
+    if up:
+        print("  未来24h内事件:")
+        for e in up[:8]:
+            print(f"    {e.event_time.isoformat()}  {e.name}  -> {e.symbols}")
+    else:
+        print("  未来24h内无预定事件（可用 --gen-calendar 生成或手动写 calendar.json）。")
+
     # 优雅退出
     stop_flag = {"stop": False}
     def _sig(_s, _f):
@@ -164,6 +190,29 @@ def main() -> int:
         while not stop_flag["stop"]:
             now = datetime.now(timezone.utc)
             scanned = 0
+
+            # ① 日历到点：自动触发事件（启动各品种冷静期）
+            for ev in calendar.pop_due(now, window_s=args.event_window):
+                for sym in ev.symbols:
+                    if sym not in symbols:
+                        continue
+                    try:
+                        rc0 = pipe.resolver.get_cached(sym)
+                        if rc0 is None or not rc0.is_locked:
+                            continue
+                        bars0 = sess.ib.reqHistoricalData(
+                            rc0.raw, endDateTime="", durationStr="2 D",
+                            barSizeSetting="1 min", whatToShow="TRADES",
+                            useRTH=False, formatDate=1)
+                        df0 = _bars_to_df(bars0)
+                        if len(df0) >= 20:
+                            pipe.on_event(sym, ev.name, ev.event_time, df0)
+                            print(f"  ⚡ 事件触发 {ev.name} -> {sym}（进入冷静期）")
+                            guardian.notify(f"事件触发 {ev.name}", sym)
+                    except Exception as exc:  # noqa: BLE001
+                        print(f"  [{sym}] 事件触发异常: {exc}")
+
+            # ② 逐品种评估（只有处于活跃事件冷静期的品种会产生信号）
             for sym in symbols:
                 if pipe.is_halted:
                     break
@@ -179,8 +228,7 @@ def main() -> int:
                     if len(df) < 40:
                         continue
 
-                    # 事件触发交由你的新闻/日历模块；这里若无活跃事件则跳过评估
-                    # （示例：若该品种当前无活跃事件，evaluate 会返回 no_active_event）
+                    # 事件由上方日历自动触发；无活跃事件时 evaluate 返回 no_active_event
                     tkr = sess.ib.reqMktData(rc.raw, snapshot=True)
                     sess.ib.sleep(1.0)
                     bid = float(tkr.bid) if tkr.bid and tkr.bid > 0 else None

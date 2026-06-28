@@ -140,8 +140,39 @@ if res["status"] in ("BUY", "SELL"):
 - ✅ 成交后真实 P&L 回写学习库（替换历史的 pnl_pct=0.0 占位）。
 - ✅ 品种权限对齐：7 个启用，MBT 加密默认禁用。
 
+## 事件自动触发（经济日历）
+
+`economic_calendar.py` 维护事件时间表（UTC），每个事件标注受影响品种；
+持续循环每轮调 `pop_due()`，到点自动对相关品种调 `pipe.on_event()` 进入冷静期。
+
+```bash
+# 生成未来 14 天默认日历（CPI/NFP/国债拍卖近似时间；FOMC/ECB/BOJ 需官方日期校正）
+python3 execution_framework/run_tws_continuous.py --gen-calendar 14
+
+# 然后正常跑，日历会自动驱动事件
+python3 execution_framework/run_tws_continuous.py --interval 60
+```
+
+事件→品种映射（仅启用品种）：CPI/FOMC/NFP → 全部 7 品；国债拍卖 → ZT/ZN/SR3；
+ECB → EURUSD；BOJ → USDJPY。FOMC/ECB/BOJ 日期不规则，请用 `calendar.add(...)` 或手动
+编辑 `reports/runtime/calendar.json` 填准确时点。
+
+## 参数校准（用真实成交 + IS/OOS 过拟合检查）
+
+`calibrate_params.py` 从 `data.db` 读取真实已平仓交易，调用共享 `StrategyEvaluator` 跑
+健康度与过拟合检测（IS/OOS Sharpe 比；并补充“IS正/OOS负的反号过拟合”与“显著衰减”判据），
+并对冷静期做样本外验证。
+
+```bash
+python3 execution_framework/calibrate_params.py            # 全部启用品种
+python3 execution_framework/calibrate_params.py --symbol MNQ
+```
+
+原则：**样本内选参 → 样本外验证 → 只有样本外也成立才采纳**；样本不足（<30 笔）时明确提示
+“暂用经验初值”，不硬给结论。报告写入 `reports/calibration/`。journal 已增记
+`minutes_after_event`，供后续逐冷静期切片精调。
+
 ## 仍建议后续做
 
-- 用 `data.db` 里的真实成交记录对 7 品种做 walk-forward + `StrategyEvaluator` 的
-  IS/OOS 过拟合检查后再定参（冷静期/ATR 阈值/实体比等仍是经验初值）。
-- 把你的新闻/经济日历源接到 `pipe.on_event(...)`（当前事件识别是接口位）。
+- 积累足够真实成交后（建议每品 ≥ 30 笔），定期跑 `calibrate_params.py` 复核参数。
+- FOMC/ECB/BOJ 等不规则事件，用官方日历校正 `calendar.json` 的准确时点。

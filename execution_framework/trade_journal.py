@@ -36,6 +36,7 @@ class TradeRecord:
     stop_loss: float
     quantity: float
     risk_per_unit: float            # |entry - stop|，用于算 R 倍数
+    minutes_after_event: float = 0.0   # 入场距事件时点的分钟（供冷静期校准）
     opened_at: str = field(default_factory=_utcnow)
     exit_price: Optional[float] = None
     closed_at: Optional[str] = None
@@ -69,6 +70,7 @@ class TradeJournal:
                     stop_loss    REAL,
                     quantity     REAL,
                     risk_per_unit REAL,
+                    minutes_after_event REAL,
                     opened_at    TEXT,
                     exit_price   REAL,
                     closed_at    TEXT,
@@ -91,11 +93,12 @@ class TradeJournal:
                 return
             c.execute("""
                 INSERT INTO trades (client_ref, symbol, event_name, direction,
-                    entry_price, stop_loss, quantity, risk_per_unit, opened_at, status)
-                VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                    entry_price, stop_loss, quantity, risk_per_unit,
+                    minutes_after_event, opened_at, status)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
                 (rec.client_ref, rec.symbol, rec.event_name, rec.direction,
                  rec.entry_price, rec.stop_loss, rec.quantity, rec.risk_per_unit,
-                 rec.opened_at, "OPEN"))
+                 rec.minutes_after_event, rec.opened_at, "OPEN"))
 
     # ── 平仓：写入真实出场价并计算 R / PnL ─────────────────────────────────
     def record_close(self, client_ref: str, exit_price: float,

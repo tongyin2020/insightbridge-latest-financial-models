@@ -77,11 +77,12 @@ class RightSideKPI:
 class RightSidePipeline:
     def __init__(self, ib=None, dry_run: bool = True,
                  equity: float = 50000.0, max_loss_pct: float = 0.0025,
-                 log_path: Optional[str] = None):
+                 log_path: Optional[str] = None, journal_db: Optional[str] = None):
         self.engine = RightSideEventEngine(DEFAULT_RULES)
         self.resolver = IBKRContractResolver(ib)
         self.om = IBKROrderManager(ib, dry_run=dry_run)
         self.kpi = RightSideKPI()
+        self.journal = TradeJournal(journal_db) if journal_db else None
         self.equity = equity
         self.max_loss_pct = max_loss_pct
         self.dry_run = dry_run or ib is None
@@ -218,6 +219,16 @@ class RightSidePipeline:
 
         if ticket.state in ("SUBMITTED", "DRYRUN"):
             self.kpi.orders_ready_for_ibkr += 1
+            # 登记开仓到学习库（含入场距事件分钟，供冷静期校准）
+            if self.journal is not None:
+                st = self.engine.states.get(symbol)
+                mins = max(0.0, (now - st.event_time).total_seconds() / 60.0) if st else 0.0
+                self.journal.record_open(TradeRecord(
+                    client_ref=ticket.client_ref, symbol=symbol,
+                    event_name=signal.get("event", ""),
+                    direction="LONG" if action == "BUY" else "SHORT",
+                    entry_price=entry, stop_loss=stop, quantity=ticket.quantity,
+                    risk_per_unit=abs(entry - stop), minutes_after_event=mins))
         result = {"status": signal["status"], "symbol": symbol,
                   "action": action, "quantity": ticket.quantity,
                   "limit_price": ticket.limit_price, "stop_loss": stop,
