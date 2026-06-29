@@ -1,8 +1,9 @@
 """
 ibkr_session.py
 ═══════════════════════════════════════════════════════════════════════════════
-TWS 会话层（第三优先实现）：真实连接 IBKR 模拟盘所需的稳健性组件
-  1. 连接管理：端口 7497（模拟盘）/ 7496（实盘），clientId、超时、握手等待。
+TWS / IB Gateway 会话层（第三优先实现）：真实连接 IBKR 模拟盘所需的稳健性组件
+  1. 连接管理：7497（TWS 模拟盘）/ 4002（IB Gateway 模拟盘）/
+     7496（TWS 实盘）/ 4001（IB Gateway 实盘），clientId、超时、握手等待。
   2. IBKR 错误码处理：分类为 INFO / WARN / RETRY / FATAL，并暴露回调。
   3. 断线重连：connectedEvent / disconnectedEvent 监听 + 指数退避重连。
   4. 对账：reqOpenOrders + reqExecutions + positions，对比本地账本，输出差异。
@@ -65,7 +66,7 @@ class ReconResult:
 class IBKRSession:
     """
     用法（模拟盘）：
-        sess = IBKRSession(host="127.0.0.1", port=7497, client_id=21)
+        sess = IBKRSession(host="127.0.0.1", port=4002, client_id=21)
         sess.connect()
         sess.on_fatal = lambda code, msg: pipeline.halt(f"IBKR {code}: {msg}")
         ...
@@ -73,7 +74,7 @@ class IBKRSession:
         if not recon.in_sync: pipeline.halt("position desync")
     """
 
-    def __init__(self, host: str = "127.0.0.1", port: int = 7497,
+    def __init__(self, host: str = "127.0.0.1", port: int = 4002,
                  client_id: int = 21, connect_timeout: float = 8.0,
                  max_reconnect_attempts: int = 6):
         self.host = host
@@ -98,7 +99,7 @@ class IBKRSession:
     # ── 连接 ──────────────────────────────────────────────────────────────
     @property
     def is_paper(self) -> bool:
-        return self.port == 7497
+        return self.port in (7497, 4002)
 
     def connect(self) -> bool:
         if not self._ib_insync_ok:

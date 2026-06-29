@@ -205,7 +205,7 @@ def main() -> int:
     parser.add_argument("--python-bin", default=sys.executable or "/opt/anaconda3/bin/python3")
     parser.add_argument("--trigger", default="manual")
     parser.add_argument("--once", action="store_true")
-    parser.add_argument("--telegram-alerts", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--telegram-alerts", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
 
     ensure_singleton()

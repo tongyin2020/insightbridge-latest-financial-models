@@ -6,7 +6,7 @@ This script is read-only:
 - checks installed desktop apps / Jts traces
 - checks Python dependencies
 - checks local process and port state when possible
-- optionally tries a read-only account connection to paper port 7497
+- optionally tries a read-only account connection to the configured paper port
 
 It never places orders.
 """
@@ -26,8 +26,8 @@ from typing import Any
 
 
 HOST = "127.0.0.1"
-PAPER_PORT = 7497
-LIVE_PORT = 7496
+PAPER_PORT = 4002
+LIVE_PORT = 4001
 DEFAULT_CLIENT_ID = 97
 
 

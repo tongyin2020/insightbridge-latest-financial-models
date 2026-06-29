@@ -19,6 +19,8 @@ HEARTBEAT = RUNTIME_DIR / "heartbeat.json"
 CONTINUOUS_LOG = RUNTIME_DIR / "continuous.log"
 STDOUT_LOG = RUNTIME_DIR / "launchd_stdout.log"
 STDERR_LOG = RUNTIME_DIR / "launchd_stderr.log"
+MANUAL_PID_FILE = RUNTIME_DIR / "five_models_paper_live.pid"
+MANUAL_LOG = RUNTIME_DIR / "five_models_paper_live.log"
 FRESH_SECONDS = 150.0
 
 SYMBOL_ALIASES = {
@@ -85,6 +87,22 @@ def launchd_info() -> dict:
         if m:
             pid = int(m.group(1))
     return {"running": running, "pid": pid, "state": state, "raw": text}
+
+
+def manual_runner_info() -> dict:
+    if not MANUAL_PID_FILE.exists():
+        return {"configured": False, "running": False, "pid": None}
+    try:
+        pid = int(MANUAL_PID_FILE.read_text(encoding="utf-8").strip())
+    except Exception:
+        return {"configured": True, "running": False, "pid": None}
+
+    try:
+        os.kill(pid, 0)
+        running = True
+    except OSError:
+        running = False
+    return {"configured": True, "running": running, "pid": pid}
 
 
 def heartbeat_info() -> dict:
@@ -161,11 +179,11 @@ def format_age(dt: datetime | None) -> str:
 
 def symbol_status(symbol: str, configured: bool, service_running: bool, hb_fresh: bool,
                   hb_halted: bool | None, latest_eval: dict[str, datetime],
-                  warn_counts: dict[str, int]) -> tuple[str, str]:
+                  warn_counts: dict[str, int], service_label: str) -> tuple[str, str]:
     if not configured:
         return "NOT_CONFIGURED", "not in current runtime set"
     if not service_running:
-        return "INTERRUPTED", "launchd service not running"
+        return "INTERRUPTED", f"{service_label} not running"
     if not hb_fresh:
         return "INTERRUPTED", "heartbeat stale or missing"
     if hb_halted:
@@ -201,13 +219,38 @@ def group_status(symbol_rows: dict[str, tuple[str, str]], group_symbols: list[st
     return "UNKNOWN", "unable to classify group"
 
 
+def infer_attached_runtime(configured_set: set[str], latest_eval: dict[str, datetime]) -> bool:
+    if not configured_set:
+        return False
+    fresh = 0
+    for symbol in configured_set:
+        dt = latest_eval.get(symbol)
+        if dt is None:
+            continue
+        age = (now_utc() - dt.astimezone(timezone.utc)).total_seconds()
+        if age <= FRESH_SECONDS:
+            fresh += 1
+    return fresh >= max(1, min(3, len(configured_set)))
+
+
 def main() -> int:
     launchd = launchd_info()
+    manual = manual_runner_info()
     hb = heartbeat_info()
     configured = hb.get("symbols") or load_plist_symbols()
     configured_set = {str(s).upper() for s in configured}
     latest_eval, reasons = parse_continuous_log()
     warn_counts = stderr_warning_counts()
+    service_running = launchd["running"] or manual["running"]
+    attached_runtime = infer_attached_runtime(configured_set, latest_eval)
+    if launchd["running"]:
+        service_source = "launchd"
+    elif manual["running"]:
+        service_source = "manual_pid"
+    elif hb.get("fresh") and attached_runtime:
+        service_source = "attached_runtime"
+    else:
+        service_source = "none"
 
     print("InsightBridge Five Models Runtime Health")
     print("============================================================")
@@ -216,6 +259,11 @@ def main() -> int:
     print(f"service_running: {launchd['running']}")
     print(f"service_state: {launchd['state']}")
     print(f"service_pid: {launchd['pid'] if launchd['pid'] else 'none'}")
+    print(f"manual_runner_configured: {manual['configured']}")
+    print(f"manual_runner_running: {manual['running']}")
+    print(f"manual_runner_pid: {manual['pid'] if manual['pid'] else 'none'}")
+    print(f"attached_runtime_detected: {attached_runtime}")
+    print(f"effective_runtime_source: {service_source}")
     print(f"heartbeat_exists: {hb.get('exists', False)}")
     print(f"heartbeat_fresh: {hb.get('fresh', False)}")
     print(f"heartbeat_age: {hb.get('age_s', 'N/A')}s")
@@ -229,11 +277,12 @@ def main() -> int:
         status, detail = symbol_status(
             symbol=symbol,
             configured=symbol in configured_set,
-            service_running=launchd["running"],
+            service_running=service_running or (service_source == "attached_runtime"),
             hb_fresh=bool(hb.get("fresh")),
             hb_halted=hb.get("halted"),
             latest_eval=latest_eval,
             warn_counts=warn_counts,
+            service_label=service_source,
         )
         symbol_rows[symbol] = (status, detail)
         print(f"[{symbol}] {status}")
@@ -256,7 +305,8 @@ def main() -> int:
         print(f"  detail: {detail}")
         print("------------------------------------------------------------")
 
-    if launchd["running"] and hb.get("fresh"):
+    effective_running = service_running or (service_source == "attached_runtime")
+    if effective_running and hb.get("fresh"):
         overall = "LIVE"
         if hb.get("halted"):
             overall = "HALTED"

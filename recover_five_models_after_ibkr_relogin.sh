@@ -10,15 +10,15 @@ GUI_DOMAIN="gui/$(id -u)"
 
 echo "InsightBridge Five Models Recovery After IBKR Re-Login"
 echo "============================================================"
-echo "Step 1/4: checking TWS paper channel..."
+echo "Step 1/4: checking IBKR paper channel..."
 
 if ! "$PY" "$BASE/check_tws_paper_channel.py"; then
   echo
-  echo "TWS paper channel is still not ready."
+  echo "IBKR paper channel is still not ready."
   echo "Please make sure:"
-  echo "1. TWS paper account is logged in"
+  echo "1. TWS paper or IB Gateway paper account is logged in"
   echo "2. API is enabled"
-  echo "3. Port 7497 is open"
+  echo "3. Port 4002 (IB Gateway) or 7497 (TWS) is open"
   exit 1
 fi
 

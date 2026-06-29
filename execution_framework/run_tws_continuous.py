@@ -10,14 +10,14 @@ run_tws_continuous.py
   - TradeJournal：成交后真实 P&L 回写学习库（SQLite data.db）
   - RuntimeGuardian：心跳 + 死手开关（主循环卡死 → 自动撤单 + 停机 + 告警）
 
-安全：默认 dry-run；--live 仅允许端口 7497（模拟盘）；致命错误/对账失败/心跳超时
-都会自动停机并撤单。
+安全：默认 dry-run；--live 仅允许模拟盘端口 7497（TWS）或 4002（IB Gateway）；
+致命错误/对账失败/心跳超时都会自动停机并撤单。
 
 用法：
   # 持续 dry-run（推荐先这样跑一两天，观察日志和 KPI）
   python3 execution_framework/run_tws_continuous.py --interval 60
 
-  # 持续真实模拟盘（仅 7497）
+  # 持续真实模拟盘（7497=TWS paper, 4002=IB Gateway paper）
   python3 execution_framework/run_tws_continuous.py --live --interval 60
 
   # 外部巡检主进程是否存活
@@ -96,14 +96,14 @@ def lock_contracts(sess: IBKRSession, resolver: IBKRContractResolver, symbols):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=7497)
+    ap.add_argument("--port", type=int, default=4002)
     ap.add_argument("--client-id", type=int, default=22)
     ap.add_argument("--symbols", default=",".join(ENABLED_SYMBOLS),
                     help="默认=全部已启用品种（不含无权限的 MBT）")
     ap.add_argument("--equity", type=float, default=50000.0)
     ap.add_argument("--interval", type=float, default=60.0, help="扫描间隔秒")
     ap.add_argument("--heartbeat-timeout", type=float, default=120.0)
-    ap.add_argument("--live", action="store_true", help="真实模拟盘下单（仅 7497）")
+    ap.add_argument("--live", action="store_true", help="真实模拟盘下单（7497=TWS paper, 4002=IB Gateway paper）")
     ap.add_argument("--telegram", action="store_true", help="启用 Telegram 告警")
     ap.add_argument("--check-heartbeat", action="store_true",
                     help="只检查主进程是否存活后退出")
@@ -131,8 +131,8 @@ def main() -> int:
         print(check_heartbeat(str(HEARTBEAT), args.heartbeat_timeout))
         return 0
 
-    if args.live and args.port != 7497:
-        print(f"拒绝：--live 仅允许 7497（模拟盘），当前 {args.port}")
+    if args.live and args.port not in (7497, 4002):
+        print(f"拒绝：--live 仅允许模拟盘端口 7497(TWS) 或 4002(IB Gateway)，当前 {args.port}")
         return 2
     dry = not args.live
 
@@ -150,9 +150,9 @@ def main() -> int:
     # 连接
     sess = IBKRSession(host=args.host, port=args.port, client_id=args.client_id)
     if not sess.connect():
-        print("无法连接 TWS。请确认已开 TWS/Gateway、API 已启用、端口正确。")
+        print("无法连接 IBKR API。请确认已开 TWS/IB Gateway、API 已启用、端口正确。")
         return 1
-    print(f"已连接 TWS {args.host}:{args.port} (paper={sess.is_paper}) "
+    print(f"已连接 IBKR {args.host}:{args.port} (paper={sess.is_paper}) "
           f"模式={'LIVE-PAPER' if args.live else 'DRY-RUN'}")
 
     pipe = RightSidePipeline(ib=sess.ib, dry_run=dry, equity=args.equity,

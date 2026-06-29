@@ -141,7 +141,7 @@ def main() -> int:
         p.add_argument("--top-n", type=int, default=5)
         p.add_argument("--event-types", default="")
         p.add_argument("--python-bin", default=sys.executable or "/opt/anaconda3/bin/python3")
-        p.add_argument("--telegram-alerts", action=argparse.BooleanOptionalAction, default=True)
+        p.add_argument("--telegram-alerts", action=argparse.BooleanOptionalAction, default=False)
 
     add_common(sub.add_parser("start"))
     sub.add_parser("stop")

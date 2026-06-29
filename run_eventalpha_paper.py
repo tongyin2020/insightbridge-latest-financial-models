@@ -89,7 +89,7 @@ def main() -> None:
     parser.add_argument("--event-type", default="cpi")
     parser.add_argument("--title", default="Manual EventAlpha paper event")
     parser.add_argument("--top-n", type=int, default=2)
-    parser.add_argument("--telegram-alerts", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--telegram-alerts", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
 
     modules = {

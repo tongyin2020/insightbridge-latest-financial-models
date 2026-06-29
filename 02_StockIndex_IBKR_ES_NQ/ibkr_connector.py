@@ -1,13 +1,13 @@
 """
 IBKR Paper Trading Connector
 Connects all five financial models to Interactive Brokers Paper Trading
-via TWS API (port 7497)
+via IB Gateway / TWS API.
 
 Requirements:
-- TWS must be running and logged in with Paper Trading account
+- IB Gateway or TWS must be running and logged in with Paper Trading account
 - Edit > Global Configuration > API > Settings:
   ✅ Enable ActiveX and Socket Clients
-  Port: 7497
+  Port: 4002 (IB Gateway paper) or 7497 (TWS paper)
 """
 
 import asyncio
@@ -26,8 +26,8 @@ logger = logging.getLogger("IBKR_Connector")
 
 # ─── Connection Settings ───────────────────────────────────────────────────────
 TWS_HOST      = os.getenv("IB_HOST", "127.0.0.1")
-TWS_PORT      = int(os.getenv("IB_PORT", "7497"))          # Paper Trading port (live = 7496)
-CLIENT_ID     = int(os.getenv("IB_CLIENT_ID", "1"))
+TWS_PORT      = int(os.getenv("IB_PORT", "4002"))          # IB Gateway paper=4002, TWS paper=7497
+CLIENT_ID     = int(os.getenv("IB_CLIENT_ID", "91"))
 
 # ─── Contract Definitions ──────────────────────────────────────────────────────
 # Futures are intentionally defined as templates without fixed expiry.
@@ -63,7 +63,7 @@ class IBKRConnector:
     # ── Connection ─────────────────────────────────────────────────────────────
 
     async def connect(self):
-        """Connect to TWS Paper Trading"""
+        """Connect to IBKR Paper Trading."""
         try:
             await self.ib.connectAsync(TWS_HOST, TWS_PORT, clientId=CLIENT_ID)
             self.connected = True
@@ -73,7 +73,10 @@ class IBKRConnector:
             return True
         except Exception as e:
             logger.error(f"❌ Connection failed: {e}")
-            logger.error(f"Make sure TWS is running and Paper Trading API is enabled (host={TWS_HOST}, port={TWS_PORT})")
+            logger.error(
+                f"Make sure IB Gateway/TWS is running and Paper Trading API is enabled "
+                f"(host={TWS_HOST}, port={TWS_PORT})"
+            )
             return False
 
     async def disconnect(self):

@@ -1,5 +1,6 @@
 """
 Check IBKR contractDetails -> conId locked resolution for the five-model runner.
+Defaults to IB Gateway paper port 4002 unless IB_PORT is explicitly set.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ async def main() -> int:
     connector = IBKRConnector()
     ok = await connector.connect()
     if not ok:
-        print("IBKR contract resolution check failed: cannot connect to TWS paper.")
+        print("IBKR contract resolution check failed: cannot connect to IBKR paper API.")
         return 1
 
     try:

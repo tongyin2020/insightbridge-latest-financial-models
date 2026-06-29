@@ -28,7 +28,7 @@ def main() -> int:
 
     payload = json.loads(proc.stdout)
     checks = payload.get("checks", {})
-    print("TWS Paper Channel Check")
+    print("IBKR Paper Channel Check")
     print("=" * 60)
     print(f"generated_at: {datetime.now().isoformat(timespec='seconds')}")
     print(f"paper_port: {checks.get('paper_port', {}).get('detail', 'n/a')}")

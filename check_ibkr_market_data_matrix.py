@@ -148,7 +148,7 @@ async def main() -> int:
         print("IBKR Market Data Matrix")
         print("=" * 60)
         print("status: ATTENTION")
-        print("reason: cannot connect to TWS paper API")
+        print("reason: cannot connect to IBKR paper API")
         return 1
 
     try:

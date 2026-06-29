@@ -1,6 +1,6 @@
 # Dukascopy Eight-Symbol Compatibility Matrix
 
-- generated_at: 2026-06-29T06:41:53.956991+00:00
+- generated_at: 2026-06-29T21:49:28.015095+00:00
 - project: `/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest`
 - source_jar: `/Users/tongyin/JForex4/libs/demo/4.8.15/jforex-api-4.8.13-sources.jar`
 - probe_csv_for_jforex: `EURUSD,USDJPY,BTC,MES,MNQ,ZT,ZN,SR3`

@@ -10,7 +10,8 @@ PID_FILE="$LOG_DIR/five_models_paper_live.pid"
 
 mkdir -p "$LOG_DIR"
 
-SYMBOLS="EURUSD,USDJPY,MES,MNQ,ZT,ZN,SR3,BTC"
+SYMBOLS="BTC,EURUSD,USDJPY,MES,MNQ,ZT,ZN,SR3"
+PORT="4002"
 
 if [[ -f "$PID_FILE" ]]; then
   OLD_PID="$(cat "$PID_FILE" 2>/dev/null || true)"
@@ -23,6 +24,7 @@ fi
 
 nohup "$PY" -u "$BASE/execution_framework/run_tws_continuous.py" \
   --live \
+  --port "$PORT" \
   --symbols "$SYMBOLS" \
   --interval 60 \
   --broker-source-of-truth \
