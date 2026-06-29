@@ -95,7 +95,7 @@ class Settings:
         self.emergent_llm_key: str = os.getenv("EMERGENT_LLM_KEY", "")
         self.host: str = "0.0.0.0"
         self.port: int = 8001
-        self.pairs: list = ["AUD/USD", "NZD/USD"]
+        self.pairs: list = self._load_pairs()
         self.api_poll_interval: int = 60
         self.sim_poll_interval: int = 3
         # Load Telegram config from env first, then override from MongoDB
@@ -112,6 +112,15 @@ class Settings:
                 self.telegram_chat_id = tg_config["chat_id"]
         except Exception as e:
             logger.warning(f"Failed to load Telegram config from DB: {e}")
+
+    def _load_pairs(self) -> list[str]:
+        raw = os.getenv("DUKASCOPY_FX_PAIRS", "AUD/USD,NZD/USD,EUR/USD,USD/JPY,GBP/USD,AUD/JPY,NZD/JPY")
+        pairs: list[str] = []
+        for item in raw.split(","):
+            pair = item.strip().upper().replace("_", "/").replace("-", "/")
+            if pair and pair not in pairs:
+                pairs.append(pair)
+        return pairs or ["AUD/USD", "NZD/USD", "EUR/USD", "USD/JPY", "GBP/USD", "AUD/JPY", "NZD/JPY"]
 
     @property
     def use_simulated_data(self) -> bool:
@@ -207,7 +216,7 @@ class RiskControlSystem:
         # ═══ 风险统计 ═══
         self._daily_stats = self._init_daily_stats()
         self._weekly_stats = self._init_weekly_stats()
-        self._recent_prices: dict[str, list[dict]] = {"AUD/USD": [], "NZD/USD": []}
+        self._recent_prices: dict[str, list[dict]] = {pair: [] for pair in settings.pairs}
         self._alerts: list[dict] = []
         self._risk_events: list[dict] = []
         
@@ -716,7 +725,7 @@ class Storage:
 
     def __init__(self):
         # Ephemeral real-time data (stays in memory)
-        self.prices: dict[str, list[dict]] = {"AUD/USD": [], "NZD/USD": []}
+        self.prices: dict[str, list[dict]] = {pair: [] for pair in settings.pairs}
         self.signals: list[dict] = []
         self.trades: list[dict] = []
         self.logs: list[dict] = []
@@ -726,6 +735,32 @@ class Storage:
         self.events: list[dict] = []
         self.backtest_results: list[dict] = db.get_backtest_results()
         self.confirmation_stats: dict = db.get_confirmation_stats()
+        self.broker_adapters: dict[str, dict] = {
+            "dukascopy": {
+                "name": "Dukascopy Bank",
+                "connected": False,
+                "configured": True,
+                "url": settings.dukascopy_api_url,
+                "status": "idle",
+                "adapter_version": None,
+                "account_id": None,
+                "equity": None,
+                "last_seen": None,
+                "features": ["SWFX 实时行情", "ECN 市场深度", "点差监控", "订单执行"],
+            },
+            "interactive_brokers": {
+                "name": "Interactive Brokers",
+                "connected": False,
+                "configured": False,
+                "host": settings.ib_tws_host,
+                "port": settings.ib_tws_port,
+                "status": "idle",
+                "features": ["新闻推送", "经济日历", "实时行情", "订单执行"],
+            },
+        }
+        self.broker_positions: dict[str, dict] = {}
+        self.latest_broker_ticks: dict[str, dict] = {}
+        self.latest_broker_bars: dict[str, dict] = {}
         # 高级风险控制系统
         self.risk_control = RiskControlSystem()
         self._seed_events()
@@ -1112,17 +1147,27 @@ class EventEngine:
         self._confirmed_direction = {}
 
 event_engine = EventEngine()
-event_response = EventResponseManager(["AUD/USD", "NZD/USD"])
+event_response = EventResponseManager(settings.pairs)
 execution_gate = ExecutionGate()
-strategy_monitor = StrategyMonitor(["AUD/USD", "NZD/USD"])
+strategy_monitor = StrategyMonitor(settings.pairs)
 
 # ─── Market Data Service ───────────────────────────────────────────────────────
 
 class MarketDataService:
-    BASE_PRICES = {"AUD/USD": 0.6300, "NZD/USD": 0.5700}
+    BASE_PRICES = {
+        "AUD/USD": 0.6300,
+        "NZD/USD": 0.5700,
+        "EUR/USD": 1.1380,
+        "USD/JPY": 161.80,
+        "GBP/USD": 1.3200,
+        "AUD/JPY": 111.60,
+        "NZD/JPY": 91.45,
+    }
 
     def __init__(self):
-        self._sim_prices: dict[str, float] = {pair: base for pair, base in self.BASE_PRICES.items()}
+        self._sim_prices: dict[str, float] = {
+            pair: self.BASE_PRICES.get(pair, 1.0000) for pair in settings.pairs
+        }
         self._connected_clients: list[asyncio.Queue] = []
         self._running = False
         self._http_client: Optional[httpx.AsyncClient] = None
@@ -1309,10 +1354,18 @@ class FeatureEngine:
     """计算实时市场特征: vol_ratio, spread_ratio, trend_score"""
 
     def __init__(self):
-        self._spread_baselines: dict[str, float] = {"AUD/USD": 1.5, "NZD/USD": 1.8}
-        self._recent_spreads: dict[str, list[float]] = {"AUD/USD": [], "NZD/USD": []}
-        self._recent_prices_1m: dict[str, list[float]] = {"AUD/USD": [], "NZD/USD": []}
-        self._recent_prices_5m: dict[str, list[float]] = {"AUD/USD": [], "NZD/USD": []}
+        self._spread_baselines: dict[str, float] = {
+            "AUD/USD": 1.5,
+            "NZD/USD": 1.8,
+            "EUR/USD": 1.0,
+            "USD/JPY": 1.2,
+            "GBP/USD": 1.4,
+            "AUD/JPY": 1.6,
+            "NZD/JPY": 1.9,
+        }
+        self._recent_spreads: dict[str, list[float]] = {pair: [] for pair in settings.pairs}
+        self._recent_prices_1m: dict[str, list[float]] = {pair: [] for pair in settings.pairs}
+        self._recent_prices_5m: dict[str, list[float]] = {pair: [] for pair in settings.pairs}
 
     def update(self, pair: str, price_data: dict) -> MarketSnapshot:
         """每次行情到来时更新特征"""
@@ -1588,174 +1641,64 @@ class AlertService:
         return db.get_alert_history(limit)
     
     async def alert_signal(self, signal: dict) -> None:
-        """发送交易信号警报"""
-        direction_emoji = {"BUY": "📈", "SELL": "📉", "WAIT": "⏸"}.get(signal.get("direction", ""), "?")
-        confidence = signal.get('confidence', 0)
-        
-        # 高置信度信号使用更醒目的格式
-        if confidence >= 70:
-            header = f"🔥 <b>HIGH CONFIDENCE SIGNAL</b> 🔥"
-        else:
-            header = f"[{direction_emoji} SIGNAL]"
-        
-        message = (
-            f"<b>{header}</b>\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"货币对: <b>{signal.get('pair', '???')}</b>\n"
-            f"方向: <b>{signal.get('direction', '?')}</b>\n"
-            f"置信度: <b>{confidence:.1f}%</b>\n"
-            f"市场状态: {signal.get('regime', '???')}\n"
-            f"原因: {signal.get('reason', '')}\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"⏰ {datetime.now(timezone.utc).strftime('%H:%M:%S')} UTC"
-        )
-        await self.send_telegram(message)
+        """按最新规则静默信号类通知，只保留真实成交通知。"""
+        return None
     
     async def alert_risk_warning(self, warning_type: str, details: dict) -> None:
-        """发送风险预警"""
-        message = (
-            f"⚠️ <b>RISK WARNING</b> ⚠️\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"类型: <b>{warning_type}</b>\n"
-        )
-        
-        if "pair" in details:
-            message += f"货币对: {details['pair']}\n"
-        if "pnl_pips" in details:
-            message += f"当前盈亏: {details['pnl_pips']:.1f} pips\n"
-        if "level" in details:
-            message += f"触发级别: {details['level']}\n"
-        if "action" in details:
-            message += f"建议操作: <b>{details['action']}</b>\n"
-        if "message" in details:
-            message += f"详情: {details['message']}\n"
-        
-        message += (
-            f"━━━━━━━━━━━━━━━\n"
-            f"⏰ {datetime.now(timezone.utc).strftime('%H:%M:%S')} UTC"
-        )
-        
-        await self.send_telegram(message)
+        """按最新规则静默风险类通知，只保留真实成交通知。"""
+        return None
     
     async def alert_risk_emergency(self, reason: str, stats: dict) -> None:
-        """发送紧急平仓警报 - 最高优先级"""
-        message = (
-            f"🚨🚨🚨 <b>EMERGENCY CLOSE</b> 🚨🚨🚨\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"原因: <b>{reason}</b>\n"
-            f"\n"
-            f"📊 <b>当日统计:</b>\n"
-            f"• 日盈亏: {stats.get('total_pnl_pips', 0):.1f} pips\n"
-            f"• 交易次数: {stats.get('trade_count', 0)}\n"
-            f"• 连续亏损: {stats.get('consecutive_losses', 0)}\n"
-            f"\n"
-            f"⛔ <b>所有交易已暂停</b>\n"
-            f"🕐 冷却期: 30分钟\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"⏰ {datetime.now(timezone.utc).strftime('%H:%M:%S')} UTC"
-        )
-        
-        # 紧急警报不静音
-        await self.send_telegram(message, silent=False)
+        """按最新规则静默风险类通知，只保留真实成交通知。"""
+        return None
     
     async def alert_market_deterioration(self, pair: str, triggers: list[str], severity: str) -> None:
-        """发送市场恶化警报"""
-        severity_emoji = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡"}.get(severity, "⚪")
-        
-        message = (
-            f"{severity_emoji} <b>MARKET DETERIORATION</b> {severity_emoji}\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"货币对: <b>{pair}</b>\n"
-            f"严重程度: <b>{severity}</b>\n"
-            f"\n"
-            f"触发条件:\n"
-        )
-        
-        for trigger in triggers:
-            message += f"• {trigger}\n"
-        
-        message += (
-            f"━━━━━━━━━━━━━━━\n"
-            f"⏰ {datetime.now(timezone.utc).strftime('%H:%M:%S')} UTC"
-        )
-        
-        await self.send_telegram(message)
+        """按最新规则静默风险类通知，只保留真实成交通知。"""
+        return None
     
     async def alert_daily_summary(self, stats: dict) -> None:
-        """发送每日交易摘要"""
-        pnl = stats.get('total_pnl_pips', 0)
-        pnl_emoji = "📈" if pnl >= 0 else "📉"
-        
-        message = (
-            f"📋 <b>DAILY TRADING SUMMARY</b> 📋\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"日期: {datetime.now(timezone.utc).strftime('%Y-%m-%d')}\n"
-            f"\n"
-            f"{pnl_emoji} 日盈亏: <b>{pnl:+.1f} pips</b>\n"
-            f"📊 交易次数: {stats.get('trade_count', 0)}\n"
-            f"⚠️ 警告触发: {stats.get('warnings_triggered', 0)}\n"
-            f"🚨 紧急触发: {stats.get('emergencies_triggered', 0)}\n"
-            f"📉 最大回撤: {stats.get('max_drawdown_pips', 0):.1f} pips\n"
-            f"\n"
-        )
-        
-        # 评价
-        if pnl >= 50:
-            message += "💪 表现优秀！继续保持！"
-        elif pnl >= 0:
-            message += "👍 稳健交易，明天继续！"
-        elif pnl > -30:
-            message += "⚡ 小幅回撤，保持冷静！"
-        else:
-            message += "🛡️ 请检视策略，注意风控！"
-        
-        message += f"\n━━━━━━━━━━━━━━━"
-        
-        await self.send_telegram(message)
+        """按最新规则静默摘要类通知，只保留真实成交通知。"""
+        return None
     
     async def alert_event_trigger(self, event_level: str, event_title: str) -> None:
-        """发送事件触发警报"""
-        level_emoji = {"A": "🔴", "B": "🟠", "C": "🟡"}.get(event_level, "⚪")
-        
-        message = (
-            f"{level_emoji} <b>EVENT TRIGGERED</b> {level_emoji}\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"级别: <b>{event_level}</b>\n"
-            f"事件: {event_title}\n"
-            f"\n"
-            f"⏸️ 交易已暂停，等待30秒确认窗口\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"⏰ {datetime.now(timezone.utc).strftime('%H:%M:%S')} UTC"
-        )
-        
-        await self.send_telegram(message)
+        """按最新规则静默事件类通知，只保留真实成交通知。"""
+        return None
     
     async def alert_recovery(self, step: int, leverage_ratio: float) -> None:
-        """发送恢复通知"""
-        if step == 0:
-            message = (
-                f"🔄 <b>GRADUATED RESTART INITIATED</b>\n"
-                f"━━━━━━━━━━━━━━━\n"
-                f"初始杠杆比例: <b>{leverage_ratio:.0f}%</b>\n"
-                f"计划: 30% → 50% → 70% → 100%\n"
-                f"━━━━━━━━━━━━━━━"
-            )
-        elif leverage_ratio >= 100:
-            message = (
-                f"✅ <b>TRADING FULLY RESTORED</b> ✅\n"
-                f"━━━━━━━━━━━━━━━\n"
-                f"杠杆比例: <b>100%</b>\n"
-                f"系统已恢复正常交易\n"
-                f"━━━━━━━━━━━━━━━"
-            )
-        else:
-            message = (
-                f"🔄 <b>RESTART STEP {step}</b>\n"
-                f"━━━━━━━━━━━━━━━\n"
-                f"当前杠杆比例: <b>{leverage_ratio:.0f}%</b>\n"
-                f"━━━━━━━━━━━━━━━"
-            )
-        
+        """按最新规则静默恢复类通知，只保留真实成交通知。"""
+        return None
+
+    async def alert_trade_executed(self, trade: dict) -> None:
+        """真实开仓通知。"""
+        pair = trade.get("pair", "?")
+        direction = trade.get("direction", "?")
+        entry_price = float(trade.get("entry_price", 0) or 0)
+        amount = trade.get("amount", trade.get("size", trade.get("quantity", "?")))
+        message = (
+            f"✅ <b>TRADE OPENED</b>\n"
+            f"Instrument: <b>{pair}</b>\n"
+            f"Direction: <b>{direction}</b>\n"
+            f"Entry: <b>{entry_price:.5f}</b>\n"
+            f"Amount: <b>{amount}</b>\n"
+            f"Time: {trade.get('entry_time') or datetime.now(timezone.utc).isoformat()}"
+        )
+        await self.send_telegram(message)
+
+    async def alert_trade_closed(self, trade: dict) -> None:
+        """真实平仓通知。"""
+        pair = trade.get("pair", "?")
+        pnl_pips = float(trade.get("pnl_pips", 0) or 0)
+        pnl_usd = float(trade.get("pnl_usd", 0) or 0)
+        result = "PROFIT" if pnl_pips > 0 else "LOSS" if pnl_pips < 0 else "FLAT"
+        duration = trade.get("duration", "unknown")
+        message = (
+            f"🏁 <b>TRADE CLOSED</b>\n"
+            f"Instrument: <b>{pair}</b>\n"
+            f"Duration: <b>{duration}</b>\n"
+            f"PnL Status: <b>{result}</b>\n"
+            f"PnL: <b>{pnl_pips:+.1f} pips / ${pnl_usd:+.2f}</b>\n"
+            f"Time: {trade.get('exit_time') or datetime.now(timezone.utc).isoformat()}"
+        )
         await self.send_telegram(message)
     
     def get_daily_stats(self) -> dict:
@@ -1990,6 +1933,52 @@ class DirectionConfirm(BaseModel):
     prices_before: list[float] = []
     prices_after: list[float] = []
 
+
+class BrokerStatusUpdate(BaseModel):
+    broker: str
+    status: str | None = None
+    adapter_version: str | None = None
+    account_id: str | None = None
+    equity: float | None = None
+    timestamp: str | None = None
+
+
+class BrokerTickUpdate(BaseModel):
+    pair: str
+    bid: float
+    ask: float
+    spread: float | None = None
+    bid_volume: float | None = None
+    ask_volume: float | None = None
+    timestamp: str
+
+
+class BrokerBarUpdate(BaseModel):
+    pair: str
+    period: str = "5min"
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float | None = None
+    timestamp: str
+
+
+class BrokerPositionUpdate(BaseModel):
+    pair: str
+    direction: str | None = None
+    amount: float | None = None
+    entry_price: float | None = None
+    stop_loss: float | None = None
+    take_profit: float | None = None
+    label: str | None = None
+    status: str | None = None
+    timestamp: str | None = None
+    broker: str | None = "dukascopy"
+    event: str | None = None
+    pnl_pips: float | None = None
+    pnl_usd: float | None = None
+
 class AIAnalysisRequest(BaseModel):
     pair: str
 
@@ -2058,6 +2047,14 @@ async def auth_refresh(request: Request, response: Response):
 
 def _normalize_pair(pair: str) -> str:
     return pair.upper().replace("_", "/").replace("-", "/")
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _broker_mid_from_tick(bid: float, ask: float) -> float:
+    return round((bid + ask) / 2.0, 5)
 
 # ─── Health ────────────────────────────────────────────────────────────────────
 
@@ -2270,6 +2267,24 @@ async def model_drivers():
             {"factor": "美联储与美元", "weight": 12},
             {"factor": "全球风险偏好", "weight": 10},
         ],
+        "EUR/USD": [
+            {"factor": "美联储与美元", "weight": 32},
+            {"factor": "欧洲央行政策", "weight": 28},
+            {"factor": "欧美经济分化", "weight": 22},
+            {"factor": "全球风险偏好", "weight": 18},
+        ],
+        "USD/JPY": [
+            {"factor": "美日利差", "weight": 36},
+            {"factor": "日本央行政策", "weight": 27},
+            {"factor": "避险情绪", "weight": 22},
+            {"factor": "美债收益率", "weight": 15},
+        ],
+        "GBP/USD": [
+            {"factor": "英格兰银行政策", "weight": 30},
+            {"factor": "美联储与美元", "weight": 28},
+            {"factor": "英国经济数据", "weight": 24},
+            {"factor": "全球风险偏好", "weight": 18},
+        ],
     }
 
 @app.get("/api/model/regime")
@@ -2285,32 +2300,147 @@ async def model_regime():
 @app.get("/api/broker/status")
 async def broker_status():
     return {
-        "dukascopy": {
-            "name": "Dukascopy Bank",
-            "configured": settings.dukascopy_api_url != "http://localhost:9090",
-            "connected": False,
-            "url": settings.dukascopy_api_url,
-            "features": ["SWFX 实时行情", "ECN 市场深度", "点差监控", "订单执行"],
-        },
-        "interactive_brokers": {
-            "name": "Interactive Brokers",
-            "configured": False,
-            "connected": False,
-            "host": settings.ib_tws_host,
-            "port": settings.ib_tws_port,
-            "features": ["新闻推送", "经济日历", "实时行情", "订单执行"],
-        },
-        "status": "Phase 2 - 待接入",
+        "dukascopy": storage.broker_adapters["dukascopy"],
+        "interactive_brokers": storage.broker_adapters["interactive_brokers"],
+        "status": "live" if any(v.get("connected") for v in storage.broker_adapters.values()) else "idle",
+        "latest_ticks": storage.latest_broker_ticks,
+        "open_positions": len(storage.broker_positions),
     }
+
+
+@app.post("/api/broker/status")
+async def broker_status_update(body: BrokerStatusUpdate):
+    broker_key = "interactive_brokers" if body.broker.lower() in {"interactive_brokers", "ib", "ibkr"} else "dukascopy"
+    broker_state = storage.broker_adapters.setdefault(broker_key, {"name": broker_key})
+    incoming_status = (body.status or "connected").lower()
+    broker_state.update({
+        "connected": incoming_status != "disconnected",
+        "status": incoming_status,
+        "adapter_version": body.adapter_version or broker_state.get("adapter_version"),
+        "account_id": body.account_id or broker_state.get("account_id"),
+        "equity": body.equity if body.equity is not None else broker_state.get("equity"),
+        "last_seen": body.timestamp or _utc_now_iso(),
+    })
+    storage.logs.insert(0, {
+        "level": "INFO",
+        "source": f"{body.broker}_bridge",
+        "message": f"Broker status update: {incoming_status}",
+        "timestamp": _utc_now_iso(),
+    })
+    storage.logs = storage.logs[:500]
+    return {"success": True, "broker": broker_key, "state": broker_state}
+
+
+@app.post("/api/broker/tick")
+async def broker_tick_update(body: BrokerTickUpdate):
+    pair = _normalize_pair(body.pair)
+    mid = _broker_mid_from_tick(body.bid, body.ask)
+    spread_pips = body.spread
+    if spread_pips is None:
+        divisor = 0.0001 if "JPY" not in pair else 0.01
+        spread_pips = round((body.ask - body.bid) / divisor, 3)
+
+    tick_payload = {
+        "pair": pair,
+        "bid": round(body.bid, 5),
+        "ask": round(body.ask, 5),
+        "mid": mid,
+        "spread_pips": spread_pips,
+        "bid_volume": body.bid_volume,
+        "ask_volume": body.ask_volume,
+        "timestamp": body.timestamp,
+        "source": "dukascopy_bridge",
+    }
+    storage.latest_broker_ticks[pair] = tick_payload
+    await market_data.broadcast({"type": "price_update", "data": tick_payload})
+    return {"success": True, "pair": pair, "mid": mid}
+
+
+@app.post("/api/broker/bar")
+async def broker_bar_update(body: BrokerBarUpdate):
+    pair = _normalize_pair(body.pair)
+    bar = {
+        "timestamp": body.timestamp,
+        "open": round(body.open, 5),
+        "high": round(body.high, 5),
+        "low": round(body.low, 5),
+        "close": round(body.close, 5),
+        "volume": body.volume or 0,
+        "source": "dukascopy_bridge",
+    }
+    storage.latest_broker_bars[pair] = bar
+    storage.prices.setdefault(pair, []).append(bar)
+    if len(storage.prices[pair]) > 500:
+        storage.prices[pair] = storage.prices[pair][-500:]
+    await market_data.broadcast({"type": "broker_bar", "data": {"pair": pair, **bar}})
+    return {"success": True, "pair": pair, "stored_bars": len(storage.prices[pair])}
+
+
+@app.post("/api/broker/position")
+async def broker_position_update(body: BrokerPositionUpdate):
+    pair = _normalize_pair(body.pair)
+    label = body.label or f"{pair}:{body.direction or 'UNKNOWN'}"
+    state = {
+        "pair": pair,
+        "direction": body.direction,
+        "amount": body.amount,
+        "entry_price": body.entry_price,
+        "stop_loss": body.stop_loss,
+        "take_profit": body.take_profit,
+        "label": label,
+        "status": body.status,
+        "event": body.event,
+        "broker": body.broker or "dukascopy",
+        "pnl_pips": body.pnl_pips,
+        "pnl_usd": body.pnl_usd,
+        "timestamp": body.timestamp or _utc_now_iso(),
+    }
+
+    terminal_statuses = {"CLOSED", "REJECTED", "CANCELLED", "FLATTENED"}
+    if (body.status or "").upper() in terminal_statuses or (body.event or "").upper() in terminal_statuses:
+        storage.broker_positions.pop(label, None)
+    else:
+        storage.broker_positions[label] = state
+
+    storage.trades.insert(0, state.copy())
+    storage.trades = storage.trades[:1000]
+    await market_data.broadcast({"type": "broker_position", "data": state})
+    return {"success": True, "label": label, "open_positions": len(storage.broker_positions)}
 
 @app.get("/api/broker/datasources")
 async def data_sources():
     return [
         {"name": "Twelve Data", "type": "行情", "status": "运行中" if not settings.use_simulated_data else "未配置", "role": "主源"},
-        {"name": "Dukascopy SWFX", "type": "行情", "status": "未连接", "role": "备源"},
-        {"name": "IB TWS", "type": "行情", "status": "未连接", "role": "备源"},
+        {"name": "Dukascopy SWFX", "type": "行情", "status": "运行中" if storage.broker_adapters["dukascopy"].get("connected") else "未连接", "role": "备源"},
+        {"name": "IB TWS", "type": "行情", "status": "运行中" if storage.broker_adapters["interactive_brokers"].get("connected") else "未连接", "role": "备源"},
         {"name": "模拟数据", "type": "行情", "status": "运行中" if settings.use_simulated_data else "待机", "role": "开发"},
     ]
+
+
+@app.get("/api/broker/dukascopy/status")
+async def dukascopy_status():
+    state = dict(storage.broker_adapters["dukascopy"])
+    state["latest_ticks"] = storage.latest_broker_ticks
+    state["latest_bars"] = storage.latest_broker_bars
+    state["open_positions"] = list(storage.broker_positions.values())
+    return state
+
+
+@app.get("/api/broker/ib/status")
+async def ib_status():
+    return storage.broker_adapters["interactive_brokers"]
+
+
+@app.get("/api/broker/positions")
+async def broker_positions():
+    positions = list(storage.broker_positions.values())
+    return {
+        "positions": positions,
+        "count": len(positions),
+        "total_equity": storage.broker_adapters["dukascopy"].get("equity") or 0,
+        "used_margin": 0,
+        "free_margin": 0,
+    }
 
 # ─── Event Response Engine APIs (事件响应引擎) ──────────────────────────────────
 
@@ -2704,7 +2834,7 @@ async def backtest_stats():
     
     # By pair statistics
     pair_stats = {}
-    for pair in ["AUD/USD", "NZD/USD"]:
+    for pair in settings.pairs:
         pair_results = [r for r in all_results if r["pair"] == pair]
         if pair_results:
             successes = [r for r in pair_results if r["confirmation_success"]]
@@ -3453,4 +3583,4 @@ async def websocket_endpoint(websocket: WebSocket):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("server:app", host="127.0.0.1", port=8001, reload=False)

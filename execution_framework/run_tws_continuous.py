@@ -4,7 +4,7 @@ run_tws_continuous.py
 长期无人值守跑 IBKR 模拟盘的持续运行入口。
 
 整合：
-  - enabled_symbols：只交易账户有权限的 7 个品种（MBT 加密无权限，默认禁用）
+  - enabled_symbols：只交易账户有权限的 8 个品种（MBT 加密无权限，默认禁用）
   - IBKRSession：错误码处理 + 断线重连 + 对账 + 按 OI 选主力
   - RightSidePipeline：右侧确认 + 硬风控 + 风险约束算手数 + dry-run/真实下单
   - TradeJournal：成交后真实 P&L 回写学习库（SQLite data.db）
@@ -64,9 +64,12 @@ def _historical_what_to_show(resolved: ResolvedContract) -> str:
 
     FX 现货不能稳定使用 TRADES/LAST，改用 MIDPOINT，
     否则会反复触发 FXSUBPIP / no historical market data 警告。
+    PAXOS 加密现货要求 AGGTRADES，不能用默认 TRADES。
     """
     if resolved.sec_type == "CASH":
         return "MIDPOINT"
+    if resolved.sec_type == "CRYPTO":
+        return "AGGTRADES"
     return "TRADES"
 
 
@@ -184,7 +187,7 @@ def main() -> int:
         on_dead=emergency,
         health_check=lambda: sess.ib.isConnected(),
         on_unhealthy=lambda: sess._schedule_reconnect(),
-        telegram=args.telegram)
+        telegram=False)
     guardian.start()
 
     # 经济日历：加载已有事件表（由 --gen-calendar 生成或外部写入）
@@ -250,7 +253,6 @@ def main() -> int:
                         mins = (ev.event_time - now).total_seconds() / 60.0
                         print(f"  ❄ 会前降温 {ev.name}（{mins:.0f}min后）：冻结 {rec['frozen']}"
                               + (f"，平现货 {len(rec['crypto_flattened'])} 笔" if rec['crypto_flattened'] else ""))
-                        guardian.notify(f"会前降温 {ev.name}", str(rec["frozen"]))
 
             # ①b 日历到点：自动触发事件（解除会前冻结 + 启动冷静期）
             for ev in calendar.pop_due(now, window_s=args.event_window):
@@ -270,7 +272,6 @@ def main() -> int:
                         if len(df0) >= 20:
                             pipe.on_event(sym, ev.name, ev.event_time, df0)
                             print(f"  ⚡ 事件触发 {ev.name} -> {sym}（进入冷静期）")
-                            guardian.notify(f"事件触发 {ev.name}", sym)
                     except Exception as exc:  # noqa: BLE001
                         print(f"  [{sym}] 事件触发异常: {exc}")
 
@@ -319,7 +320,6 @@ def main() -> int:
             for trig in pipe.om.check_soft_stops(_spot_price):
                 print(f"  ⛔ 软止损触发 {trig['symbol']} @ {trig['current']} "
                       f"(止损 {trig['stop_price']}) -> {trig['exit_state']}")
-                guardian.notify("软止损触发", f"{trig['symbol']} @ {trig['current']}")
                 # 回写真实平仓 P&L 到学习库
                 pipe.on_close(trig["symbol"], trig["client_ref"],
                               exit_price=trig["current"], exit_reason="soft_stop")

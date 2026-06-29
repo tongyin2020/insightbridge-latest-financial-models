@@ -30,6 +30,7 @@ from event_right_side_engine import RightSideEventEngine, DEFAULT_RULES
 from ibkr_contract_resolver import IBKRContractResolver, ContractResolutionError
 from ibkr_order_manager import IBKROrderManager
 from trade_journal import TradeJournal, TradeRecord
+from trade_telegram_notifier import TradeTelegramNotifier
 
 # 共享风控/仓位（容错导入：缺失时降级为安全默认，但会在日志里标记）
 _SHARED_OK = True
@@ -91,6 +92,7 @@ class RightSidePipeline:
         self._halted = False
         self._halt_reason = ""
         self._pre_event_frozen: set = set()   # 会前冻结的品种（禁新入场）
+        self.trade_notifier = TradeTelegramNotifier(enabled=True)
 
         if _SHARED_OK:
             self.hard_stop = HardStopController(
@@ -294,6 +296,7 @@ class RightSidePipeline:
     def confirm_fill(self, symbol: str, client_ref: str) -> str:
         ticket = self.om.poll_fill(client_ref)
         if ticket.state == "FILLED":
+            trade_row = self.journal.get_trade(client_ref) if self.journal is not None else None
             if self.journal is not None and ticket.fills:
                 avg_fill = float(ticket.fills[-1].get("avg") or 0.0)
                 if avg_fill > 0:
@@ -304,6 +307,13 @@ class RightSidePipeline:
                     )
                     if result:
                         self._log({"stage": "trade_filled", "symbol": symbol, **result})
+                        direction = trade_row.get("direction", "") if trade_row else ""
+                        self.trade_notifier.notify_trade_open(
+                            symbol=symbol,
+                            direction=direction,
+                            fill_price=avg_fill,
+                            quantity=ticket.quantity,
+                        )
             self.engine.mark_filled(symbol)       # 成交后才关闭事件
         elif ticket.state in ("REJECTED", "CANCELLED"):
             self.engine.mark_abandoned(symbol, ticket.state)
@@ -314,10 +324,23 @@ class RightSidePipeline:
     def on_close(self, symbol: str, client_ref: str, exit_price: float,
                  exit_reason: str = "") -> Optional[Dict[str, Any]]:
         result = None
+        trade_before_close = self.journal.get_trade(client_ref) if self.journal is not None else None
         if self.journal is not None:
             result = self.journal.record_close(client_ref, exit_price, exit_reason)
             if result:
                 self._log({"stage": "trade_closed", "symbol": symbol, **result})
+                trade_after_close = self.journal.get_trade(client_ref)
+                if trade_after_close:
+                    self.trade_notifier.notify_trade_close(
+                        symbol=trade_after_close.get("symbol", symbol),
+                        direction=trade_after_close.get("direction", ""),
+                        opened_at=trade_after_close.get("opened_at") or (trade_before_close or {}).get("opened_at"),
+                        closed_at=trade_after_close.get("closed_at"),
+                        entry_price=trade_after_close.get("entry_price"),
+                        exit_price=trade_after_close.get("exit_price"),
+                        pnl_abs=result.get("pnl_abs"),
+                        pnl_pct=result.get("pnl_pct"),
+                    )
         self.om.release(symbol)
         return result
 

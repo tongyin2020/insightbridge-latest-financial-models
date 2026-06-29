@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-06-29T06:41:53.956991+00:00",
+  "project": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest",
+  "source_jar": "/Users/tongyin/JForex4/libs/demo/4.8.15/jforex-api-4.8.13-sources.jar",
+  "probe_csv_for_jforex": "EURUSD,USDJPY,BTC,MES,MNQ,ZT,ZN,SR3",
+  "resolved_probe_targets": [
+    "EUR/USD",
+    "USD/JPY",
+    "BTC/USD",
+    "USA500.IDX/USD",
+    "USATECH.IDX/USD"
+  ],
+  "rows": [
+    {
+      "logical_symbol": "EURUSD",
+      "requested_asset": "Spot FX",
+      "dukascopy_mode": "direct",
+      "dukascopy_candidate": "EUR/USD",
+      "api_candidate_exists": true,
+      "recommendation": "can_probe_now",
+      "notes": "Dukascopy strong fit."
+    },
+    {
+      "logical_symbol": "USDJPY",
+      "requested_asset": "Spot FX",
+      "dukascopy_mode": "direct",
+      "dukascopy_candidate": "USD/JPY",
+      "api_candidate_exists": true,
+      "recommendation": "can_probe_now",
+      "notes": "Dukascopy strong fit."
+    },
+    {
+      "logical_symbol": "BTC",
+      "requested_asset": "Crypto spot/CFD",
+      "dukascopy_mode": "direct",
+      "dukascopy_candidate": "BTC/USD",
+      "api_candidate_exists": true,
+      "recommendation": "can_probe_now",
+      "notes": "Depends on demo-market availability and permissions."
+    },
+    {
+      "logical_symbol": "MES",
+      "requested_asset": "Micro S&P 500 future",
+      "dukascopy_mode": "proxy",
+      "dukascopy_candidate": "USA500.IDX/USD",
+      "api_candidate_exists": true,
+      "recommendation": "can_probe_as_proxy_only",
+      "notes": "Proxy only; index CFD, not CME micro future."
+    },
+    {
+      "logical_symbol": "MNQ",
+      "requested_asset": "Micro Nasdaq future",
+      "dukascopy_mode": "proxy",
+      "dukascopy_candidate": "USATECH.IDX/USD",
+      "api_candidate_exists": true,
+      "recommendation": "can_probe_as_proxy_only",
+      "notes": "Proxy only; index CFD, not CME micro future."
+    },
+    {
+      "logical_symbol": "ZT",
+      "requested_asset": "2Y Treasury future",
+      "dukascopy_mode": "unsupported",
+      "dukascopy_candidate": null,
+      "api_candidate_exists": false,
+      "recommendation": "do_not_route_to_dukascopy",
+      "notes": "No clean Dukascopy treasury future mapping in public API."
+    },
+    {
+      "logical_symbol": "ZN",
+      "requested_asset": "10Y Treasury future",
+      "dukascopy_mode": "unsupported",
+      "dukascopy_candidate": null,
+      "api_candidate_exists": false,
+      "recommendation": "do_not_route_to_dukascopy",
+      "notes": "No clean Dukascopy treasury future mapping in public API."
+    },
+    {
+      "logical_symbol": "SR3",
+      "requested_asset": "3M SOFR future",
+      "dukascopy_mode": "unsupported",
+      "dukascopy_candidate": null,
+      "api_candidate_exists": false,
+      "recommendation": "do_not_route_to_dukascopy",
+      "notes": "No clean Dukascopy short-rate future mapping in public API."
+    }
+  ]
+}

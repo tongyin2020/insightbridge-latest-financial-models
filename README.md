@@ -102,6 +102,18 @@ Examples of secrets that must remain local:
 - Telegram bot tokens
 - cloud model provider keys
 
+### Secondary broker path
+
+This local project now also supports a Dukascopy demo-account scaffolding layer in parallel with IBKR paper trading.
+
+Files:
+
+- `check_dukascopy_demo_setup.py`
+- `check_dukascopy_demo_setup.sh`
+- `README_DUKASCOPY_DEMO.md`
+
+The intent is to use Dukascopy as a secondary broker / market-data path where IBKR data coverage is weak, while keeping IBKR as the main execution source of truth.
+
 ## Suggested Next Steps
 
 1. Add model-specific setup notes inside each of the five model folders.

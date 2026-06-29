@@ -28,7 +28,7 @@ public class DukascopyBridgeStrategy implements IStrategy {
     // ── Configurable parameters (exposed in JForex UI) ──────────────────────
 
     @Configurable("Backend URL")
-    public String backendUrl = "http://localhost:8000";
+    public String backendUrl = "http://localhost:8001";
 
     @Configurable("Trade amount (lots)")
     public double tradeAmountLots = 0.01;

@@ -13,7 +13,7 @@ Dukascopy JForex Platform
     |
     |   HTTP GET/POST
     v
-Python FastAPI Backend (http://localhost:8000)
+Python FastAPI Backend (http://localhost:8001)
     |
     +-- /api/health              <-- health check
     +-- /api/signals/current     <-- signal polling
@@ -29,7 +29,7 @@ Python FastAPI Backend (http://localhost:8000)
 1. **Dukascopy Demo or Live Account** -- register at https://www.dukascopy.com
 2. **JForex Platform** -- download from Dukascopy after registration
 3. **Java JDK 8 or higher** -- required for compilation
-4. **Python Backend Running** -- the FastAPI backend must be running on `http://localhost:8000`
+4. **Python Backend Running** -- the FastAPI backend must be running on `http://localhost:8001`
 
 ## Setup
 
@@ -105,7 +105,7 @@ When you start the strategy, JForex will show a configuration dialog with these 
 | Signal poll interval (ms) | `2000` | How often signals are fetched from the backend |
 | Max consecutive backend failures | `5` | Failures before safety shutdown triggers |
 
-Set **Backend URL** to wherever your Python backend is running. For local development this is typically `http://localhost:8000`. For a remote server, use the appropriate host and port.
+Set **Backend URL** to wherever your Python backend is running. For local development in this project it is typically `http://localhost:8001`. For a remote server, use the appropriate host and port.
 
 ## How It Works
 
@@ -150,12 +150,12 @@ Lifecycle events (fill, close, reject) are also reported immediately.
 - Make sure `HttpClient.java` is in the same directory as `DukascopyBridgeStrategy.java`.
 
 **Backend connection fails:**
-- Verify the Python backend is running: `curl http://localhost:8000/api/health`
+- Verify the Python backend is running: `curl http://localhost:8001/api/health`
 - Check that no firewall is blocking localhost connections.
 - If running on a different machine, update the Backend URL in strategy parameters.
 
 **Orders are not being placed:**
-- Check that `kill_switch` is not active: `curl http://localhost:8000/api/settings`
+- Check that `kill_switch` is not active: `curl http://localhost:8001/api/settings`
 - Check that `override_mode` is set to `NORMAL`.
 - Verify that signal confidence is >= 50 in the backend signals.
 - Check the JForex console for spread-too-wide messages.

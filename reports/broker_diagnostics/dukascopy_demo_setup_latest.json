@@ -1,0 +1,129 @@
+{
+  "generated_at": "2026-06-29T06:18:13.739700+00:00",
+  "project": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest",
+  "env_file": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/.env.dukascopy_demo.local",
+  "checks": {
+    "credentials": {
+      "ok": true,
+      "detail": "demo credentials present locally",
+      "extra": {
+        "url": "https://dukascopy.com",
+        "jnlp_url": "https://platform.dukascopy.com/demo_4/jforex_4.jnlp",
+        "user_present": true,
+        "password_present": true
+      }
+    },
+    "java_runtime": {
+      "ok": true,
+      "detail": "java runtime available",
+      "extra": {
+        "java_bin": "/Users/tongyin/JForex4/.install4j/jre.bundle/Contents/Home/bin/java",
+        "output": [
+          "openjdk version \"21.0.6\" 2025-01-21 LTS",
+          "OpenJDK Runtime Environment Zulu21.40+17-CA (build 21.0.6+7-LTS)"
+        ],
+        "source": "env_or_detected_bundle"
+      }
+    },
+    "sdk_jars": {
+      "ok": true,
+      "detail": "dukascopy sdk jar path configured",
+      "extra": {
+        "sdk_jar": "/Users/tongyin/JForex4/libs/demo/4.8.15/jforex-api-4.8.13.jar",
+        "jnlp_jar": "/Users/tongyin/JForex4/libs/demo/4.8.15/jforex-demo.jnlp",
+        "source": "env_or_detected_jforex_install"
+      }
+    }
+  },
+  "supplement_rows": [
+    {
+      "symbol": "EURUSD",
+      "asset_group": "FX",
+      "ibkr_cause": "no_recent_ibkr_diagnostic",
+      "dukascopy_strength": "strong",
+      "recommendation": "verify_manually",
+      "notes": "Spot FX is the cleanest Dukascopy fit."
+    },
+    {
+      "symbol": "USDJPY",
+      "asset_group": "FX",
+      "ibkr_cause": "no_recent_ibkr_diagnostic",
+      "dukascopy_strength": "strong",
+      "recommendation": "verify_manually",
+      "notes": "Spot FX is the cleanest Dukascopy fit."
+    },
+    {
+      "symbol": "BTC",
+      "asset_group": "CRYPTO",
+      "ibkr_cause": "subscription_missing",
+      "dukascopy_strength": "partial",
+      "recommendation": "conditional_supplement",
+      "notes": "Possible via Dukascopy crypto/CFD style instruments; verify exact demo availability."
+    },
+    {
+      "symbol": "ETH",
+      "asset_group": "CRYPTO",
+      "ibkr_cause": "subscription_missing",
+      "dukascopy_strength": "partial",
+      "recommendation": "conditional_supplement",
+      "notes": "Possible via Dukascopy crypto/CFD style instruments; verify exact demo availability."
+    },
+    {
+      "symbol": "SOL",
+      "asset_group": "CRYPTO",
+      "ibkr_cause": "subscription_missing",
+      "dukascopy_strength": "partial",
+      "recommendation": "conditional_supplement",
+      "notes": "May not map cleanly; verify exact instrument support in demo."
+    },
+    {
+      "symbol": "CL",
+      "asset_group": "OIL",
+      "ibkr_cause": "subscription_missing",
+      "dukascopy_strength": "partial",
+      "recommendation": "conditional_supplement",
+      "notes": "Could be proxied through energy CFD / spot-style instruments, not exact CME CL futures."
+    },
+    {
+      "symbol": "MES",
+      "asset_group": "INDEX",
+      "ibkr_cause": "subscription_missing",
+      "dukascopy_strength": "weak",
+      "recommendation": "low_probability_supplement",
+      "notes": "No clean 1:1 micro future mapping expected; only index-CFD style approximation may exist."
+    },
+    {
+      "symbol": "MNQ",
+      "asset_group": "INDEX",
+      "ibkr_cause": "no_recent_ibkr_diagnostic",
+      "dukascopy_strength": "weak",
+      "recommendation": "verify_manually",
+      "notes": "No clean 1:1 micro future mapping expected; only index-CFD style approximation may exist."
+    },
+    {
+      "symbol": "ZT",
+      "asset_group": "TREASURY",
+      "ibkr_cause": "no_recent_ibkr_diagnostic",
+      "dukascopy_strength": "weak",
+      "recommendation": "verify_manually",
+      "notes": "Treasury futures usually do not map cleanly into Dukascopy demo instruments."
+    },
+    {
+      "symbol": "ZN",
+      "asset_group": "TREASURY",
+      "ibkr_cause": "subscription_missing",
+      "dukascopy_strength": "weak",
+      "recommendation": "low_probability_supplement",
+      "notes": "Treasury futures usually do not map cleanly into Dukascopy demo instruments."
+    },
+    {
+      "symbol": "SR3",
+      "asset_group": "TREASURY",
+      "ibkr_cause": "no_recent_ibkr_diagnostic",
+      "dukascopy_strength": "weak",
+      "recommendation": "verify_manually",
+      "notes": "Short-rate futures are unlikely to have a clean Dukascopy demo equivalent."
+    }
+  ],
+  "overall": "READY - local Dukascopy demo bridge prerequisites are present."
+}

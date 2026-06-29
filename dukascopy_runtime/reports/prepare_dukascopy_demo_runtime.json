@@ -1,0 +1,43 @@
+{
+  "project": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest",
+  "runtime_dir": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/dukascopy_runtime",
+  "created_dirs": {
+    "runtime": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/dukascopy_runtime",
+    "sdk": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/dukascopy_runtime/sdk",
+    "lib": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/dukascopy_runtime/lib",
+    "src": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/dukascopy_runtime/src",
+    "build": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/dukascopy_runtime/build",
+    "logs": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/dukascopy_runtime/logs",
+    "reports": "/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/dukascopy_runtime/reports"
+  },
+  "detected_candidates": {
+    "sdk_jars": [
+      "/Users/tongyin/JForex4/libs/demo/4.8.15/jforex-api-4.8.13-sources.jar",
+      "/Users/tongyin/JForex4/libs/demo/4.8.15/jforex-api-4.8.13.jar",
+      "/Users/tongyin/JForex4/libs/demo/4.8.15/jforex4-4.8.15.jar",
+      "/Users/tongyin/JForex4/libs/live/4.8.14/jforex-api-4.8.13-sources.jar",
+      "/Users/tongyin/JForex4/libs/live/4.8.14/jforex-api-4.8.13.jar",
+      "/Users/tongyin/JForex4/libs/live/4.8.14/jforex4-4.8.14.jar"
+    ],
+    "jnlp_jars": [
+      "/Users/tongyin/JForex4/libs/demo/4.8.15/jforex-demo.jnlp",
+      "/Users/tongyin/JForex4/libs/demo/4.8.15/libs_4.jnlp",
+      "/Users/tongyin/JForex4/libs/live/4.8.14/jforex-live.jnlp",
+      "/Users/tongyin/JForex4/libs/live/4.8.14/libs_4.jnlp"
+    ],
+    "jforex_apps": [
+      "/Users/tongyin/JForex4/JForex4.app"
+    ],
+    "java_bins": [
+      "/Users/tongyin/JForex4/.install4j/jre.bundle/Contents/Home/bin/java"
+    ],
+    "compiler_jars": [
+      "/Users/tongyin/JForex4/libs/demo/4.8.15/ecj-3.20.0.1d.jar",
+      "/Users/tongyin/JForex4/libs/live/4.8.14/ecj-3.20.0.1d.jar"
+    ],
+    "lib_dirs": [
+      "/Users/tongyin/JForex4/libs/demo/4.8.15",
+      "/Users/tongyin/JForex4/libs/live/4.8.14"
+    ]
+  }
+}

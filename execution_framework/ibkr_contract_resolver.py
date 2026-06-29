@@ -40,7 +40,13 @@ FUT_SPECS: Dict[str, Dict[str, str]] = {
     "MBT": {"symbol": "MBT", "exchange": "CME", "currency": "USD"},   # Micro Bitcoin
     "ZT":  {"symbol": "ZT",  "exchange": "CBOT", "currency": "USD"},
     "ZN":  {"symbol": "ZN",  "exchange": "CBOT", "currency": "USD"},
-    "SR3": {"symbol": "SR3", "exchange": "CME", "currency": "USD"},   # 3M SOFR
+    "SR3": {
+        "symbol": "SR3",
+        "exchange": "CME",
+        "currency": "USD",
+        "tradingClass": "SR3",
+        "multiplier": "2500",
+    },   # 3M SOFR
 }
 
 
@@ -143,8 +149,16 @@ class IBKRContractResolver:
             raise ContractResolutionError("未连接 IB，无法解析（拒绝在未解析状态下下单）")
         from ib_insync import Future
         # 模糊模板：不指定到期月，让 IBKR 返回所有可交易月份
-        template = Future(symbol=spec["symbol"], exchange=spec["exchange"],
-                          currency=spec["currency"])
+        template_kwargs = {
+            "symbol": spec["symbol"],
+            "exchange": spec["exchange"],
+            "currency": spec["currency"],
+        }
+        if spec.get("tradingClass"):
+            template_kwargs["tradingClass"] = spec["tradingClass"]
+        if spec.get("multiplier"):
+            template_kwargs["multiplier"] = spec["multiplier"]
+        template = Future(**template_kwargs)
         details = self.ib.reqContractDetails(template)
         if not details:
             raise ContractResolutionError(f"期货合约无返回: {symbol}")

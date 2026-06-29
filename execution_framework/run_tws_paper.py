@@ -50,6 +50,8 @@ def _bars_to_df(bars):
 def _historical_what_to_show(resolved: ResolvedContract) -> str:
     if resolved.sec_type == "CASH":
         return "MIDPOINT"
+    if resolved.sec_type == "CRYPTO":
+        return "AGGTRADES"
     return "TRADES"
 
 

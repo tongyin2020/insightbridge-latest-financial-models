@@ -1,0 +1,36 @@
+diff --git a/resources/commandsend.sh b/resources/commandsend.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/enableapi.sh b/resources/enableapi.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/gatewaystart.sh b/resources/gatewaystart.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/gatewaystartmacos.sh b/resources/gatewaystartmacos.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/pause.sh b/resources/pause.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/reconnectaccount.sh b/resources/reconnectaccount.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/reconnectdata.sh b/resources/reconnectdata.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/restart.sh b/resources/restart.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/scripts/ibcstart.sh b/resources/scripts/ibcstart.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/stop.sh b/resources/stop.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/twsstart.sh b/resources/twsstart.sh
+old mode 100644
+new mode 100755
+diff --git a/resources/twsstartmacos.sh b/resources/twsstartmacos.sh
+old mode 100644
+new mode 100755

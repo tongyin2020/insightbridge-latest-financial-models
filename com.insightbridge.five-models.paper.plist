@@ -12,7 +12,7 @@
     <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/execution_framework/run_tws_continuous.py</string>
     <string>--live</string>
     <string>--symbols</string>
-    <string>EURUSD,USDJPY,MES,MNQ,ZT,ZN</string>
+    <string>EURUSD,USDJPY,MES,MNQ,ZT,ZN,SR3,BTC</string>
     <string>--interval</string>
     <string>60</string>
     <string>--broker-source-of-truth</string>

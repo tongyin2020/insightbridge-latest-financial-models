@@ -189,6 +189,11 @@ class TradeJournal:
             return {"client_ref": client_ref, "pnl_abs": pnl_abs,
                     "pnl_pct": pnl_pct, "r_multiple": r_multiple}
 
+    def get_trade(self, client_ref: str) -> Optional[Dict[str, Any]]:
+        with self._lock, self._conn() as c:
+            row = c.execute("SELECT * FROM trades WHERE client_ref=?", (client_ref,)).fetchone()
+            return dict(row) if row is not None else None
+
     # ── 统计：供参数校准 / 风控使用 ────────────────────────────────────────
     def stats(self, symbol: Optional[str] = None) -> Dict[str, Any]:
         with self._lock, self._conn() as c:

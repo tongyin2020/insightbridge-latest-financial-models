@@ -34,11 +34,20 @@ class Settings:
         self.database_path: str = os.getenv("DATABASE_PATH", "fx_trading.db")
 
         # Trading pairs
-        self.pairs: list = ["AUD/USD", "NZD/USD"]
+        self.pairs: list = self._load_pairs()
 
         # Polling intervals (seconds)
         self.api_poll_interval: int = 60  # For real Twelve Data API (free tier)
         self.sim_poll_interval: int = 2   # For simulated data
+
+    def _load_pairs(self) -> list[str]:
+        raw = os.getenv("DUKASCOPY_FX_PAIRS", "AUD/USD,NZD/USD,EUR/USD,USD/JPY,GBP/USD,AUD/JPY,NZD/JPY")
+        pairs: list[str] = []
+        for item in raw.split(","):
+            pair = item.strip().upper().replace("_", "/").replace("-", "/")
+            if pair and pair not in pairs:
+                pairs.append(pair)
+        return pairs or ["AUD/USD", "NZD/USD", "EUR/USD", "USD/JPY", "GBP/USD", "AUD/JPY", "NZD/JPY"]
 
     @property
     def use_simulated_data(self) -> bool:

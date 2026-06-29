@@ -1,8 +1,19 @@
-"""MongoDB database module for FX Trading System"""
+"""Database module for FX Trading System.
+
+This backend prefers MongoDB when configured, but can fall back to a lightweight
+in-memory store so local bridge services can still run without a Mongo daemon or
+extra Python drivers.
+"""
 import os
 import logging
+from copy import deepcopy
 from datetime import datetime, timezone
-from pymongo import MongoClient, DESCENDING
+
+try:
+    from pymongo import MongoClient, DESCENDING
+except Exception:  # pragma: no cover - local fallback path
+    MongoClient = None
+    DESCENDING = -1
 
 logger = logging.getLogger("fx_main")
 
@@ -13,13 +24,101 @@ _client = None
 _db = None
 
 
+class _InMemoryCursor:
+    def __init__(self, docs):
+        self._docs = list(docs)
+
+    def sort(self, key, direction):
+        reverse = direction == DESCENDING or direction == -1
+        self._docs.sort(key=lambda d: d.get(key), reverse=reverse)
+        return self
+
+    def limit(self, count):
+        self._docs = self._docs[:count]
+        return self
+
+    def __iter__(self):
+        return iter(deepcopy(self._docs))
+
+
+class _InMemoryCollection:
+    def __init__(self):
+        self._docs = []
+
+    def create_index(self, *args, **kwargs):
+        return None
+
+    def _match(self, doc, query):
+        return all(doc.get(k) == v for k, v in (query or {}).items())
+
+    def find(self, query=None, projection=None):
+        results = [deepcopy(doc) for doc in self._docs if self._match(doc, query or {})]
+        if projection:
+            trimmed = []
+            exclude_id = projection.get("_id") == 0
+            include_keys = {k for k, v in projection.items() if v and k != "_id"}
+            for doc in results:
+                if include_keys:
+                    new_doc = {k: doc.get(k) for k in include_keys if k in doc}
+                else:
+                    new_doc = dict(doc)
+                if exclude_id:
+                    new_doc.pop("_id", None)
+                trimmed.append(new_doc)
+            results = trimmed
+        return _InMemoryCursor(results)
+
+    def find_one(self, query=None, projection=None):
+        for doc in self.find(query, projection):
+            return doc
+        return None
+
+    def update_one(self, query, update, upsert=False):
+        for idx, doc in enumerate(self._docs):
+            if self._match(doc, query):
+                if "$set" in update:
+                    self._docs[idx] = {**doc, **update["$set"]}
+                return
+        if upsert:
+            new_doc = dict(query)
+            if "$set" in update:
+                new_doc.update(update["$set"])
+            self._docs.append(new_doc)
+
+    def insert_one(self, doc):
+        self._docs.append(deepcopy(doc))
+
+    def insert_many(self, docs):
+        self._docs.extend(deepcopy(list(docs)))
+
+    def delete_many(self, query=None):
+        if not query:
+            self._docs = []
+            return
+        self._docs = [doc for doc in self._docs if not self._match(doc, query)]
+
+
+class _InMemoryDB:
+    def __init__(self):
+        self.settings = _InMemoryCollection()
+        self.telegram_config = _InMemoryCollection()
+        self.alert_history = _InMemoryCollection()
+        self.ai_analyses = _InMemoryCollection()
+        self.backtest_results = _InMemoryCollection()
+        self.users = _InMemoryCollection()
+
+
 def get_db():
     global _client, _db
     if _db is None:
-        _client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
-        _db = _client[DB_NAME]
-        _ensure_indexes()
-        logger.info(f"MongoDB connected: {DB_NAME}")
+        if MongoClient is None or not MONGO_URL or not DB_NAME:
+            _db = _InMemoryDB()
+            logger.warning("MongoDB not configured; using in-memory fallback store.")
+        else:
+            _client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
+            _db = _client[DB_NAME]
+            _ensure_indexes()
+            logger.info(f"MongoDB connected: {DB_NAME}")
     return _db
 
 
