@@ -30,10 +30,10 @@
   <true/>
 
   <key>StandardOutPath</key>
-  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/dukascopy_bridge/launchd_stdout.log</string>
+  <string>/Users/tongyin/Library/Logs/InsightBridge/dukascopy_bridge_launchd_stdout.log</string>
 
   <key>StandardErrorPath</key>
-  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/dukascopy_bridge/launchd_stderr.log</string>
+  <string>/Users/tongyin/Library/Logs/InsightBridge/dukascopy_bridge_launchd_stderr.log</string>
 
   <key>ProcessType</key>
   <string>Background</string>

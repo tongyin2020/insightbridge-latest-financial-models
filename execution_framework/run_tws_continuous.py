@@ -178,7 +178,7 @@ def main() -> int:
     def emergency(why: str):
         try:
             for s in symbols:
-                sess.cancel_all_for(s)
+                pipe.om.cancel_all_for(s)
         finally:
             pipe.halt(f"dead_man_switch:{why}")
 
