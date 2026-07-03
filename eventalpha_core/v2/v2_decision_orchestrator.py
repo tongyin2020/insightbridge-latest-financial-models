@@ -16,6 +16,7 @@ from .risk_gate import RiskGate
 from .expected_value_engine import ExpectedValueEngine
 from .execution_quality_gate import ExecutionQualityGate
 from .cost_model import CostModel, default_cost_model
+from .calibration import load_calibration
 from .audit_logger import V2AuditLogger
 
 
@@ -31,15 +32,20 @@ class V2Decision:
 
 
 class V2DecisionOrchestrator:
-    def __init__(self, opportunity=None, risk=None, ev=None, execution=None):
+    def __init__(self, opportunity=None, risk=None, ev=None, execution=None,
+                 calibration=None):
         self.opportunity = opportunity or OpportunityEngine()
         self.risk = risk or RiskGate()
-        self.ev = ev or ExpectedValueEngine()
+        # use the shipped real-data calibration by default (falls back to the
+        # heuristic per-bucket when the table is missing or a cell is too thin)
+        if calibration is None:
+            calibration = load_calibration()
+        self.ev = ev or ExpectedValueEngine(calibration=calibration)
         self.execution = execution or ExecutionQualityGate()
 
     def decide(self, event, state, account_state=None, execution_state=None,
                cost_model: Optional[CostModel] = None,
-               secs_since_t0: float = 0.0) -> V2Decision:
+               secs_since_t0: float = 0.0, bucket: Optional[str] = None) -> V2Decision:
         opp = self.opportunity.evaluate(state, event)
         if not opp.should_consider:
             return V2Decision("NO_TRADE", "none", 0.0, opp.confidence, 0.0,
@@ -61,7 +67,8 @@ class V2DecisionOrchestrator:
 
         if cost_model is None:
             cost_model = default_cost_model(getattr(state, "asset", "FX"))
-        ev = self.ev.estimate(opp, state, cost_model, secs_since_t0=secs_since_t0)
+        ev = self.ev.estimate(opp, state, cost_model, secs_since_t0=secs_since_t0,
+                              bucket=bucket)
         if not ev.tradable:
             return V2Decision("NO_TRADE", "none", 0.0, opp.confidence, ev.ev_bps,
                               "EV rejected: " + ev.reason, "expected_value")

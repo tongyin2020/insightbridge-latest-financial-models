@@ -26,6 +26,7 @@ from .expected_value_engine import ExpectedValueEngine, ExpectedValueResult
 from .execution_quality_gate import ExecutionQualityGate, ExecutionQualityResult
 from .dynamic_exit_engine import DynamicExitEngine, ExitDecision
 from .cost_model import CostModel, default_cost_model
+from .calibration import load_calibration
 from .audit_logger import V2AuditLogger
 
 __all__ = [
@@ -36,5 +37,6 @@ __all__ = [
     "ExecutionQualityGate", "ExecutionQualityResult",
     "DynamicExitEngine", "ExitDecision",
     "CostModel", "default_cost_model",
+    "load_calibration",
     "V2AuditLogger",
 ]

@@ -122,6 +122,28 @@ def test_exit_time_stop_and_giveback():
     _check("healthy trade holds", not ex.evaluate(hold, FakeState()).should_exit)
 
 
+def test_calibrated_ev_path():
+    # calibrated payoff overrides the heuristic and drives the enter/skip decision
+    calib = {
+        "FX": {"mid": {"n": 30, "p_win": 0.9, "avg_win_bps": 20.0,
+                       "avg_loss_bps": 5.0, "mean_gross_bps": 17.5}},
+        "CRYPTO": {"mid": {"n": 30, "p_win": 0.5, "avg_win_bps": 8.0,
+                           "avg_loss_bps": 8.0, "mean_gross_bps": 0.0}},
+    }
+    eng = ExpectedValueEngine(calibration=calib, min_calib_n=8)
+    fx = eng.estimate(None, FakeState(asset="FX", spread_bps=None), None, bucket="mid")
+    _check("calibrated reason", "calibrated[mid]" in fx.reason)
+    _check("calibrated payoff used", abs(fx.p_win - 0.9) < 1e-9)
+    _check("rich FX cell is tradable", fx.tradable)
+    # crypto mid: gross ~0 minus ~34bps round-trip commission -> not tradable
+    cr = eng.estimate(None, FakeState(asset="CRYPTO", spread_bps=None), None, bucket="mid")
+    _check("crypto cost kills calibrated EV", not cr.tradable)
+    # unknown bucket / thin cell -> falls back to heuristic (needs an opportunity)
+    fb = eng.estimate(OpportunityEngine().evaluate(FakeState(), FakeEvent()),
+                      FakeState(), None, bucket="big")
+    _check("thin/unknown bucket -> heuristic", "heuristic" in fb.reason)
+
+
 def test_audit_logger_writes():
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "v2.jsonl")
@@ -137,7 +159,8 @@ def main():
     for fn in [test_strong_setup_enters, test_weak_move_rejected_by_opportunity,
                test_wide_spread_rejected_by_risk, test_stale_quote_rejected_by_execution,
                test_costs_can_kill_ev, test_cost_model_round_trip,
-               test_exit_time_stop_and_giveback, test_audit_logger_writes]:
+               test_exit_time_stop_and_giveback, test_calibrated_ev_path,
+               test_audit_logger_writes]:
         print(fn.__name__)
         fn()
     print("\nALL V2 SELF-CHECKS PASSED")
