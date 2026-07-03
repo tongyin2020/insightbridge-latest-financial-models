@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List
 
 from eventalpha_core.schema import EventType, MacroEvent, MarketState
+from eventalpha_core.advanced.measured_timing import measured_wait_window
 
 
 @dataclass
@@ -28,7 +29,15 @@ BASE_WINDOWS = {
 
 
 def waiting_policy(event: MacroEvent, state: MarketState, severity_score: float, memory_best_wait: int | None = None) -> WaitingPolicy:
-    lo, hi = BASE_WINDOWS.get(event.event_type, (120, 900))
+    # Prefer measured per-asset windows; fall back to the legacy per-event windows
+    # for assets/events that have not been measured yet.
+    measured = measured_wait_window(state.asset, event.event_type)
+    if measured is not None:
+        lo, hi = measured
+        window_source = f"measured[{state.asset.value}]"
+    else:
+        lo, hi = BASE_WINDOWS.get(event.event_type, (120, 900))
+        window_source = "legacy"
     if memory_best_wait:
         lo = int(0.6 * lo + 0.4 * memory_best_wait)
         hi = max(lo + 60, int(0.6 * hi + 0.4 * memory_best_wait * 2))
@@ -44,4 +53,4 @@ def waiting_policy(event: MacroEvent, state: MarketState, severity_score: float,
         "cross_asset_confirmation_still_above_threshold",
         "reversal_score_below_threshold",
     ]
-    return WaitingPolicy(lo, hi, checks, f"event_type={event.event_type.value}; severity={severity_score:.2f}; volatility_z={state.volatility_z:.2f}")
+    return WaitingPolicy(lo, hi, checks, f"event_type={event.event_type.value}; window={window_source}; severity={severity_score:.2f}; volatility_z={state.volatility_z:.2f}")

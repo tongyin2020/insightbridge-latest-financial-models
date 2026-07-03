@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List
 
 from eventalpha_core.schema import DecisionAction, PositionState
+from eventalpha_core.advanced.measured_timing import measured_time_stop
 
 
 @dataclass
@@ -41,9 +42,10 @@ def escape_decision(pos: PositionState, mfe_r_multiple: float = 0.0, current_r_m
     if mfe_r_multiple > 1.0 and current_r_multiple < 0.60 * mfe_r_multiple:
         score += 0.22
         reasons.append(f"profit_giveback: mfe={mfe_r_multiple:.2f}R now={current_r_multiple:.2f}R")
-    if pos.seconds_in_trade > 1800 and pos.momentum_score < 0.52:
+    time_stop = measured_time_stop(pos.asset, default=1800)
+    if pos.seconds_in_trade > time_stop and pos.momentum_score < 0.52:
         score += 0.12
-        reasons.append("time_decay_without_momentum")
+        reasons.append(f"time_decay_without_momentum(>{time_stop}s)")
     score = min(1.0, score)
     if score >= 0.58:
         return EscapeSignal(DecisionAction.EXIT, 5, 1.0, score, reasons)
