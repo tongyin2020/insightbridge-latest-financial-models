@@ -26,6 +26,7 @@ Run:
 from __future__ import annotations
 
 import math
+from dataclasses import replace as _dc_replace
 from datetime import timedelta, timezone
 
 import numpy as np
@@ -35,6 +36,7 @@ from .config import reports_dir
 from .event_study import _resample_bars, PRE_WINDOW_MIN, HORIZON_S
 from .macro_calendar import build_calendar
 from . import backtest_pnl as bt
+from .data_sources import gdelt_tone as gd
 from eventalpha_core.schema import AssetClass, EventType, MacroEvent, MarketState, DecisionAction
 from eventalpha_core.eventalpha_brain import EventAlphaBrain
 from eventalpha_core.learning_engine import LearningEngine
@@ -238,6 +240,19 @@ def run(years=(2024, 2025), types=("NFP", "CPI", "FOMC")) -> pd.DataFrame:
     learning = LearningEngine(EventMemoryDB(str(mem_path)))
     brain = EventAlphaBrain(learning)
 
+    # 0. real GDELT news tone per event (cache-only; populate via
+    #    gdelt_news_validation first). Maps to a bullishness news_alignment.
+    tone_by_event, tone_vals = {}, []
+    for ev in calendar:
+        t0 = pd.Timestamp(ev.t0_utc)
+        sig = gd.tone_signal_cached(f"{ev.event_type}_{t0.strftime('%Y%m%dT%H%M')}")
+        if sig:
+            tone_by_event[(ev.event_type, t0)] = sig
+            tone_vals.append(sig["tone_change"])
+    tone_std = float(np.std(tone_vals)) if len(tone_vals) > 3 else 1.0
+    tone_std = max(tone_std, 1e-6)
+    print(f"[fullstack] GDELT tone available for {len(tone_by_event)} events")
+
     # 1. load each asset's events (t0, event_type, price series)
     per_asset = {a: bt._asset_events(a, calendar) for a in ("CRYPTO", "FX", "OIL")}
 
@@ -268,8 +283,9 @@ def run(years=(2024, 2025), types=("NFP", "CPI", "FOMC")) -> pd.DataFrame:
     for asset, items in built.items():
         bs_stop = NEW[asset]["stop"]
         cost = COST_BPS[asset]
-        full_trades, timing_trades = [], []
+        full_trades, timing_trades, gdelt_trades = [], [], []
         n_events = len(items)
+        n_gdelt_events = 0
         for order, (t0, et, state, ctx) in enumerate(items):
             et_enum = _EVENT_TYPE[et]
             sgn = 1 if ctx["early_move"] >= 0 else -1
@@ -278,7 +294,7 @@ def run(years=(2024, 2025), types=("NFP", "CPI", "FOMC")) -> pd.DataFrame:
                 tr = _simulate_from(ctx, sgn, bs_stop, cost)
                 tr["order"] = order
                 timing_trades.append(tr)
-            # ---- full stack: let the brain decide ----
+            # ---- full stack (price-proxy news): let the brain decide ----
             related = {a: s for a, s in lookup.get((t0, et), {}).items() if a != asset}
             event = _make_event(et_enum, t0, asset, ctx["early_move"])
             decision = brain.decide(event, state, related)
@@ -287,8 +303,21 @@ def run(years=(2024, 2025), types=("NFP", "CPI", "FOMC")) -> pd.DataFrame:
                 tr = _simulate_from(ctx, d, bs_stop, cost)
                 tr["order"] = order
                 full_trades.append(tr)
+            # ---- full stack (REAL GDELT news): same brain, news from tone ----
+            sig = tone_by_event.get((et, t0))
+            if sig is not None:
+                n_gdelt_events += 1
+                news_g = _clip(0.50 + 0.42 * math.tanh(sig["tone_change"] / tone_std), 0.05, 0.95)
+                state_g = _dc_replace(state, news_alignment=news_g)
+                dec_g = brain.decide(event, state_g, related)
+                if dec_g.action in ENTRY_ACTIONS and dec_g.direction.value in ("long", "short"):
+                    d = 1 if dec_g.direction.value == "long" else -1
+                    tr = _simulate_from(ctx, d, bs_stop, cost)
+                    tr["order"] = order
+                    gdelt_trades.append(tr)
         rows.append({"asset": asset, "policy": "TIMING_ONLY", **_agg(timing_trades, n_events)})
         rows.append({"asset": asset, "policy": "FULL_STACK", **_agg(full_trades, n_events)})
+        rows.append({"asset": asset, "policy": "FULL_STACK_GDELT", **_agg(gdelt_trades, n_gdelt_events)})
 
     res = pd.DataFrame(rows)
     with pd.option_context("display.max_columns", None, "display.width", 260):
@@ -357,6 +386,27 @@ def _write_report(res: pd.DataFrame) -> None:
         )
     lines += [
         "",
+        "## Real news (GDELT) vs price-proxy news",
+        "",
+        "`FULL_STACK_GDELT` is the identical brain but with `news_alignment` fed by "
+        "**real GDELT news tone** around each release (see `GDELT_NEWS_VALIDATION.md`) "
+        "instead of the price-derived proxy. It runs only on the events with GDELT "
+        "coverage, so compare it to `FULL_STACK` directionally, not on absolute totals.",
+        "",
+    ]
+    for asset in ("CRYPTO", "FX", "OIL"):
+        f = res[(res.asset == asset) & (res.policy == "FULL_STACK")].iloc[0]
+        g = res[(res.asset == asset) & (res.policy == "FULL_STACK_GDELT")]
+        if g.empty:
+            continue
+        g = g.iloc[0]
+        lines.append(
+            f"- **{asset}**: proxy-news win {f['win_rate_%']}% / P&L {f['avg_pnl_bps']} "
+            f"vs real-GDELT-news win {g['win_rate_%']}% / P&L {g['avg_pnl_bps']} bps "
+            f"(GDELT traded {g['n_trades']} of {g['n_events']} covered events)."
+        )
+    lines += [
+        "",
         "## Honest verdict",
         "",
         "- The confirmation stack behaves as a **risk filter**: it stands down on a "
@@ -366,10 +416,22 @@ def _write_report(res: pd.DataFrame) -> None:
         "consistent with the P&L study (`THREE_MODEL_VALIDATION.md`): the realised "
         "edge comes from the **decisive-move selectivity threshold**, which is "
         "complementary to (and can be stacked on top of) the brain's gating.",
-        "- The news / surprise legs here are price-collinear proxies, so this run "
-        "**cannot credit real news or real macro-surprise** with any gain. Wiring a "
-        "true historical news-tone feed (e.g. GDELT) and real consensus forecasts is "
-        "the only way to measure the genuine independent contribution of those legs.",
+        "- **Real GDELT news tone carries no measurable directional edge.** The "
+        "standalone test (`GDELT_NEWS_VALIDATION.md`, 197 asset-events) shows "
+        "tone-vs-move hit-rate ~50-54% and correlation ~0.05 — statistically a "
+        "coin flip. News *positivity* is not the *surprise vs expectations* that "
+        "moves price.",
+        "- When tone is fed into the brain (`FULL_STACK_GDELT`) it mostly disagrees "
+        "with momentum, so the brain trades far fewer events. On that small residual "
+        "subset crypto/FX P&L looks better, but with only ~9-40 trades this is "
+        "**selection + small-sample noise, not proven news alpha** — requiring any "
+        "second signal to agree with momentum thins trades without adding per-trade "
+        "edge unless the signal is informative, and the 197-sample test says it "
+        "isn't. Oil is outright worse.",
+        "- Net: attaching a real, price-independent news feed did **not** unlock new "
+        "edge. The genuinely missing input remains a real consensus-forecast "
+        "*surprise* feed (actual-vs-expected), for which no free historical source "
+        "has been found.",
         "",
     ]
     out = reports_dir() / "FULLSTACK_VALIDATION.md"
