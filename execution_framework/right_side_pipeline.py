@@ -22,6 +22,7 @@ right_side_pipeline.py
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -78,8 +79,15 @@ class RightSideKPI:
 class RightSidePipeline:
     def __init__(self, ib=None, dry_run: bool = True,
                  equity: float = 50000.0, max_loss_pct: float = 0.0025,
-                 log_path: Optional[str] = None, journal_db: Optional[str] = None):
-        self.engine = RightSideEventEngine(DEFAULT_RULES)
+                 log_path: Optional[str] = None, journal_db: Optional[str] = None,
+                 selectivity_enabled: Optional[bool] = None):
+        # Opt-in selectivity gate: default OFF; enable via arg or
+        # EVENTALPHA_SELECTIVITY=1 (paper first). See event_right_side_engine.
+        if selectivity_enabled is None:
+            selectivity_enabled = os.environ.get(
+                "EVENTALPHA_SELECTIVITY", "").lower() in {"1", "true", "yes", "on"}
+        self.engine = RightSideEventEngine(DEFAULT_RULES,
+                                           selectivity_enabled=selectivity_enabled)
         self.resolver = IBKRContractResolver(ib)
         self.om = IBKROrderManager(ib, dry_run=dry_run)
         self.kpi = RightSideKPI()

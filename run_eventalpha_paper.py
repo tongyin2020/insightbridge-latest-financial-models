@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 import sys
@@ -17,6 +18,7 @@ if str(BASE) not in sys.path:
 
 from eventalpha_core import (
     AssetClass,
+    DecisionLogger,
     Direction,
     EventAlphaBrain,
     EventMemoryDB,
@@ -58,6 +60,7 @@ def market_state_from_adapter(payload: dict) -> MarketState:
         trend_persistence=float(raw.get("trend_persistence", 0.5)),
         execution_quality=float(raw.get("execution_quality", 0.5)),
         breakout_quality=float(raw.get("breakout_quality", 0.5)),
+        early_move_bps=(float(raw["early_move_bps"]) if raw.get("early_move_bps") is not None else None),
         raw=raw.get("raw", {}),
     )
 
@@ -90,6 +93,12 @@ def main() -> None:
     parser.add_argument("--title", default="Manual EventAlpha paper event")
     parser.add_argument("--top-n", type=int, default=2)
     parser.add_argument("--telegram-alerts", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument(
+        "--selectivity",
+        action=argparse.BooleanOptionalAction,
+        default=os.environ.get("EVENTALPHA_SELECTIVITY", "").lower() in {"1", "true", "yes", "on"},
+        help="Enable the impact-based selectivity gate (stand down on small events).",
+    )
     args = parser.parse_args()
 
     modules = {
@@ -112,8 +121,10 @@ def main() -> None:
     memory_path = BASE / "reports" / "eventalpha_memory.sqlite"
     memory_path.parent.mkdir(parents=True, exist_ok=True)
     learning = LearningEngine(EventMemoryDB(str(memory_path)))
-    brain = EventAlphaBrain(learning, max_account_risk=0.02)
+    brain = EventAlphaBrain(learning, max_account_risk=0.02, selectivity_enabled=args.selectivity)
     event = build_event(args.event_type, args.title)
+
+    decision_logger = DecisionLogger(BASE / "reports" / "eventalpha_decisions.jsonl")
 
     ranks = brain.rank_assets_for_event(event, states)
 
@@ -135,6 +146,7 @@ def main() -> None:
             a.value: s for a, s in states.items() if a != rank.asset
         }
         decision = brain.decide(event, state, related=related)
+        decision_logger.log_decision(event, state, decision, rank_score=rank.score)
         candidate_decisions.append(
             {
                 "asset": rank.asset.value,

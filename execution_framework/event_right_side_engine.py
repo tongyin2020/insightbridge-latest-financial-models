@@ -29,6 +29,26 @@ from typing import Any, Dict, Literal, Optional, Tuple
 
 import pandas as pd
 
+# Selectivity gate deps: the measured impact buckets live in the eventalpha_core
+# package (repo root). Import defensively so a missing package degrades the gate
+# to a no-op instead of breaking the live engine's import.
+_SELECTIVITY_OK = True
+try:
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+    from eventalpha_core.schema import AssetClass as _AssetClass
+    from eventalpha_core.advanced.measured_timing import impact_bucket as _impact_bucket_fn
+    _MEASURED_ASSET = {
+        "FX": _AssetClass.FX,
+        "CRYPTO_SPOT": _AssetClass.CRYPTO,
+        "CRYPTO_FUT": _AssetClass.CRYPTO,
+        # INDEX / TREASURY / RATES have no measured impact edges -> gate no-op.
+    }
+except Exception:                       # noqa: BLE001
+    _SELECTIVITY_OK = False
+    _MEASURED_ASSET = {}
+
 
 Direction = Literal["LONG", "SHORT"]
 SignalStatus = Literal["HOLD", "BUY", "SELL", "REJECT"]
@@ -112,6 +132,7 @@ class EventState:
     event_time: datetime
     base_atr: float
     peak_atr: float
+    event_price: float = 0.0            # close at trigger, for early-move magnitude
     active: bool = True
     confirmed_pending: bool = False     # 已产生信号、等待成交确认
     reason: str = ""
@@ -122,9 +143,34 @@ class RightSideEventEngine:
     """事件后右侧确认引擎。判定与状态推进分离：evaluate() 给判定，
     mark_filled()/mark_abandoned() 由调用方在拿到券商回报后驱动。"""
 
-    def __init__(self, rules: Optional[Dict[str, AssetRule]] = None):
+    def __init__(self, rules: Optional[Dict[str, AssetRule]] = None,
+                 selectivity_enabled: bool = False):
         self.rules = rules or DEFAULT_RULES
         self.states: Dict[str, EventState] = {}
+        # Selectivity gate: stand down on 'small' early-move events (the only
+        # logic change the 2024-2025 P&L study proved adds edge). Default OFF so
+        # the live judgement is byte-for-byte unchanged unless a caller opts in
+        # (paper first). Only crypto/FX symbols have measured edges; others no-op.
+        self.selectivity_enabled = selectivity_enabled
+
+    # ── selectivity helpers ─────────────────────────────────────────────────
+    @staticmethod
+    def _early_move_bps(st: EventState, df: pd.DataFrame) -> Optional[float]:
+        """Absolute post-event price reaction (bps): the executable, price-derived
+        proxy for the macro surprise. Measured from the trigger-bar close."""
+        if not st.event_price or st.event_price <= 0 or len(df) == 0:
+            return None
+        last_close = float(df["close"].iloc[-1])
+        return abs(last_close / st.event_price - 1.0) * 1e4
+
+    @staticmethod
+    def _impact_bucket(asset_class: str, early_move_bps: Optional[float]) -> Optional[str]:
+        if not _SELECTIVITY_OK or early_move_bps is None:
+            return None
+        ac = _MEASURED_ASSET.get(asset_class)
+        if ac is None:
+            return None
+        return _impact_bucket_fn(ac, early_move_bps)
 
     # ── ATR ────────────────────────────────────────────────────────────────
     @staticmethod
@@ -158,10 +204,11 @@ class RightSideEventEngine:
         if base_atr <= 0:
             raise ValueError(f"ATR 非正: {symbol}")
 
+        event_price = float(df["close"].iloc[-1]) if len(df) else 0.0
         self.states[symbol] = EventState(
             symbol=symbol, event_name=event_name, event_time=event_time,
-            base_atr=base_atr, peak_atr=base_atr, active=True,
-            reason="macro_event_triggered",
+            base_atr=base_atr, peak_atr=base_atr, event_price=event_price,
+            active=True, reason="macro_event_triggered",
         )
 
     # ── 状态推进（由调用方在券商回报后调用）───────────────────────────────
@@ -319,6 +366,17 @@ class RightSideEventEngine:
             return {**signal, "symbol": symbol, "event": st.event_name,
                     "atr_reason": atr_reason}
 
+        # --- selectivity gate (opt-in) --------------------------------------
+        # Classify the event by its early-move magnitude; when enabled, stand
+        # down on 'small' events. The bucket is always reported for audit.
+        early_move_bps = self._early_move_bps(st, df)
+        impact_bucket = self._impact_bucket(rule.asset_class, early_move_bps)
+        if self.selectivity_enabled and impact_bucket == "small":
+            return {"status": "HOLD", "symbol": symbol, "event": st.event_name,
+                    "reason": "selectivity_stand_down_small_impact",
+                    "early_move_bps": early_move_bps, "impact_bucket": impact_bucket,
+                    "pre_signal": signal}
+
         vol_ok, vol_reason = self._volume_confirmed(rule, df)
         if not vol_ok:
             return {"status": "HOLD", "symbol": symbol, "reason": vol_reason,
@@ -336,4 +394,6 @@ class RightSideEventEngine:
                 "atr_reason": atr_reason, "volume_reason": vol_reason,
                 "market_reason": mkt_reason, "risk_fraction": rule.risk_fraction,
                 "asset_class": rule.asset_class, "tick_size": rule.tick_size,
+                "early_move_bps": early_move_bps, "impact_bucket": impact_bucket,
+                "selectivity_enabled": self.selectivity_enabled,
                 "requires_fill_confirmation": True}

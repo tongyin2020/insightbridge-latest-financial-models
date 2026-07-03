@@ -124,6 +124,11 @@ class MarketState:
     trend_persistence: float = 0.50
     execution_quality: float = 0.50
     breakout_quality: float = 0.50
+    # Observed early post-event price reaction magnitude (basis points, signed or
+    # absolute). This is the real-time, price-derived proxy for the macro surprise
+    # (actual-minus-consensus is what the first move prices in). The selectivity
+    # gate uses it to stand down on small events and scale the window on big ones.
+    early_move_bps: Optional[float] = None
     raw: Dict[str, Any] = field(default_factory=dict)
 
 

@@ -11,6 +11,7 @@ from .advanced.bayesian_confidence_engine import combine_signals, default_event_
 from .advanced.escape_engine import escape_decision
 from .advanced.event_severity_engine import event_severity
 from .advanced.macro_regime_engine import RegimeInput, infer_macro_regime
+from .advanced.measured_timing import impact_bucket, measured_wait_window_by_impact
 from .advanced.waiting_policy_engine import waiting_policy
 
 
@@ -28,9 +29,27 @@ class EventAlphaBrain:
     - cross-asset ranking
     """
 
-    def __init__(self, learning: LearningEngine, max_account_risk: float = 0.02):
+    def __init__(
+        self,
+        learning: LearningEngine,
+        max_account_risk: float = 0.02,
+        selectivity_enabled: bool = False,
+    ):
         self.learning = learning
         self.max_account_risk = max_account_risk
+        # Selectivity gate: the only logic change the P&L study proved adds edge --
+        # stand down on small-impact events and use the impact-scaled window on
+        # decisive ones. Default OFF so the decision chain is byte-for-byte
+        # unchanged unless a caller opts in (paper first). See advanced.measured_timing.
+        self.selectivity_enabled = selectivity_enabled
+
+    @staticmethod
+    def _early_move_bps(state: MarketState) -> float | None:
+        if state.early_move_bps is not None:
+            return state.early_move_bps
+        raw = state.raw or {}
+        v = raw.get("early_move_bps")
+        return float(v) if v is not None else None
 
     def _infer_regime(
         self,
@@ -158,7 +177,30 @@ class EventAlphaBrain:
             severity_score=severity.severity_score,
             memory_best_wait=memory_wait,
         )
+        wait_seconds = wait.min_wait_seconds
+        max_wait_seconds = wait.max_wait_seconds
         direction = infer_direction(state)
+
+        # --- selectivity gate (opt-in) ---------------------------------------
+        # Pick the impact bucket from the market's own early-move magnitude and,
+        # when enabled: stand down on 'small' events, and adopt the measured
+        # impact-scaled window (faster entry, longer hold) on 'mid'/'big' ones.
+        early_move_bps = self._early_move_bps(state)
+        bucket = impact_bucket(state.asset, early_move_bps) if early_move_bps is not None else None
+        impact_window = (
+            measured_wait_window_by_impact(state.asset, early_move_bps)
+            if early_move_bps is not None
+            else None
+        )
+        selectivity_stand_down = False
+        selectivity_applied = False
+        if self.selectivity_enabled and bucket is not None:
+            if bucket == "small":
+                selectivity_stand_down = True
+                selectivity_applied = True
+            elif impact_window is not None:
+                wait_seconds, max_wait_seconds, _time_stop = impact_window
+                selectivity_applied = True
 
         execution_confidence = _clip01(
             posterior.posterior
@@ -178,9 +220,11 @@ class EventAlphaBrain:
             f"execution_confidence={execution_confidence:.2f}",
             f"memory_edge={memory_edge:.2f}",
             f"cross_asset_alignment={state.cross_asset_alignment:.2f}",
-            f"wait_seconds={wait.min_wait_seconds}",
+            f"wait_seconds={wait_seconds}",
             *posterior.signals_used,
         ]
+        if bucket is not None:
+            reasons.append(f"impact_bucket={bucket}")
         invalidation = [
             "news_alignment_below_0.38",
             "cross_asset_alignment_below_0.38",
@@ -193,6 +237,10 @@ class EventAlphaBrain:
             action = DecisionAction.WATCH
             risk = 0.0
             reasons.append("direction_or_confidence_not_confirmed")
+        if selectivity_stand_down:
+            action = DecisionAction.WATCH
+            risk = 0.0
+            reasons.append("selectivity_stand_down_small_impact")
         return EventDecision(
             action=action,
             grade=grade,
@@ -202,7 +250,7 @@ class EventAlphaBrain:
             raw_score=severity.severity_score,
             calibrated_confidence=posterior.posterior,
             execution_confidence=execution_confidence,
-            wait_seconds=wait.min_wait_seconds,
+            wait_seconds=wait_seconds,
             max_risk_fraction=risk,
             reasons=reasons,
             invalidation_rules=invalidation,
@@ -211,10 +259,16 @@ class EventAlphaBrain:
                 "event_type": event.event_type.value,
                 "action_band": posterior.action_band,
                 "wait_reason": wait.reason,
+                "max_wait_seconds": max_wait_seconds,
                 "severity_tradeable": severity.tradeable,
                 "macro_regime": regime.value,
                 "macro_regime_probabilities": regime_probs,
                 "macro_regime_explanation": regime_explanation,
+                "early_move_bps": early_move_bps,
+                "impact_bucket": bucket,
+                "impact_scaled_window": impact_window,
+                "selectivity_enabled": self.selectivity_enabled,
+                "selectivity_applied": selectivity_applied,
             },
         )
 
