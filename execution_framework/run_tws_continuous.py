@@ -40,6 +40,7 @@ from enabled_symbols import (ENABLED_SYMBOLS, filter_enabled, rejected,
 from ibkr_session import IBKRSession
 from ibkr_contract_resolver import IBKRContractResolver, ResolvedContract, FUT_SPECS
 from right_side_pipeline import RightSidePipeline
+from v2_telemetry_shadow import V2TelemetryShadow
 from runtime_guardian import RuntimeGuardian, check_heartbeat
 from economic_calendar import EconomicCalendar
 
@@ -159,6 +160,14 @@ def main() -> int:
                              log_path=str(RUNTIME_DIR / "continuous.log"),
                              journal_db=JOURNAL_DB)
     pipe.attach_session(sess)
+
+    # v2 遥测影子记录（observe-only，默认关，EVENTALPHA_V2_TELEMETRY=1 开启）。
+    # 只把实时盘口/连接/延迟转成 v2 ExecutionState 并跑执行质量门后落日志，
+    # 绝不下单、不改任何交易决策，用于在真实 paper 行情上验证遥测适配器。
+    shadow = V2TelemetryShadow(log_path=str(RUNTIME_DIR / "v2_telemetry_shadow.log"))
+    if shadow.enabled:
+        print("v2 遥测影子记录: 已开启（observe-only，不影响下单）"
+              " -> reports/runtime/v2_telemetry_shadow.log")
 
     lock_contracts(sess, pipe.resolver, symbols)
 
@@ -293,12 +302,24 @@ def main() -> int:
 
                     bid = None
                     ask = None
+                    _tkr = None
                     if _quote_snapshot_needed(pipe, sym):
                         # 只有在可能进入真实右侧确认时才拉盘口，避免 idle 态制造 warning。
                         tkr = sess.ib.reqMktData(rc.raw, snapshot=True)
                         sess.ib.sleep(1.0)
+                        _tkr = tkr
                         bid = float(tkr.bid) if tkr.bid and tkr.bid > 0 else None
                         ask = float(tkr.ask) if tkr.ask and tkr.ask > 0 else None
+
+                    # v2 遥测影子记录（仅在已开启且已取到盘口时；observe-only）。
+                    if shadow.enabled and _tkr is not None:
+                        _bs = float(_tkr.bidSize) if getattr(_tkr, "bidSize", None) else None
+                        _as = float(_tkr.askSize) if getattr(_tkr, "askSize", None) else None
+                        _te = (_tkr.time.timestamp()
+                               if getattr(_tkr, "time", None) else None)
+                        shadow.observe(sym, connected=sess.ib.isConnected(),
+                                       bid=bid, ask=ask, bid_size=_bs, ask_size=_as,
+                                       latency_s=0.080, tick_epoch=_te)
 
                     res = pipe.step(sym, datetime.now(timezone.utc), df,
                                     bid=bid, ask=ask,
