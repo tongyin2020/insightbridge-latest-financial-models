@@ -23,7 +23,17 @@ That rule is now available inside the decision chain:
   and `selectivity_applied` in `EventDecision.metadata` for audit (even when off).
 - Enable in the paper runner with `--selectivity` or `EVENTALPHA_SELECTIVITY=1`.
 
-Guard: `eventalpha_core/test_selectivity_gate.py` (deterministic, data-free).
+The same gate is also wired into the **live** IBKR path
+(`execution_framework/event_right_side_engine.py`), again **off by default**:
+`RightSideEventEngine(selectivity_enabled=False)`, enabled via
+`RightSidePipeline(selectivity_enabled=True)` or `EVENTALPHA_SELECTIVITY=1`. There
+the early move is measured from the trigger-bar close; on a confirmed breakout a
+`small`-impact event is stood down (`HOLD`), and `impact_bucket` / `early_move_bps`
+are attached to the signal for audit. Only crypto/FX symbols have measured edges;
+INDEX/TREASURY/RATES no-op.
+
+Guards (deterministic, data-free): `eventalpha_core/test_selectivity_gate.py`
+(brain path) and `execution_framework/test_selectivity_live.py` (live engine).
 
 ## 2. Decision logging (every decision, joinable to realized PnL)
 
@@ -50,7 +60,9 @@ Standard: **replay every change against the 2024-2025 dataset before deploy** an
 
 ```
 python3 eventalpha_core/test_selectivity_gate.py
+python3 execution_framework/test_selectivity_live.py
 python3 eventalpha_intraday_study/test_metrics_regression.py
 python3 execution_framework/test_crypto_spot.py
 python3 execution_framework/test_pre_event.py
+python3 execution_framework/test_pipeline_dryrun.py
 ```
