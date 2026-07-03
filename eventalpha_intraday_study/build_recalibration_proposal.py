@@ -10,9 +10,14 @@ Live insertion points (verified in code):
     time-stop and the 0.60 profit-giveback ratio.
 
 Mapping from measured distributions -> parameters:
-  min_wait_seconds  ~ washout p50..p75   (do not enter until the fake-impulse clears)
+  min_wait_seconds  ~ washout p50, floored at a per-venue execution minimum
+                      (we cannot realistically fire in ~1s on a retail channel, and
+                      the floor also protects against the whipsaw p75 tail)
   max_wait_seconds  ~ time_to_peak p50   (must be positioned before the move tops)
-  time_stop_seconds ~ trend_lifetime p75 (flatten once the typical trend is spent)
+  time_stop_seconds ~ trend_lifetime p75 (flatten once the typical trend is spent);
+                      when p75 is censored at the measurement horizon we do NOT
+                      early-time-stop (keep the legacy 1800s), because the trend
+                      routinely outlives the 30-minute window.
 
 Everything here is a proposal written to a report; it does NOT modify live code.
 """
@@ -25,33 +30,47 @@ from pathlib import Path
 import pandas as pd
 
 from .config import reports_dir
+from .event_study import HORIZON_S
 
-# newest summary per asset
+# newest summary per asset. FX prefers the JForex TICK study over the 1-minute
+# HistData study when a tick export is present (falls back to 1-minute otherwise).
 ASSET_FILES = {
-    "CRYPTO": "crypto_event_summary_BTCUSDT_*.csv",
-    "FX_EURUSD": "fxoil_event_summary_EURUSD_*.csv",
-    "FX_USDJPY": "fxoil_event_summary_USDJPY_*.csv",
-    "OIL_BRENT": "fxoil_event_summary_BCOUSD_*.csv",
+    "CRYPTO": ["crypto_event_summary_BTCUSDT_*.csv"],
+    "FX_EURUSD": ["jforex_event_summary_EURUSD_*.csv", "fxoil_event_summary_EURUSD_*.csv"],
+    "FX_USDJPY": ["jforex_event_summary_USDJPY_*.csv", "fxoil_event_summary_USDJPY_*.csv"],
+    "OIL_BRENT": ["fxoil_event_summary_BCOUSD_*.csv"],
 }
+# venue-realistic minimum entry latency (seconds) per asset family
+MIN_WAIT_FLOOR = {"CRYPTO": 5, "FX": 30, "OIL": 60}
 EVENTS = ["NFP", "CPI", "FOMC"]
 
 
-def _latest(pattern: str) -> Path | None:
-    files = sorted(glob.glob(str(reports_dir() / pattern)))
-    return Path(files[-1]) if files else None
+def _latest(patterns: list[str]) -> Path | None:
+    for pattern in patterns:
+        files = sorted(glob.glob(str(reports_dir() / pattern)))
+        if files:
+            return Path(files[-1])
+    return None
 
 
 def _round_to(x: float, base: int) -> int:
     return int(base * round(float(x) / base))
 
 
+def _asset_family(asset: str) -> str:
+    return "OIL" if asset.startswith("OIL") else ("FX" if asset.startswith("FX") else "CRYPTO")
+
+
 def build() -> dict:
     proposal: dict = {"assets": {}, "notes": []}
-    for asset, pat in ASSET_FILES.items():
-        f = _latest(pat)
+    censored = 0.95 * HORIZON_S
+    for asset, pats in ASSET_FILES.items():
+        f = _latest(pats)
         if f is None:
             proposal["notes"].append(f"missing summary for {asset}")
             continue
+        floor = MIN_WAIT_FLOOR[_asset_family(asset)]
+        is_tick = f.name.startswith("jforex_") or f.name.startswith("crypto_")
         df = pd.read_csv(f).set_index("event_type")
         per_event = {}
         for et in EVENTS + ["ALL"]:
@@ -63,9 +82,12 @@ def build() -> dict:
             peak_p50 = r.get("time_to_peak_s_med")
             life_p75 = r.get("trend_lifetime_s_p75")
             # proposed live values
-            min_wait = _round_to(max(wash_p50 or 0, 5), 5)
+            min_wait = _round_to(max(wash_p50 or 0, floor), 5)
             max_wait = _round_to(max((peak_p50 or 0), min_wait + 30), 15)
-            time_stop = _round_to(max((life_p75 or 0), max_wait + 60), 30)
+            if (life_p75 or 0) >= censored:
+                time_stop = HORIZON_S   # censored: trend outlives the window -> no early stop
+            else:
+                time_stop = _round_to(max((life_p75 or 0), max_wait + 60), 30)
             per_event[et] = {
                 "measured": {
                     "washout_p50": wash_p50, "washout_p75": wash_p75,
@@ -79,7 +101,9 @@ def build() -> dict:
                     "time_stop_seconds": time_stop,
                 },
             }
-        proposal["assets"][asset] = {"source_file": f.name, "by_event": per_event}
+        proposal["assets"][asset] = {"source_file": f.name,
+                                      "resolution": "tick" if is_tick else "1-minute",
+                                      "by_event": per_event}
     return proposal
 
 
@@ -89,7 +113,7 @@ def to_markdown(p: dict) -> str:
                  "percentiles from real intraday data; `proposed` = suggested live value.")
     lines.append("")
     for asset, blk in p["assets"].items():
-        lines.append(f"## {asset}  (`{blk['source_file']}`)")
+        lines.append(f"## {asset}  ({blk['resolution']}, `{blk['source_file']}`)")
         lines.append("")
         lines.append("| event | washout p50/p75 | to_peak p50 | trend_life p75 | move bps p50 | -> min_wait | max_wait | time_stop |")
         lines.append("|---|---|---|---|---|---|---|---|")

@@ -3,17 +3,22 @@
 These numbers are NOT guesses. They are measured by the `eventalpha_intraday_study`
 package from real 2024-2025 intraday data (63 NFP/CPI/FOMC events per asset):
   - CRYPTO: BTCUSDT tick data (Binance public archive)
-  - FX:     EURUSD 1-minute bars (HistData) as the liquid-major proxy
+  - FX:     EURUSD + USDJPY TICK data (JForex authenticated export), pooled
   - OIL:    Brent (BCOUSD) 1-minute bars (HistData) as the WTI proxy
 
 Mapping from the event study to these parameters:
-  min_wait_seconds  ~ washout p50      (do not enter until the fake-impulse clears)
+  min_wait_seconds  ~ washout p50, floored at a venue-realistic minimum
+                      (crypto 5s, FX 30s, oil 60s -- we cannot fire in ~1s on a
+                      retail channel, and the floor also covers the whipsaw p75 tail)
   max_wait_seconds  ~ time_to_peak p50 (must be positioned before the move tops)
-  time_stop_seconds ~ trend_lifetime p75 (typical trend is spent by here)
+  time_stop_seconds ~ trend_lifetime p75; when p75 is censored at the 30-min
+                      measurement horizon we keep 1800s (no early time-stop).
 
-FX/OIL reaction/washout are at 1-minute resolution (a known limitation; a tick
-refresh via JForex is planned). Values are rounded. RATES and INDEX are not yet
-measured and intentionally omitted so they fall back to the legacy windows.
+FX is now real tick (reaction ~1s, not the earlier 1-minute artifact). OIL is
+still 1-minute Brent (this Dukascopy account is FX-only, so no WTI CFD tick; the
+precise oil path is IBKR historical, where the live oil model already runs).
+RATES and INDEX are not yet measured and intentionally omitted so they fall back
+to the legacy windows.
 
 Source report: eventalpha_intraday_study RECALIBRATION_PROPOSAL.md (measured 2026-07).
 """
@@ -29,9 +34,10 @@ MEASURED_WAIT: dict[Tuple[AssetClass, EventType], Tuple[int, int]] = {
     (AssetClass.CRYPTO, EventType.CPI):  (5, 330),
     (AssetClass.CRYPTO, EventType.FOMC): (45, 165),
 
-    (AssetClass.FX, EventType.NFP):  (30, 660),
-    (AssetClass.FX, EventType.CPI):  (180, 300),
-    (AssetClass.FX, EventType.FOMC): (10, 600),
+    # FX = EURUSD+USDJPY tick, pooled (see RECALIBRATION_PROPOSAL.md)
+    (AssetClass.FX, EventType.NFP):  (30, 450),
+    (AssetClass.FX, EventType.CPI):  (30, 585),
+    (AssetClass.FX, EventType.FOMC): (30, 450),
 
     (AssetClass.OIL, EventType.NFP):  (120, 780),
     (AssetClass.OIL, EventType.CPI):  (180, 420),
@@ -41,14 +47,16 @@ MEASURED_WAIT: dict[Tuple[AssetClass, EventType], Tuple[int, int]] = {
 # per-asset fallback window when the specific event type was not measured
 MEASURED_WAIT_ASSET_DEFAULT: dict[AssetClass, Tuple[int, int]] = {
     AssetClass.CRYPTO: (15, 420),
-    AssetClass.FX: (60, 600),
+    AssetClass.FX: (30, 510),
     AssetClass.OIL: (120, 540),
 }
 
-# per-asset time stop (trend_lifetime p75, ALL events)
+# per-asset time stop (trend_lifetime p75, ALL events).
+# FX p75 is censored at the 30-min horizon (trends routinely outlive the window),
+# so FX keeps the legacy 1800s -- i.e. do NOT flatten FX early on time alone.
 MEASURED_TIME_STOP: dict[AssetClass, int] = {
     AssetClass.CRYPTO: 1530,
-    AssetClass.FX: 1560,
+    AssetClass.FX: 1800,
     AssetClass.OIL: 1560,
 }
 
