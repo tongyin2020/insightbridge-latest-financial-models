@@ -27,7 +27,7 @@ and a simple pnl/vol ratio.
 """
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import timedelta
 
 import numpy as np
 import pandas as pd
@@ -37,6 +37,13 @@ from .event_study import _resample_bars, PRE_WINDOW_MIN, HORIZON_S
 from .macro_calendar import build_calendar
 from .data_sources import binance_aggtrades as binance
 from .data_sources import jforex_ticks as jf
+from eventalpha_core.schema import AssetClass
+from eventalpha_core.advanced.measured_timing import (
+    impact_bucket, MEASURED_WAIT_BY_IMPACT,
+)
+
+_ASSET_CLASS = {"CRYPTO": AssetClass.CRYPTO, "FX": AssetClass.FX, "OIL": AssetClass.OIL}
+CLASSIFY_S = 20          # read the early-move magnitude this many seconds after T0
 
 REACT_BPS = 2.0          # entry confirmation threshold
 GIVEBACK_FRAC = 0.4      # trailing exit: give back this fraction of MFE
@@ -121,6 +128,30 @@ def _simulate(series: pd.DataFrame, t0: pd.Timestamp, win: tuple[int, int],
             "hold_s": float(secs[fwd[exit_j]] - secs[idx])}
 
 
+def _scaled_plan(series: pd.DataFrame, t0: pd.Timestamp, asset: str,
+                 bar_seconds: int) -> tuple[tuple[int, int], int] | None:
+    """Impact-scaled window for one event: read the early-move magnitude at
+    CLASSIFY_S, pick the bucket, return (window, time_stop). Return None to SKIP
+    (small bucket = 'don't chase'), which is the selectivity the backtest proved."""
+    pre = _resample_bars(series, t0 - timedelta(minutes=PRE_WINDOW_MIN), t0, bar_seconds)
+    post = _resample_bars(series, t0, t0 + timedelta(seconds=HORIZON_S), bar_seconds)
+    if len(pre) < 5 or len(post) < 10:
+        return None
+    p0 = float(pre["Price"].iloc[-1])
+    secs = ((post.index - t0).total_seconds()).astype(float)
+    price = post["Price"].to_numpy(dtype=float)
+    early_mask = secs <= CLASSIFY_S
+    if not np.any(early_mask):
+        return None
+    early_bps = float(np.max(np.abs(price[early_mask] / p0 - 1.0))) * 1e4
+    ac = _ASSET_CLASS[asset]
+    b = impact_bucket(ac, early_bps)
+    if b is None or b == "small":
+        return None                       # stand down on the noise events
+    mn, mx, stop = MEASURED_WAIT_BY_IMPACT[(ac, b)]
+    return (max(mn, CLASSIFY_S), mx), stop
+
+
 def _asset_events(asset: str, calendar) -> list[tuple[pd.Timestamp, str, pd.DataFrame]]:
     out = []
     if asset == "CRYPTO":
@@ -185,6 +216,18 @@ def run(years=(2024, 2025), types=("NFP", "CPI", "FOMC"),
                 if sc.get("n_trades"):
                     rows.append({"asset": asset, "entry_bps": entry_bps,
                                  "policy": label, **sc})
+        # impact-scaled policy: bucket each event by its early move, skip small,
+        # apply the bucket's window/stop (the live-ready selectivity rule)
+        strades = []
+        for t0, et, series in events:
+            plan = _scaled_plan(series, t0, asset, bs)
+            if plan is None:
+                continue
+            (win, stop) = plan
+            strades.append(_simulate(series, t0, win, stop, bs, cost, entry_bps=REACT_BPS))
+        sc = _score(strades)
+        if sc.get("n_trades"):
+            rows.append({"asset": asset, "entry_bps": "scaled", "policy": "SCALED", **sc})
     res = pd.DataFrame(rows)
     with pd.option_context("display.max_columns", None, "display.width", 240):
         print(res.to_string(index=False))

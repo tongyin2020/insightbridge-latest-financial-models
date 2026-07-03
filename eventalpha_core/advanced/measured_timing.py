@@ -76,3 +76,60 @@ def measured_wait_window(asset: AssetClass, event_type: EventType) -> Optional[T
 def measured_time_stop(asset: AssetClass, default: int = 1800) -> int:
     """Return measured per-asset time stop (seconds); legacy default if unmeasured."""
     return MEASURED_TIME_STOP.get(asset, default)
+
+
+# --- impact-scaled windows (NOT yet wired into the live decision path) --------
+# The P&L backtest showed the edge is in selectivity: trading every event is
+# flat/negative; committing only to decisive moves turns crypto/FX positive.
+# These per-bucket windows let the model shrink the wait + extend the hold on big
+# events and stand down on small ones. The bucket is picked at entry from the
+# market's own early-move magnitude (bps) -- an executable, real-time proxy for
+# the surprise (actual-minus-consensus is exactly what the first move prices in),
+# so no external forecast feed is needed. Thresholds and windows are measured
+# (see IMPACT_SCALED_WINDOWS.md). Wiring the selector into the entry loop is a
+# logic change and is intentionally left to an explicit, approved step.
+IMPACT = str  # "small" | "mid" | "big"
+
+# |early move| bps that separates the buckets, per asset family
+MEASURED_IMPACT_EDGES: dict[AssetClass, Tuple[float, float]] = {
+    AssetClass.CRYPTO: (48.6, 106.9),   # small < 48.6 <= mid < 106.9 <= big
+    AssetClass.FX:     (21.1, 41.8),
+    AssetClass.OIL:    (22.8, 42.4),
+}
+
+# (min_wait, max_wait, time_stop) per asset x bucket
+MEASURED_WAIT_BY_IMPACT: dict[Tuple[AssetClass, str], Tuple[int, int, int]] = {
+    (AssetClass.CRYPTO, "small"): (115, 225, 690),
+    (AssetClass.CRYPTO, "mid"):   (35, 225, 1350),
+    (AssetClass.CRYPTO, "big"):   (5, 705, 1800),
+
+    (AssetClass.FX, "small"): (105, 345, 1500),
+    (AssetClass.FX, "mid"):   (30, 330, 1620),
+    (AssetClass.FX, "big"):   (30, 1110, 1800),
+
+    (AssetClass.OIL, "small"): (60, 360, 690),
+    (AssetClass.OIL, "mid"):   (65, 630, 1650),
+    (AssetClass.OIL, "big"):   (60, 1200, 1800),
+}
+
+
+def impact_bucket(asset: AssetClass, early_move_bps: float) -> Optional[str]:
+    """Classify an event by its observed early-move magnitude. None if unmeasured."""
+    edges = MEASURED_IMPACT_EDGES.get(asset)
+    if edges is None:
+        return None
+    lo, hi = edges
+    m = abs(early_move_bps)
+    return "small" if m < lo else ("mid" if m < hi else "big")
+
+
+def measured_wait_window_by_impact(
+    asset: AssetClass, early_move_bps: float
+) -> Optional[Tuple[int, int, int]]:
+    """Return (min_wait, max_wait, time_stop) for the observed impact bucket, or
+    None when the asset was not measured. Pure/inert: nothing in the live loop
+    calls this yet -- flip the entry loop to use it once approved."""
+    b = impact_bucket(asset, early_move_bps)
+    if b is None:
+        return None
+    return MEASURED_WAIT_BY_IMPACT.get((asset, b))
