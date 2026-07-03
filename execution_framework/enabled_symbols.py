@@ -27,7 +27,7 @@ ENABLED_SYMBOLS: List[str] = [
     "ZT", "ZN",          # 国债
     "SR3",               # 利率
     "EURUSD", "USDJPY",  # 外汇
-    "BTC",               # 现货加密（PAXOS），软止损
+    "BTC",               # 现货加密（ZEROHASH），软止损
 ]
 
 # 已实现但因选择暂不启用
@@ -44,7 +44,7 @@ SYMBOL_NOTES = {
     "SR3": "3M SOFR (CME)",
     "EURUSD": "EUR/USD spot (IDEALPRO)",
     "USDJPY": "USD/JPY spot (IDEALPRO)",
-    "BTC": "BTC/USD 现货 (PAXOS) — IOC 限价 + 软止损",
+    "BTC": "BTC/USD 现货 (ZEROHASH) — IOC 限价 + 软止损",
     "MBT": "Micro Bitcoin 期货 (CME) — 现用现货 BTC 代替，默认禁用",
 }
 

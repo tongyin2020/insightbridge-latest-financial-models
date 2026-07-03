@@ -64,7 +64,7 @@ def _historical_what_to_show(resolved: ResolvedContract) -> str:
 
     FX 现货不能稳定使用 TRADES/LAST，改用 MIDPOINT，
     否则会反复触发 FXSUBPIP / no historical market data 警告。
-    PAXOS 加密现货要求 AGGTRADES，不能用默认 TRADES。
+    ZEROHASH 加密现货要求 AGGTRADES，不能用默认 TRADES（Paxos 迁移后同样如此）。
     """
     if resolved.sec_type == "CASH":
         return "MIDPOINT"
@@ -316,7 +316,7 @@ def main() -> int:
                 except Exception as exc:  # noqa: BLE001
                     print(f"  [{sym}] 扫描异常: {exc}")
 
-            # 软止损检查（现货加密专用：PAXOS 无原生 STP）
+            # 软止损检查（现货加密专用：ZEROHASH 无原生 STP）
             for trig in pipe.om.check_soft_stops(_spot_price):
                 print(f"  ⛔ 软止损触发 {trig['symbol']} @ {trig['current']} "
                       f"(止损 {trig['stop_price']}) -> {trig['exit_state']}")

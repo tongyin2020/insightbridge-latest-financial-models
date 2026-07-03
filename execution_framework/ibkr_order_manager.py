@@ -36,7 +36,7 @@ class OrderTicket:
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     fills: list = field(default_factory=list)
     note: str = ""
-    is_crypto: bool = False        # 现货加密（PAXOS）：cashQty+IOC，无原生止损
+    is_crypto: bool = False        # 现货加密（ZEROHASH）：cashQty+IOC，无原生止损
     soft_stop: bool = False        # 是否由软止损监控器看护
 
 
@@ -134,12 +134,12 @@ class IBKROrderManager:
         self._tickets[client_ref] = ticket
         return ticket
 
-    # 现货加密下单：IOC 限价（PAXOS 要求）+ 软止损（无原生 STP）
+    # 现货加密下单：IOC 限价（IBKR 现货加密要求）+ 软止损（无原生 STP）
     def _place_live_crypto(self, rc, ticket: OrderTicket) -> OrderTicket:
         from ib_insync import LimitOrder
         order = LimitOrder(ticket.action, ticket.quantity, ticket.limit_price)
         order.orderRef = ticket.client_ref
-        order.tif = "IOC"          # PAXOS 要求 IOC，不是 DAY
+        order.tif = "IOC"          # IBKR 现货加密要求 IOC，不是 DAY
         order.transmit = True
         trade = self.ib.placeOrder(rc.raw, order)
         ticket.state = "SUBMITTED"
