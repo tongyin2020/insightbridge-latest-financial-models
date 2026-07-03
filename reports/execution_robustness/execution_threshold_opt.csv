@@ -1,0 +1,4 @@
+asset,annealed_theta_bps,measured_small_cut_bps,kept_trades,kept_mean_net_bps,kept_robust_lo_bps
+CRYPTO,84.4,48.6,10,-22.8,-30.4
+FX,0.6,21.1,120,-0.7,-2.0
+OIL,20.0,22.8,10,2.8,-9.0
