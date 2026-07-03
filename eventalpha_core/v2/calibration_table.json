@@ -1,0 +1,75 @@
+{
+  "basis": "2024-2025 real replay, GROSS payoff, pooled",
+  "min_n": 8,
+  "table": {
+    "CRYPTO": {
+      "small": {
+        "n": 40,
+        "p_win": 0.775,
+        "avg_win_bps": 6.99,
+        "avg_loss_bps": 25.38,
+        "mean_gross_bps": -0.3
+      },
+      "mid": {
+        "n": 16,
+        "p_win": 0.75,
+        "avg_win_bps": 12.2,
+        "avg_loss_bps": 13.44,
+        "mean_gross_bps": 5.79
+      },
+      "big": {
+        "n": 7,
+        "p_win": 0.5714,
+        "avg_win_bps": 13.69,
+        "avg_loss_bps": 16.5,
+        "mean_gross_bps": 0.75
+      }
+    },
+    "FX": {
+      "small": {
+        "n": 45,
+        "p_win": 0.8222,
+        "avg_win_bps": 2.46,
+        "avg_loss_bps": 7.21,
+        "mean_gross_bps": 0.74
+      },
+      "mid": {
+        "n": 55,
+        "p_win": 0.9091,
+        "avg_win_bps": 2.82,
+        "avg_loss_bps": 16.0,
+        "mean_gross_bps": 1.11
+      },
+      "big": {
+        "n": 24,
+        "p_win": 0.8333,
+        "avg_win_bps": 2.89,
+        "avg_loss_bps": 17.7,
+        "mean_gross_bps": -0.55
+      }
+    },
+    "OIL": {
+      "small": {
+        "n": 55,
+        "p_win": 0.6182,
+        "avg_win_bps": 5.25,
+        "avg_loss_bps": 14.69,
+        "mean_gross_bps": -2.36
+      },
+      "mid": {
+        "n": 7,
+        "p_win": 0.7143,
+        "avg_win_bps": 19.34,
+        "avg_loss_bps": 2.71,
+        "mean_gross_bps": 13.04
+      },
+      "big": {
+        "n": 1,
+        "p_win": 0.0,
+        "avg_win_bps": 0.0,
+        "avg_loss_bps": 8.54,
+        "mean_gross_bps": -8.54
+      }
+    }
+  }
+}

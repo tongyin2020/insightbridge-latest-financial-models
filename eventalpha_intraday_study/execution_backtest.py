@@ -131,7 +131,8 @@ def _records(asset: str, events, bs: int, costs_by_scen: dict) -> list[dict]:
             continue
         early = path["early_bps"]
         bucket = impact_bucket(ac, early) if early is not None else None
-        rec = {"asset": asset, "event_type": et, "early_bps": early, "bucket": bucket}
+        rec = {"asset": asset, "event_type": et, "year": int(pd.Timestamp(t0).year),
+               "early_bps": early, "bucket": bucket}
         g = em.fills(path["secs"], path["price"], path["entry_idx"],
                      path["exit_idx"], path["direction"], em.GROSS)
         rec["gross_bps"] = g["net_bps"]
