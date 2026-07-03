@@ -30,8 +30,8 @@ FX_SPECS: Dict[str, Dict[str, str]] = {
 
 # ── 期货：模糊模板，交给 reqContractDetails 展开到期月 ───────────────────────
 CRYPTO_SPECS: Dict[str, Dict[str, str]] = {
-    "BTC": {"symbol": "BTC", "currency": "USD", "exchange": "PAXOS"},
-    # 如需 ETH: "ETH": {"symbol": "ETH", "currency": "USD", "exchange": "PAXOS"},
+    "BTC": {"symbol": "BTC", "currency": "USD", "exchange": "ZEROHASH"},
+    # 如需 ETH: "ETH": {"symbol": "ETH", "currency": "USD", "exchange": "ZEROHASH"},
 }
 
 FUT_SPECS: Dict[str, Dict[str, str]] = {
