@@ -44,7 +44,7 @@ MEASURED = {
 ASSET_SOURCES = {
     "CRYPTO": ["crypto_event_measurements_BTCUSDT_*.csv"],
     "FX":     ["jforex_event_measurements_EURUSD_*.csv", "jforex_event_measurements_USDJPY_*.csv"],
-    "OIL":    ["fxoil_event_measurements_BCOUSD_*.csv"],
+    "OIL":    ["ibkr_event_measurements_WTIUSD_*.csv", "fxoil_event_measurements_BCOUSD_*.csv"],
 }
 
 
@@ -54,11 +54,16 @@ def _latest(pattern: str) -> Path | None:
 
 
 def _load_asset(patterns: list[str]) -> pd.DataFrame:
+    # FX pools EURUSD+USDJPY (two patterns); OIL/CRYPTO prefer the first pattern
+    # that resolves (real WTI over Brent, tick over 1-minute).
+    fx = len(patterns) == 2 and all("jforex_" in p for p in patterns)
     frames = []
     for pat in patterns:
         f = _latest(pat)
         if f is not None:
             frames.append(pd.read_csv(f))
+            if not fx:
+                break
     if not frames:
         return pd.DataFrame()
     df = pd.concat(frames, ignore_index=True)

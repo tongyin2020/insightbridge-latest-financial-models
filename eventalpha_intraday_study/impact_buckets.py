@@ -23,7 +23,7 @@ from .config import reports_dir
 ASSET_SOURCES = {
     "CRYPTO": ["crypto_event_measurements_BTCUSDT_*.csv"],
     "FX":     ["jforex_event_measurements_EURUSD_*.csv", "jforex_event_measurements_USDJPY_*.csv"],
-    "OIL":    ["fxoil_event_measurements_BCOUSD_*.csv"],
+    "OIL":    ["ibkr_event_measurements_WTIUSD_*.csv", "fxoil_event_measurements_BCOUSD_*.csv"],
 }
 COLS = ["washout_s", "time_to_peak_s", "trend_lifetime_s", "retrace_after_peak_s"]
 
@@ -34,7 +34,15 @@ def _latest(pattern: str) -> Path | None:
 
 
 def _load(patterns: list[str]) -> pd.DataFrame:
-    frames = [pd.read_csv(_latest(p)) for p in patterns if _latest(p) is not None]
+    # FX pools both majors; OIL prefers the first resolving source (WTI over Brent)
+    fx = len(patterns) == 2 and all("jforex_" in p for p in patterns)
+    frames = []
+    for p in patterns:
+        f = _latest(p)
+        if f is not None:
+            frames.append(pd.read_csv(f))
+            if not fx:
+                break
     if not frames:
         return pd.DataFrame()
     df = pd.concat(frames, ignore_index=True)

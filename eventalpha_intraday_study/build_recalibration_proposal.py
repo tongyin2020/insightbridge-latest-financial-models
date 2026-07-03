@@ -38,8 +38,19 @@ ASSET_FILES = {
     "CRYPTO": ["crypto_event_summary_BTCUSDT_*.csv"],
     "FX_EURUSD": ["jforex_event_summary_EURUSD_*.csv", "fxoil_event_summary_EURUSD_*.csv"],
     "FX_USDJPY": ["jforex_event_summary_USDJPY_*.csv", "fxoil_event_summary_USDJPY_*.csv"],
-    "OIL_BRENT": ["fxoil_event_summary_BCOUSD_*.csv"],
+    # oil prefers real WTI 5-second (IBKR) and falls back to 1-minute Brent proxy
+    "OIL": ["ibkr_event_summary_WTIUSD_*.csv", "fxoil_event_summary_BCOUSD_*.csv"],
 }
+
+
+def _resolution(name: str) -> str:
+    if name.startswith("jforex_") or name.startswith("crypto_"):
+        return "tick"
+    if name.startswith("ibkr_"):
+        return "5-second"
+    return "1-minute"
+
+
 # venue-realistic minimum entry latency (seconds) per asset family
 MIN_WAIT_FLOOR = {"CRYPTO": 5, "FX": 30, "OIL": 60}
 EVENTS = ["NFP", "CPI", "FOMC"]
@@ -70,7 +81,6 @@ def build() -> dict:
             proposal["notes"].append(f"missing summary for {asset}")
             continue
         floor = MIN_WAIT_FLOOR[_asset_family(asset)]
-        is_tick = f.name.startswith("jforex_") or f.name.startswith("crypto_")
         df = pd.read_csv(f).set_index("event_type")
         per_event = {}
         for et in EVENTS + ["ALL"]:
@@ -102,7 +112,7 @@ def build() -> dict:
                 },
             }
         proposal["assets"][asset] = {"source_file": f.name,
-                                      "resolution": "tick" if is_tick else "1-minute",
+                                      "resolution": _resolution(f.name),
                                       "by_event": per_event}
     return proposal
 
