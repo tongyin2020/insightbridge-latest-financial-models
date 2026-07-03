@@ -37,7 +37,7 @@ LEGACY_TIME_STOP = 1800
 MEASURED = {
     "CRYPTO": {"win": {"NFP": (70, 585), "CPI": (5, 330), "FOMC": (45, 165)}, "stop": 1530},
     "FX":     {"win": {"NFP": (30, 450), "CPI": (30, 585), "FOMC": (30, 450)}, "stop": 1800},
-    "OIL":    {"win": {"NFP": (120, 780), "CPI": (180, 420), "FOMC": (120, 420)}, "stop": 1560},
+    "OIL":    {"win": {"NFP": (60, 630), "CPI": (65, 615), "FOMC": (60, 960)}, "stop": 1650},
 }
 
 # per-asset per-event data (prefer FX tick over 1-minute)
