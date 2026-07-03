@@ -1,5 +1,5 @@
 """
-test_crypto_spot.py — 离线自检：BTC 现货(PAXOS) 接入 + 软止损 + 品种启用。
+test_crypto_spot.py — 离线自检：BTC 现货(ZEROHASH) 接入 + 软止损 + 品种启用。
 运行：python3 execution_framework/test_crypto_spot.py
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ def test_rule_and_spec():
     assert "BTC" in DEFAULT_RULES, "缺 BTC AssetRule"
     r = DEFAULT_RULES["BTC"]
     assert r.asset_class == "CRYPTO_SPOT", r.asset_class
-    assert "BTC" in CRYPTO_SPECS and CRYPTO_SPECS["BTC"]["exchange"] == "PAXOS"
+    assert "BTC" in CRYPTO_SPECS and CRYPTO_SPECS["BTC"]["exchange"] == "ZEROHASH"
     print(f"✓ BTC 规则: class={r.asset_class} tick={r.tick_size} "
           f"冷静期={r.min_cooldown_minutes}min；现货交易所={CRYPTO_SPECS['BTC']['exchange']}")
 
@@ -36,7 +36,7 @@ def test_soft_stop_flow():
     om = IBKROrderManager(ib=None, dry_run=True)
     # 模拟一个已锁定的 BTC 现货合约
     rc = ResolvedContract(symbol="BTC", sec_type="CRYPTO", con_id=12345,
-                          exchange="PAXOS", currency="USD",
+                          exchange="ZEROHASH", currency="USD",
                           local_symbol="BTC.USD", raw=object())
     # 多单：入场 60000，止损 59000，数量 0.01 BTC
     ticket = om.submit_bracket(resolved_contract=rc, symbol="BTC", action="BUY",
