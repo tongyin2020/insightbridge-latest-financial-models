@@ -33,9 +33,12 @@ CLIENT_ID     = int(os.getenv("IB_CLIENT_ID", "91"))
 # Futures are intentionally defined as templates without fixed expiry.
 # We resolve them via contractDetails -> choose front/near month -> lock conId.
 CONTRACTS = {
-    "BTC": Crypto("BTC", "PAXOS", "USD"),
-    "ETH": Crypto("ETH", "PAXOS", "USD"),
-    "SOL": Crypto("SOL", "PAXOS", "USD"),
+    # IBKR migrated spot crypto from Paxos to Zerohash; the account's market-data
+    # subscription is "ZEROHASH Cryptocurrency TP", so requests must use ZEROHASH
+    # (PAXOS now returns Error 162 "No market data permissions for PAXOS CRYPTO").
+    "BTC": Crypto("BTC", "ZEROHASH", "USD"),
+    "ETH": Crypto("ETH", "ZEROHASH", "USD"),
+    "SOL": Crypto("SOL", "ZEROHASH", "USD"),
     "AUDUSD": Forex("AUDUSD"),
     "NZDUSD": Forex("NZDUSD"),
     "ZN": Future(symbol="ZN", exchange="CBOT", currency="USD", tradingClass="ZN"),
@@ -223,11 +226,11 @@ class IBKRConnector:
             return {"error": f"Could not resolve {symbol}: {exc}"}
 
         order = MarketOrder(direction.upper(), quantity)
-        # IBKR crypto contracts (PAXOS) require cashQty + IOC time-in-force
+        # IBKR spot crypto (Zerohash) requires cashQty + IOC time-in-force
         if isinstance(contract, Crypto):
             order.totalQuantity = 0
             order.cashQty = quantity   # quantity = USD amount for crypto (e.g. 100 = $100)
-            order.tif = 'IOC'          # PAXOS requires IOC (Immediate or Cancel), not DAY
+            order.tif = 'IOC'          # IBKR spot crypto requires IOC (Immediate or Cancel), not DAY
         order.orderRef = f"{model}_{symbol}_{datetime.now(timezone.utc).strftime('%H%M%S')}"
 
         trade = self.ib.placeOrder(contract, order)

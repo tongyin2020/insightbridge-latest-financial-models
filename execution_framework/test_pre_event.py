@@ -45,7 +45,7 @@ def test_pre_event_freeze_and_flatten():
     # 注入 MNQ 期货 + BTC 现货已锁定合约
     pipe.resolver._cache["MNQ"] = ResolvedContract("MNQ", "FUT", 111, "CME", "USD",
                                                    local_symbol="MNQU6", raw=object())
-    pipe.resolver._cache["BTC"] = ResolvedContract("BTC", "CRYPTO", 222, "PAXOS", "USD",
+    pipe.resolver._cache["BTC"] = ResolvedContract("BTC", "CRYPTO", 222, "ZEROHASH", "USD",
                                                    local_symbol="BTC.USD", raw=object())
     # 先给 BTC 建一个软止损持仓（dry-run）
     t = pipe.om.submit_bracket(pipe.resolver._cache["BTC"], "BTC", "BUY", 0.01,
