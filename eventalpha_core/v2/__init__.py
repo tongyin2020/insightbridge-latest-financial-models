@@ -27,6 +27,10 @@ from .execution_quality_gate import ExecutionQualityGate, ExecutionQualityResult
 from .dynamic_exit_engine import DynamicExitEngine, ExitDecision
 from .cost_model import CostModel, default_cost_model
 from .calibration import load_calibration
+from .telemetry import (
+    ExecutionState, RejectRateTracker, spread_bps_from_quote,
+    liquidity_score_from_sizes,
+)
 from .audit_logger import V2AuditLogger
 
 __all__ = [
@@ -38,5 +42,7 @@ __all__ = [
     "DynamicExitEngine", "ExitDecision",
     "CostModel", "default_cost_model",
     "load_calibration",
+    "ExecutionState", "RejectRateTracker", "spread_bps_from_quote",
+    "liquidity_score_from_sizes",
     "V2AuditLogger",
 ]
