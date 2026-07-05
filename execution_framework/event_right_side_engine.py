@@ -39,6 +39,11 @@ try:
     _sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
     from eventalpha_core.schema import AssetClass as _AssetClass
     from eventalpha_core.advanced.measured_timing import impact_bucket as _impact_bucket_fn
+    from eventalpha_core.advanced.microstructure import (
+        FakeoutConfig as _FakeoutConfig,
+        is_breakout_fakeout as _is_breakout_fakeout,
+        order_book_imbalance as _order_book_imbalance,
+    )
     _MEASURED_ASSET = {
         "FX": _AssetClass.FX,
         "CRYPTO_SPOT": _AssetClass.CRYPTO,
@@ -75,6 +80,10 @@ class AssetRule:
     min_vol_mult: float = 1.10         # 突破K线量 >= 前N根均量 * 该倍数
     max_spread_ticks: float = 4.0      # 点差上限（tick 数）
     max_slippage_ticks: float = 6.0    # 滑点上限（tick 数）
+    # 假冲击(fakeout)盘口失衡门槛：突破方向必须有足够的同向挂单支撑才算真突破。
+    # None = 用 FakeoutConfig 的占位默认值。**该阈值未经真实数据验证(见 microstructure.py)**，
+    # 第二步用历史数据校准前只是占位。仅在 fakeout_filter_enabled=True 时生效。
+    min_obi_abs: Optional[float] = None
     risk_fraction: float = 0.0025      # 单笔风险预算（占权益比例，交给 sizer 用）
     # 交易时段（UTC）。None 表示 24h（如 FX/Crypto）。
     session_start_utc: Optional[time] = None
@@ -144,9 +153,17 @@ class RightSideEventEngine:
     mark_filled()/mark_abandoned() 由调用方在拿到券商回报后驱动。"""
 
     def __init__(self, rules: Optional[Dict[str, AssetRule]] = None,
-                 selectivity_enabled: bool = False):
+                 selectivity_enabled: bool = False,
+                 fakeout_filter_enabled: bool = False):
         self.rules = rules or DEFAULT_RULES
         self.states: Dict[str, EventState] = {}
+        # Fakeout (false-breakout) filter: after the K-line breakout + volume +
+        # market-quality checks pass, require the order book to actually support
+        # the breakout direction (OBI gate). Default OFF so the live judgement is
+        # unchanged unless a caller opts in (paper first). Degrades to a no-op
+        # when no Level-2 sizes are supplied (never blocks a trade it can't judge).
+        # Thresholds are UNVALIDATED placeholders pending Step-2 calibration.
+        self.fakeout_filter_enabled = fakeout_filter_enabled and _SELECTIVITY_OK
         # Selectivity gate: stand down on 'small' early-move events (the only
         # logic change the 2024-2025 P&L study proved adds edge). Default OFF so
         # the live judgement is byte-for-byte unchanged unless a caller opts in
@@ -330,7 +347,8 @@ class RightSideEventEngine:
 
     # ── 主判定 ────────────────────────────────────────────────────────────
     def evaluate(self, symbol: str, now: datetime, df: pd.DataFrame,
-                 bid: Optional[float] = None, ask: Optional[float] = None
+                 bid: Optional[float] = None, ask: Optional[float] = None,
+                 bid_sizes: Optional[list] = None, ask_sizes: Optional[list] = None
                  ) -> Dict[str, Any]:
         st = self.states.get(symbol)
         if st is None or not st.active:
@@ -388,6 +406,21 @@ class RightSideEventEngine:
             return {"status": "HOLD", "symbol": symbol, "reason": mkt_reason,
                     "pre_signal": signal}
 
+        # --- fakeout (false-breakout) gate (opt-in) -------------------------
+        # The breakout passed price/volume/spread; now require the order book to
+        # actually back the direction. OBI is always reported for audit. When
+        # enabled and the book contradicts the breakout, reject as a fakeout.
+        # No-op when OBI is unavailable (no Level-2 sizes) or the filter is off.
+        obi = _order_book_imbalance(bid_sizes, ask_sizes) if _SELECTIVITY_OK else None
+        fakeout, fakeout_reason = (False, "fakeout_filter_disabled")
+        if self.fakeout_filter_enabled:
+            cfg = _FakeoutConfig(min_obi_abs=rule.min_obi_abs) if rule.min_obi_abs is not None else _FakeoutConfig()
+            fakeout, fakeout_reason = _is_breakout_fakeout(signal.get("direction", ""), obi, cfg)
+            if fakeout:
+                return {"status": "REJECT", "symbol": symbol, "event": st.event_name,
+                        "reason": fakeout_reason, "obi": obi, "pre_signal": signal,
+                        "fakeout_filter_enabled": True}
+
         # 关键：不在此处关闭事件。标记 pending，等待调用方成交确认后 mark_filled()。
         st.confirmed_pending = True
         return {**signal, "symbol": symbol, "event": st.event_name,
@@ -396,4 +429,6 @@ class RightSideEventEngine:
                 "asset_class": rule.asset_class, "tick_size": rule.tick_size,
                 "early_move_bps": early_move_bps, "impact_bucket": impact_bucket,
                 "selectivity_enabled": self.selectivity_enabled,
+                "obi": obi, "fakeout_filter_enabled": self.fakeout_filter_enabled,
+                "fakeout_reason": fakeout_reason,
                 "requires_fill_confirmation": True}

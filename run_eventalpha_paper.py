@@ -99,6 +99,13 @@ def main() -> None:
         default=os.environ.get("EVENTALPHA_SELECTIVITY", "").lower() in {"1", "true", "yes", "on"},
         help="Enable the impact-based selectivity gate (stand down on small events).",
     )
+    parser.add_argument(
+        "--microstructure-exit",
+        action=argparse.BooleanOptionalAction,
+        default=os.environ.get("EVENTALPHA_MICROSTRUCTURE_EXIT", "").lower() in {"1", "true", "yes", "on"},
+        help="Enable capital-safety microstructure exits (CVD divergence / liquidity "
+             "crash / hard hold cap). Thresholds are unvalidated placeholders (Step 2).",
+    )
     args = parser.parse_args()
 
     modules = {
@@ -121,7 +128,9 @@ def main() -> None:
     memory_path = BASE / "reports" / "eventalpha_memory.sqlite"
     memory_path.parent.mkdir(parents=True, exist_ok=True)
     learning = LearningEngine(EventMemoryDB(str(memory_path)))
-    brain = EventAlphaBrain(learning, max_account_risk=0.02, selectivity_enabled=args.selectivity)
+    brain = EventAlphaBrain(learning, max_account_risk=0.02,
+                            selectivity_enabled=args.selectivity,
+                            microstructure_exit_enabled=args.microstructure_exit)
     event = build_event(args.event_type, args.title)
 
     decision_logger = DecisionLogger(BASE / "reports" / "eventalpha_decisions.jsonl")
