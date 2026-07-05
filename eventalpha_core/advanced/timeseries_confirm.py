@@ -25,10 +25,16 @@ Design rules (mirror ``microstructure.py``):
 from __future__ import annotations
 
 import math
+import os
 import random
 import statistics
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple
+
+# Default Chronos checkpoint. Must be a **sample-based** t5 model (``predict``
+# returns ``[series, num_samples, horizon]``); the *bolt* checkpoints are
+# quantile-based and are NOT compatible with the sample-path logic below.
+_DEFAULT_CHRONOS_MODEL = "amazon/chronos-t5-small"
 
 
 # ── provisional, UNVALIDATED defaults ────────────────────────────────────────
@@ -99,11 +105,15 @@ class ChronosForecaster:
 
     backend = "chronos"
 
-    def __init__(self, model_name: str = "amazon/chronos-bolt-small") -> None:
+    def __init__(self, model_name: Optional[str] = None) -> None:
         import torch  # noqa: F401  (lazy; may be absent)
         from chronos import ChronosPipeline  # type: ignore
+        name = (model_name
+                or os.environ.get("EVENTALPHA_TS_CHRONOS_MODEL")
+                or _DEFAULT_CHRONOS_MODEL)
+        self.model_name = name
         self._torch = torch
-        self._pipe = ChronosPipeline.from_pretrained(model_name)
+        self._pipe = ChronosPipeline.from_pretrained(name)
 
     def forecast(self, context: Sequence[float], horizon: int,
                  n_samples: int) -> ForecastResult:
