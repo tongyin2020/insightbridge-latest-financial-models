@@ -42,6 +42,7 @@ from ibkr_contract_resolver import IBKRContractResolver, ResolvedContract, FUT_S
 from right_side_pipeline import RightSidePipeline
 from v2_telemetry_shadow import V2TelemetryShadow
 from microstructure_shadow import MicrostructureShadow
+from timeseries_shadow import TimeSeriesShadow
 from depth_collector import DepthCollector
 from runtime_guardian import RuntimeGuardian, check_heartbeat
 from economic_calendar import EconomicCalendar
@@ -181,6 +182,16 @@ def main() -> int:
     if micro_shadow.enabled:
         print("microstructure 影子记录: 已开启（observe-only，不影响下单）"
               " -> reports/runtime/microstructure_shadow.log")
+
+    # Step 2 · Phase D: 零样本时序确认影子（observe-only，默认关，
+    # EVENTALPHA_TIMESERIES_SHADOW=1 开启）。用已拉的历史收盘价喂预训练零样本模型
+    # （Chronos，未装则降级 naive 基线并如实标注 backend），记录"模型会确认还是否决"
+    # 信号方向，只落日志，绝不下单、不改任何决策。阈值仍是未验证占位，等 Phase C 校准。
+    ts_shadow = TimeSeriesShadow(
+        log_path=str(RUNTIME_DIR / "timeseries_shadow.log"))
+    if ts_shadow.enabled:
+        print("timeseries 影子记录: 已开启（observe-only，不影响下单）"
+              " -> reports/runtime/timeseries_shadow.log")
 
     lock_contracts(sess, pipe.resolver, symbols)
 
@@ -353,6 +364,18 @@ def main() -> int:
                                 tape_source=_raw["tape_source"])
                         except Exception as _mexc:  # noqa: BLE001
                             print(f"  [{sym}] microstructure影子异常: {_mexc}")
+
+                    # Step 2 · Phase D: 零样本时序确认影子（observe-only）。
+                    # 用历史收盘价问预训练模型"下 H 根是否顺信号方向"，只落日志。
+                    if ts_shadow.enabled:
+                        try:
+                            _tcloses = df["close"].tolist()
+                            _tref = _tcloses[-min(len(_tcloses), 10)]
+                            _tdir = "long" if _tcloses[-1] >= _tref else "short"
+                            ts_shadow.observe(sym, _tdir, _tcloses,
+                                              source="bar_close")
+                        except Exception as _texc:  # noqa: BLE001
+                            print(f"  [{sym}] timeseries影子异常: {_texc}")
 
                     res = pipe.step(sym, datetime.now(timezone.utc), df,
                                     bid=bid, ask=ask,
