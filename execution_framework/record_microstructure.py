@@ -148,6 +148,8 @@ def _parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
                    help="逗号分隔；免费深度: FX/WTI/加密")
     p.add_argument("--interval", type=float, default=60.0,
                    help="每轮采集间隔秒")
+    p.add_argument("--depth-wait", type=float, default=4.0,
+                   help="每个品种等订单簿异步填充的最长秒数（填满即提前返回）")
     p.add_argument("--minutes", type=float, default=20.0,
                    help="总运行分钟数（到时自动退出）")
     p.add_argument("--log-path",
@@ -179,7 +181,24 @@ def main(argv: Optional[List[str]] = None) -> int:
           f"clientId={args.client_id} — 只读采集，不下单")
 
     resolver = IBKRContractResolver(ib=sess.ib)
-    collector = DepthCollector()
+    collector = DepthCollector(depth_sleep=args.depth_wait)
+
+    # Capture market-data / depth errors so we can tell *why* depth is empty
+    # (permission vs. market-hours vs. not-supported) without scrolling the log.
+    _INFO_CODES = {2104, 2106, 2158, 2107, 2119, 2100, 2150}
+    depth_errs: List[str] = []
+
+    def _on_err(reqId, code, msg, contract=None):  # noqa: ANN001
+        try:
+            if int(code) not in _INFO_CODES:
+                depth_errs.append(f"Error {code}: {msg}")
+        except Exception:                   # noqa: BLE001
+            pass
+
+    try:
+        sess.ib.errorEvent += _on_err
+    except Exception:                       # noqa: BLE001
+        pass
 
     deadline = time.time() + args.minutes * 60.0
     round_no = 0
@@ -188,7 +207,14 @@ def main(argv: Optional[List[str]] = None) -> int:
         while time.time() < deadline:
             round_no += 1
             print(f"[采集轮 {round_no}] {time.strftime('%H:%M:%S')}")
+            depth_errs.clear()
             total += record_once(sess.ib, resolver, collector, shadow, symbols)
+            if depth_errs:
+                seen = set()
+                for e in depth_errs:
+                    if e not in seen:
+                        seen.add(e)
+                        print(f"    · IB: {e}")
             if time.time() >= deadline:
                 break
             try:
