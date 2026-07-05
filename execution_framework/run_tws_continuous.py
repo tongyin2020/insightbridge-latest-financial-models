@@ -43,6 +43,7 @@ from right_side_pipeline import RightSidePipeline
 from v2_telemetry_shadow import V2TelemetryShadow
 from microstructure_shadow import MicrostructureShadow
 from timeseries_shadow import TimeSeriesShadow
+from news_shadow import NewsShadow
 from depth_collector import DepthCollector
 from runtime_guardian import RuntimeGuardian, check_heartbeat
 from economic_calendar import EconomicCalendar
@@ -193,6 +194,17 @@ def main() -> int:
         print("timeseries 影子记录: 已开启（observe-only，不影响下单）"
               " -> reports/runtime/timeseries_shadow.log")
 
+    # Step 2 · Phase E: LLM 新闻网关影子（observe-only，默认关，
+    # EVENTALPHA_NEWS_SHADOW=1 开启）。对日历/新闻条目做事件分类 + 风险情绪 + 置信度，
+    # 记录"若开会不会唤醒"，只落日志，绝不下单。LLM 后端懒加载（有 key 才用，没 key
+    # 降级关键词基线并如实标注 backend）。唤醒阈值仍是未验证占位，等 Phase C 校准。
+    news_shadow = NewsShadow(
+        log_path=str(RUNTIME_DIR / "news_shadow.log"),
+        enabled_symbols=symbols)
+    if news_shadow.enabled:
+        print("news 影子记录: 已开启（observe-only，不影响下单）"
+              " -> reports/runtime/news_shadow.log")
+
     lock_contracts(sess, pipe.resolver, symbols)
 
     # 启动对账
@@ -307,6 +319,17 @@ def main() -> int:
                             print(f"  ⚡ 事件触发 {ev.name} -> {sym}（进入冷静期）")
                     except Exception as exc:  # noqa: BLE001
                         print(f"  [{sym}] 事件触发异常: {exc}")
+
+            # ①c Phase E: 新闻网关影子（observe-only）。对未来 24h 的日历事件做
+            # 分类/情绪/唤醒判定，只落日志（按 item_id 去重，同一事件只记一次）。
+            if news_shadow.enabled:
+                try:
+                    for ev in calendar.upcoming(now, horizon_h=24):
+                        _txt = ev.title or ev.name
+                        _eid = f"{ev.name}@{ev.event_time.isoformat()}"
+                        news_shadow.observe(_txt, item_id=_eid, source="calendar")
+                except Exception as _nexc:  # noqa: BLE001
+                    print(f"  news影子异常: {_nexc}")
 
             # ② 逐品种评估（只有处于活跃事件冷静期的品种会产生信号）
             for sym in symbols:
