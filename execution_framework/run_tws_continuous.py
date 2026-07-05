@@ -44,6 +44,7 @@ from v2_telemetry_shadow import V2TelemetryShadow
 from microstructure_shadow import MicrostructureShadow
 from timeseries_shadow import TimeSeriesShadow
 from news_shadow import NewsShadow
+from news_feed import RssNewsFeed
 from depth_collector import DepthCollector
 from runtime_guardian import RuntimeGuardian, check_heartbeat
 from economic_calendar import EconomicCalendar
@@ -201,9 +202,13 @@ def main() -> int:
     news_shadow = NewsShadow(
         log_path=str(RUNTIME_DIR / "news_shadow.log"),
         enabled_symbols=symbols)
+    news_feed = RssNewsFeed() if news_shadow.enabled else None
     if news_shadow.enabled:
         print("news 影子记录: 已开启（observe-only，不影响下单）"
               " -> reports/runtime/news_shadow.log")
+        if news_feed is not None:
+            print(f"news RSS 源: {len(news_feed.feeds)} 个 -> "
+                  + ", ".join(news_feed.feeds))
 
     lock_contracts(sess, pipe.resolver, symbols)
 
@@ -330,6 +335,16 @@ def main() -> int:
                         news_shadow.observe(_txt, item_id=_eid, source="calendar")
                 except Exception as _nexc:  # noqa: BLE001
                     print(f"  news影子异常: {_nexc}")
+
+            # ①d Phase E-2: 实时 RSS 新闻源。每轮抓新标题喂网关（按 item_id 去重，
+            # 稳态下只有真·新标题才会触发一次 LLM 调用，成本极低）。observe-only。
+            if news_shadow.enabled and news_feed is not None:
+                try:
+                    for it in news_feed.fetch(max_items=12):
+                        _ntxt = (it.title + (". " + it.summary if it.summary else "")).strip()
+                        news_shadow.observe(_ntxt, item_id=it.item_id, source="rss")
+                except Exception as _fexc:  # noqa: BLE001
+                    print(f"  news RSS 影子异常: {_fexc}")
 
             # ② 逐品种评估（只有处于活跃事件冷静期的品种会产生信号）
             for sym in symbols:
