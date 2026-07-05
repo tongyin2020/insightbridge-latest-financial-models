@@ -37,7 +37,7 @@ class NewsGatewayConfig:
     min_confidence_wake: float = 0.60      # confidence needed to "wake" on an item
     relevant_categories: tuple = (
         "FOMC", "CPI", "PPI", "NFP", "RETAIL_SALES",
-        "ECB", "BOJ", "OPEC", "GEOPOLITICS", "TREASURY_AUCTION",
+        "ECB", "BOJ", "OPEC", "EIA", "GEOPOLITICS", "TREASURY_AUCTION",
     )
 
 
@@ -70,16 +70,20 @@ _CATEGORY_PATTERNS: List[tuple] = [
     ("ECB", r"\b(ecb|european central bank|lagarde)\b"),
     ("BOJ", r"\b(boj|bank of japan|ueda)\b"),
     ("OPEC", r"\b(opec|crude output|oil production|barrels per day)\b"),
+    ("EIA", r"\b(eia|crude (oil )?invent\w+|crude stocks|petroleum status|"
+            r"inventory (build|draw))\b"),
     ("GEOPOLITICS", r"\b(war|invasion|sanction|strike|attack|conflict|missile)\b"),
     ("TREASURY_AUCTION", r"\b(treasury auction|ust auction|bond auction)\b"),
 ]
 _RISK_OFF = re.compile(
     r"\b(hawkish|rate hike|hikes|raises rates|higher than expected|hotter|"
-    r"surges?|escalat\w+|war|invasion|attack|sanction|misses?|worse than expected)\b",
+    r"surges?|escalat\w+|war|invasion|attack|sanction|misses?|worse than expected|"
+    r"inventory build|stocks? (rose|rise|build|climb\w*))\b",
     re.I)
 _RISK_ON = re.compile(
     r"\b(dovish|rate cut|cuts rates|lower than expected|cooler|beats?|"
-    r"better than expected|de-escalat\w+|ceasefire|truce|softer)\b",
+    r"better than expected|de-escalat\w+|ceasefire|truce|softer|"
+    r"inventory draw|stocks? (fell|fall|drop\w*|draw\w*))\b",
     re.I)
 
 
@@ -131,8 +135,9 @@ class KeywordNewsClassifier:
 _LLM_SYSTEM_PROMPT = (
     "You classify a financial news headline for a macro event-driven trader. "
     "Return STRICT JSON with keys: is_relevant (bool), category (one of FOMC, CPI, "
-    "PPI, NFP, RETAIL_SALES, ECB, BOJ, OPEC, GEOPOLITICS, TREASURY_AUCTION, NONE), "
-    "sentiment (risk_on, risk_off, or neutral — risk_off = hawkish/hot/escalation), "
+    "PPI, NFP, RETAIL_SALES, ECB, BOJ, OPEC, EIA, GEOPOLITICS, TREASURY_AUCTION, NONE), "
+    "sentiment (risk_on, risk_off, or neutral — risk_off = hawkish/hot/escalation; "
+    "for EIA crude oil, an inventory build is risk_off and a draw is risk_on), "
     "confidence (0..1), reason (short). No prose, JSON only."
 )
 

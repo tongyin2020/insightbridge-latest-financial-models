@@ -45,6 +45,7 @@ from microstructure_shadow import MicrostructureShadow
 from timeseries_shadow import TimeSeriesShadow
 from news_shadow import NewsShadow
 from news_feed import RssNewsFeed
+from eia_feed import EiaPetroleumFeed, _enabled_from_env as _eia_enabled
 from depth_collector import DepthCollector
 from runtime_guardian import RuntimeGuardian, check_heartbeat
 from economic_calendar import EconomicCalendar
@@ -203,12 +204,20 @@ def main() -> int:
         log_path=str(RUNTIME_DIR / "news_shadow.log"),
         enabled_symbols=symbols)
     news_feed = RssNewsFeed() if news_shadow.enabled else None
+    # Phase E-3: EIA weekly crude-inventory feed. Default OFF; only built when
+    # EVENTALPHA_EIA_FEED is set AND a free EIA_API_KEY is present (no key => the
+    # feed yields nothing, never an error). observe-only.
+    eia_feed = (EiaPetroleumFeed()
+                if (news_shadow.enabled and _eia_enabled()) else None)
     if news_shadow.enabled:
         print("news 影子记录: 已开启（observe-only，不影响下单）"
               " -> reports/runtime/news_shadow.log")
         if news_feed is not None:
             print(f"news RSS 源: {len(news_feed.feeds)} 个 -> "
                   + ", ".join(news_feed.feeds))
+        if eia_feed is not None:
+            has_key = bool(eia_feed.api_key)
+            print(f"news EIA 源: 已开启（原油周度库存） key={'已配' if has_key else '缺失→不会产出'}")
 
     lock_contracts(sess, pipe.resolver, symbols)
 
@@ -345,6 +354,15 @@ def main() -> int:
                         news_shadow.observe(_ntxt, item_id=it.item_id, source="rss")
                 except Exception as _fexc:  # noqa: BLE001
                     print(f"  news RSS 影子异常: {_fexc}")
+
+            # ①e Phase E-3: EIA 原油周度库存。结构化 build/draw 头条喂网关（按发布周
+            # 去重，一周只记一次）。observe-only；无 key 时静默不产出。
+            if news_shadow.enabled and eia_feed is not None:
+                try:
+                    for it in eia_feed.fetch(max_items=1):
+                        news_shadow.observe(it.title, item_id=it.item_id, source="eia")
+                except Exception as _eexc:  # noqa: BLE001
+                    print(f"  news EIA 影子异常: {_eexc}")
 
             # ② 逐品种评估（只有处于活跃事件冷静期的品种会产生信号）
             for sym in symbols:
