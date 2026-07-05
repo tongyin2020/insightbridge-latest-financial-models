@@ -41,6 +41,11 @@ EVENT_IMPACT: Dict[str, List[str]] = {
     "TREASURY_AUCTION": ["ZT", "ZN", "SR3"],
     "ECB":  ["EURUSD"],
     "BOJ":  ["USDJPY"],
+    # EIA weekly crude inventory affects oil (CL). Not one of this loop's live
+    # symbols, so affected_symbols filters to empty here — recorded for the
+    # separate oil model / Phase C.
+    "OPEC": ["CL"],
+    "EIA":  ["CL"],
 }
 
 
