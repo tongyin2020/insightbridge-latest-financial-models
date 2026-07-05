@@ -34,6 +34,7 @@ class EventAlphaBrain:
         learning: LearningEngine,
         max_account_risk: float = 0.02,
         selectivity_enabled: bool = False,
+        microstructure_exit_enabled: bool = False,
     ):
         self.learning = learning
         self.max_account_risk = max_account_risk
@@ -42,6 +43,10 @@ class EventAlphaBrain:
         # decisive ones. Default OFF so the decision chain is byte-for-byte
         # unchanged unless a caller opts in (paper first). See advanced.measured_timing.
         self.selectivity_enabled = selectivity_enabled
+        # Capital-safety microstructure exits (CVD divergence, near-side liquidity
+        # crash, hard hold cap). Default OFF -> exit path unchanged. Thresholds are
+        # UNVALIDATED placeholders to be calibrated on real data (Step 2).
+        self.microstructure_exit_enabled = microstructure_exit_enabled
 
     @staticmethod
     def _early_move_bps(state: MarketState) -> float | None:
@@ -282,6 +287,7 @@ class EventAlphaBrain:
             position,
             mfe_r_multiple=mfe_r_multiple,
             current_r_multiple=current_r_multiple,
+            microstructure_exit_enabled=self.microstructure_exit_enabled,
         )
         reason = "; ".join(signal.reasons) if signal.reasons else "exit_conditions_not_met"
         return ExitDecision(

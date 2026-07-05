@@ -80,14 +80,22 @@ class RightSidePipeline:
     def __init__(self, ib=None, dry_run: bool = True,
                  equity: float = 50000.0, max_loss_pct: float = 0.0025,
                  log_path: Optional[str] = None, journal_db: Optional[str] = None,
-                 selectivity_enabled: Optional[bool] = None):
+                 selectivity_enabled: Optional[bool] = None,
+                 fakeout_filter_enabled: Optional[bool] = None):
         # Opt-in selectivity gate: default OFF; enable via arg or
         # EVENTALPHA_SELECTIVITY=1 (paper first). See event_right_side_engine.
         if selectivity_enabled is None:
             selectivity_enabled = os.environ.get(
                 "EVENTALPHA_SELECTIVITY", "").lower() in {"1", "true", "yes", "on"}
+        # Opt-in fakeout (false-breakout / OBI) filter: default OFF; enable via arg
+        # or EVENTALPHA_FAKEOUT_FILTER=1 (paper first). No-op without Level-2 sizes.
+        # Thresholds are UNVALIDATED placeholders pending Step-2 calibration.
+        if fakeout_filter_enabled is None:
+            fakeout_filter_enabled = os.environ.get(
+                "EVENTALPHA_FAKEOUT_FILTER", "").lower() in {"1", "true", "yes", "on"}
         self.engine = RightSideEventEngine(DEFAULT_RULES,
-                                           selectivity_enabled=selectivity_enabled)
+                                           selectivity_enabled=selectivity_enabled,
+                                           fakeout_filter_enabled=fakeout_filter_enabled)
         self.resolver = IBKRContractResolver(ib)
         self.om = IBKROrderManager(ib, dry_run=dry_run)
         self.kpi = RightSideKPI()
@@ -188,6 +196,7 @@ class RightSidePipeline:
 
     # ── 每根K线评估 + 风控 + 仓位 + 下单意图 ──────────────────────────────
     def step(self, symbol: str, now, df, bid=None, ask=None,
+             bid_sizes=None, ask_sizes=None,
              account_state: Optional[Dict[str, Any]] = None,
              available_depth: float = 5_000_000.0,
              confirm_live: bool = False) -> Dict[str, Any]:
@@ -203,7 +212,8 @@ class RightSidePipeline:
         if self.om.has_open(symbol):
             return {"status": "HOLD", "reason": "symbol_has_open_order", "symbol": symbol}
 
-        signal = self.engine.evaluate(symbol, now, df, bid=bid, ask=ask)
+        signal = self.engine.evaluate(symbol, now, df, bid=bid, ask=ask,
+                                      bid_sizes=bid_sizes, ask_sizes=ask_sizes)
         self._tally(signal)
 
         if signal["status"] not in ("BUY", "SELL"):
