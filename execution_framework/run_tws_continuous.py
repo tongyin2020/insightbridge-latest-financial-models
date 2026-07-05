@@ -41,6 +41,8 @@ from ibkr_session import IBKRSession
 from ibkr_contract_resolver import IBKRContractResolver, ResolvedContract, FUT_SPECS
 from right_side_pipeline import RightSidePipeline
 from v2_telemetry_shadow import V2TelemetryShadow
+from microstructure_shadow import MicrostructureShadow
+from depth_collector import DepthCollector
 from runtime_guardian import RuntimeGuardian, check_heartbeat
 from economic_calendar import EconomicCalendar
 
@@ -168,6 +170,17 @@ def main() -> int:
     if shadow.enabled:
         print("v2 遥测影子记录: 已开启（observe-only，不影响下单）"
               " -> reports/runtime/v2_telemetry_shadow.log")
+
+    # Step 2 · Phase A: microstructure 影子记录（observe-only，默认关，
+    # EVENTALPHA_MICROSTRUCTURE_SHADOW=1 开启）。用 reqMktDepth 取 Level-2 买卖量、
+    # 用已拉的 1 分钟 bar 近似逐笔 CVD，跑 Step-1 的假冲击/CVD背离/买盘枯竭门只落日志，
+    # 绝不下单、不改任何决策。阈值仍是未验证占位，等 Phase C 用这些日志校准。
+    micro_shadow = MicrostructureShadow(
+        log_path=str(RUNTIME_DIR / "microstructure_shadow.log"))
+    depth_collector = DepthCollector()
+    if micro_shadow.enabled:
+        print("microstructure 影子记录: 已开启（observe-only，不影响下单）"
+              " -> reports/runtime/microstructure_shadow.log")
 
     lock_contracts(sess, pipe.resolver, symbols)
 
@@ -320,6 +333,26 @@ def main() -> int:
                         shadow.observe(sym, connected=sess.ib.isConnected(),
                                        bid=bid, ask=ask, bid_size=_bs, ask_size=_as,
                                        latency_s=0.080, tick_epoch=_te)
+
+                    # Step 2 · Phase A: microstructure 影子（observe-only）。
+                    # 取 Level-2 深度 + bar 近似 tape，记录 Step-1 门"若开会怎么判"。
+                    if micro_shadow.enabled:
+                        try:
+                            _bsz, _asz = depth_collector.fetch_depth(
+                                sess.ib, rc.raw, sym)
+                            depth_collector.update_tape_from_df(sym, df)
+                            _closes = df["close"].tolist()
+                            _ref = _closes[-min(len(_closes), 10)]
+                            _dir = "long" if _closes[-1] >= _ref else "short"
+                            _raw = depth_collector.raw_for_exit(sym)
+                            micro_shadow.observe(
+                                sym, _dir, _bsz, _asz,
+                                recent_prices=_raw["recent_prices"],
+                                recent_volumes=_raw["recent_volumes"],
+                                near_side_size_series=_raw["near_side_size_series"],
+                                tape_source=_raw["tape_source"])
+                        except Exception as _mexc:  # noqa: BLE001
+                            print(f"  [{sym}] microstructure影子异常: {_mexc}")
 
                     res = pipe.step(sym, datetime.now(timezone.utc), df,
                                     bid=bid, ask=ask,
