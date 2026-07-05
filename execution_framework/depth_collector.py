@@ -33,10 +33,13 @@ from typing import Any, Deque, Dict, List, Optional, Tuple
 
 class DepthCollector:
     def __init__(self, levels: int = 5, history: int = 40,
-                 depth_sleep: float = 1.0) -> None:
+                 depth_sleep: float = 4.0, poll_step: float = 0.25) -> None:
         self.levels = int(levels)
         self.history = int(history)
+        # ``depth_sleep`` is the *max* time to wait for the async order book to
+        # populate; we poll every ``poll_step`` and stop as soon as it fills.
         self.depth_sleep = float(depth_sleep)
+        self.poll_step = float(poll_step)
         self._bid_size_hist: Dict[str, Deque[float]] = {}
         self._prices: Dict[str, Deque[float]] = {}
         self._volumes: Dict[str, Deque[float]] = {}
@@ -47,15 +50,29 @@ class DepthCollector:
                     ) -> Tuple[Optional[List[float]], Optional[List[float]]]:
         """Return ``(bid_sizes, ask_sizes)`` (top ``levels`` resting sizes) or
         ``(None, None)`` if depth is unavailable. Also records the top bid size
-        into the near-side history used by the liquidity-crash gate."""
+        into the near-side history used by the liquidity-crash gate.
+
+        ``reqMktDepth`` fills the book **asynchronously**, so a single fixed
+        sleep often reads an empty ``domBids``/``domAsks``. We poll up to
+        ``depth_sleep`` seconds and return as soon as the book has data."""
         try:
             tkr = ib.reqMktDepth(contract, numRows=self.levels)
-            try:
-                ib.sleep(self.depth_sleep)
-            except Exception:               # noqa: BLE001
-                pass
-            bid_sizes = self._sizes(getattr(tkr, "domBids", None))
-            ask_sizes = self._sizes(getattr(tkr, "domAsks", None))
+            bid_sizes: List[float] = []
+            ask_sizes: List[float] = []
+            waited = 0.0
+            step = self.poll_step if self.poll_step > 0 else self.depth_sleep
+            while True:
+                try:
+                    ib.sleep(step)
+                except Exception:           # noqa: BLE001
+                    break
+                waited += step
+                bid_sizes = self._sizes(getattr(tkr, "domBids", None))
+                ask_sizes = self._sizes(getattr(tkr, "domAsks", None))
+                if bid_sizes or ask_sizes:
+                    break
+                if waited >= self.depth_sleep:
+                    break
             try:
                 ib.cancelMktDepth(contract)
             except Exception:               # noqa: BLE001
