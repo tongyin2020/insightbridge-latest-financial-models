@@ -1,4 +1,6 @@
 #!/bin/zsh
+IBREPO="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+export IBREPO
 set -euo pipefail
 
 APP="/Users/tongyin/Applications/Trader Workstation/Trader Workstation.app"
@@ -12,4 +14,4 @@ open -a "$APP"
 echo "TWS launched."
 echo "Please log into the Paper Trading account in TWS, then keep TWS open."
 echo "After login, run:"
-echo "bash /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/check_tws_paper_channel.sh"
+echo "bash $IBREPO/check_tws_paper_channel.sh"

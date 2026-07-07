@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 CHECK_SCRIPT = BASE / "check_ibkr_paper_setup.py"
 
 

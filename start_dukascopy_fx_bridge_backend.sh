@@ -1,10 +1,12 @@
 #!/bin/zsh
+IBREPO="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+export IBREPO
 set -euo pipefail
 
-BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/03_FX_AUD_NZD_EUR_GBP/backend"
-PROJECT_BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
+BASE="$IBREPO/03_FX_AUD_NZD_EUR_GBP/backend"
+PROJECT_BASE="$IBREPO"
 PY="${PYTHON_BIN:-/opt/anaconda3/bin/python3}"
-LOG_DIR="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/dukascopy_bridge"
+LOG_DIR="$IBREPO/reports/dukascopy_bridge"
 PID_FILE="${LOG_DIR}/dukascopy_fx_backend.pid"
 LOG_FILE="${LOG_DIR}/dukascopy_fx_backend.log"
 HEALTH_URL="http://127.0.0.1:8001/api/health"

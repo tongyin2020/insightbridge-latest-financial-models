@@ -20,7 +20,7 @@ except Exception:  # pragma: no cover
 
 TOOLS_BASE = Path("/Users/tongyin/Desktop/Anaconda_Local_Tools")
 DEFAULT_ENV_FILE = TOOLS_BASE / ".env.ibm_quantum"
-DEFAULT_RUN_DIR = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_runs")
+DEFAULT_RUN_DIR = Path(__file__).resolve().parents[1] / "reports/quantum_runs"
 
 
 def parse_args() -> argparse.Namespace:

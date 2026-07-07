@@ -21,7 +21,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 STATE_DIR = BASE / "reports" / "ibkr_watchdog"
 STATE_FILE = STATE_DIR / "ibkr_watchdog_state.json"
 LOG_FILE = STATE_DIR / "ibkr_watchdog.log"

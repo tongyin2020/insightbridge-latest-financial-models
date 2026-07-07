@@ -10,7 +10,7 @@ import json
 import sys
 from pathlib import Path
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 CONNECTOR_DIR = BASE / "02_StockIndex_IBKR_ES_NQ"
 if str(CONNECTOR_DIR) not in sys.path:
     sys.path.insert(0, str(CONNECTOR_DIR))

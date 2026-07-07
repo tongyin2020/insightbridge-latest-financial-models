@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 
-PROJECT_BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+PROJECT_BASE = Path(__file__).resolve().parents[1]
 DEFAULT_PENALTY_JSON = PROJECT_BASE / "reports" / "quantum_research" / "penalty_results.json"
 
 

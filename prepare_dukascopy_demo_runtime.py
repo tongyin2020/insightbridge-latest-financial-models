@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 RUNTIME_DIR = BASE / "dukascopy_runtime"
 JFOREX_HOME = Path.home() / "JForex4"
 DIRS = {

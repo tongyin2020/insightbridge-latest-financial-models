@@ -1,8 +1,10 @@
 #!/bin/zsh
+IBREPO="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+export IBREPO
 
 set -euo pipefail
 
-REPO_BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
+REPO_BASE="$IBREPO"
 TMP_BASE="/private/tmp/insightbridge_financial_origin_main_run"
 PYTHON_BIN="${PYTHON_BIN:-/opt/anaconda3/bin/python3}"
 

@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 RUNTIME_DIR = BASE / "reports" / "runtime_logs"
 PID_FILE = RUNTIME_DIR / "eventalpha_runtime.pid"
 STATE_FILE = RUNTIME_DIR / "eventalpha_runtime_state.json"

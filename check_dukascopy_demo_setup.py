@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 ENV_FILE = BASE / ".env.dukascopy_demo.local"
 LATEST_IBKR_MATRIX = BASE / "reports" / "market_data_diagnostics" / "ibkr_market_data_matrix_latest.json"
 REPORTS_DIR = BASE / "reports" / "broker_diagnostics"

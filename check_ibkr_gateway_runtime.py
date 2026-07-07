@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 RUNTIME_DIR = BASE / "ibkr_runtime"
 PID_FILE = RUNTIME_DIR / "ib_gateway.pid"
 STATE_FILE = RUNTIME_DIR / "runtime_state.json"

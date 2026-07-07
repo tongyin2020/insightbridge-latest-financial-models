@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 PID_FILE = BASE / "reports" / "dukascopy_bridge" / "dukascopy_fx_backend.pid"
 LOG_FILE = BASE / "reports" / "dukascopy_bridge" / "dukascopy_fx_backend.log"
 ROOT = "http://127.0.0.1:8001"

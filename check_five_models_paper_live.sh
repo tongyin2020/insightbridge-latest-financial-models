@@ -1,9 +1,11 @@
 #!/bin/zsh
+IBREPO="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+export IBREPO
 
 set -euo pipefail
 
 LABEL="com.insightbridge.five-models.paper"
-BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
+BASE="$IBREPO"
 
 echo "InsightBridge Five Models Paper Runtime Status"
 echo "============================================================"

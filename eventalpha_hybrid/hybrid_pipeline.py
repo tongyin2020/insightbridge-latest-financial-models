@@ -19,7 +19,7 @@ from eventalpha_core import (
 )
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[1]
 REPORTS_DIR = BASE / "reports"
 QUANTUM_RUNS_DIR = REPORTS_DIR / "quantum_runs"
 QUANTUM_TASKS_DIR = REPORTS_DIR / "quantum_tasks"

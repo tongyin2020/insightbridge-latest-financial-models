@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 
-PROJECT_BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+PROJECT_BASE = Path(__file__).resolve().parents[0]
 DEFAULT_OUTPUT_DIR = PROJECT_BASE / "reports" / "quantum_research"
 
 

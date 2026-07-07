@@ -9,7 +9,7 @@ import pandas as pd
 from unified_scoring_engine import YEAR_WEIGHTS, build_unified_validation_bundle
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[1]
 OUT = BASE / "reports" / "validation_upgrade"
 OUT.mkdir(parents=True, exist_ok=True)
 

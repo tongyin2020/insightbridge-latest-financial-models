@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 RUNNER = BASE / "run_eventalpha_paper.py"
 RUNTIME_DIR = BASE / "reports" / "runtime_logs"
 STATE_FILE = RUNTIME_DIR / "eventalpha_runtime_state.json"

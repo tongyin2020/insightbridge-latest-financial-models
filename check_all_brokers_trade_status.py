@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 DATA_DB = BASE / "data.db"
 DUKASCOPY_ROOT = "http://127.0.0.1:8001"
 REPORT_DIR = BASE / "reports" / "broker_trade_status_reports"

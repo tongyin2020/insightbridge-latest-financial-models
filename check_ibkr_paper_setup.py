@@ -214,7 +214,7 @@ def main() -> int:
 
     print("IBKR Paper Trading Readiness Check")
     print("=" * 60)
-    print(f"project: /Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+    print(f"project: {Path(__file__).resolve().parents[0]}")
     print(f"host: {args.host}")
     print(f"paper_port: {args.port}")
     print("-" * 60)

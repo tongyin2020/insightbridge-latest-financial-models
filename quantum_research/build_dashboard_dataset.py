@@ -12,7 +12,7 @@ from typing import Any
 from dashboard_schema import QuantumRunRecord
 
 
-PROJECT_BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+PROJECT_BASE = Path(__file__).resolve().parents[1]
 DEFAULT_RUNS_DIR = PROJECT_BASE / "reports" / "quantum_runs"
 DEFAULT_OUTPUT = PROJECT_BASE / "reports" / "quantum_research" / "dashboard_runs.csv"
 DEFAULT_SUMMARY = PROJECT_BASE / "reports" / "quantum_research" / "dashboard_summary.json"

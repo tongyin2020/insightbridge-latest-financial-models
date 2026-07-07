@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 ENV_FILE = BASE / ".env.ibkr_paper.local"
 RUNTIME_DIR = BASE / "ibkr_runtime"
 PRIVATE_DIR = RUNTIME_DIR / "private"

@@ -9,7 +9,7 @@ from pathlib import Path
 from statistics import mean
 
 
-PROJECT_BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+PROJECT_BASE = Path(__file__).resolve().parents[1]
 DEFAULT_CSV = PROJECT_BASE / "reports" / "quantum_research" / "dashboard_runs.csv"
 DEFAULT_OUTDIR = PROJECT_BASE / "reports" / "quantum_research" / "dashboard_charts"
 

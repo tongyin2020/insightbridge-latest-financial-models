@@ -25,7 +25,7 @@ import pandas as pd
 import yfinance as yf
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 
 import sys
 
