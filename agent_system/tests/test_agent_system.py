@@ -7,6 +7,8 @@ from pathlib import Path
 from agent_system.adapters import BotFactory
 from agent_system.config import AgentConfig
 from agent_system.gatekeeper.macro_monitor import MacroMonitor
+from agent_system.graph import CrisisGraph
+from agent_system.state import AgentState
 
 
 def _make_base(tmp: Path) -> Path:
@@ -109,3 +111,44 @@ def test_bot_adapter_reads_db_and_shadows(tmp_path):
     assert snap.latest_trade is not None
     assert snap.latest_trade["symbol"] == "BTC"
     assert snap.shadow_summary["microstructure_fakeout"] == 1
+
+
+def test_crisis_graph_runs_and_produces_recommendation(tmp_path):
+    base = _make_base(tmp_path)
+    now = datetime.now(timezone.utc).isoformat()
+    _write_log(base, "news_shadow.log", [
+        {"ts": now, "would_wake": True, "is_relevant": True,
+         "confidence": 0.85, "text": "Iran tensions hit oil", "reason": "geopolitical",
+         "sentiment": "risk_on", "category": "GEOPOL", "affected_symbols": ["CL"]},
+        {"ts": now, "would_wake": True, "is_relevant": True,
+         "confidence": 0.90, "text": "EIA crude draw sparks supply fears", "reason": "inventory draw",
+         "sentiment": "risk_on", "category": "EIA", "affected_symbols": ["CL"]},
+    ])
+    _write_log(base, "timeseries_shadow.log", [
+        {"ts": now, "symbol": "CL", "expected_move_frac": 0.05, "would_confirm": True},
+    ])
+    _write_log(base, "microstructure_shadow.log", [
+        {"ts": now, "symbol": "CL", "would_reject_fakeout": False,
+         "would_flag_cvd_divergence": False, "would_force_exit_liquidity_crash": False},
+    ])
+    _write_log(base, "continuous.log", [])
+
+    cfg = AgentConfig(base_dir=base)
+    gatekeeper = MacroMonitor(cfg).evaluate()
+    assert gatekeeper.phase == "CRISIS_AWAKEN"
+
+    factory = BotFactory(cfg)
+    state = AgentState(
+        ts=datetime.now(timezone.utc),
+        base_dir=str(base),
+        phase="CRISIS_AWAKEN",
+        gatekeeper=gatekeeper,
+    )
+    for bot in factory.all_bots():
+        state.bot_snapshots[bot.bot_id] = bot.snapshot()
+
+    graph = CrisisGraph(cfg)
+    result = graph.run(state)
+    assert result.recommendation is not None
+    assert "actions" in result.recommendation
+    assert result.recommendation["observe_only"] is True

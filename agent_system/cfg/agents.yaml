@@ -6,6 +6,26 @@ log_window_minutes: 60.0
 news_lookback_minutes: 30.0
 crisis_threshold: 0.55
 
+# Phase 1 crisis-reasoning subgraph
+use_llm: false
+llm_model: "nvidia/nemotron-3.5-lightning-30b-a3b"
+llm_base_url: "https://integrate.api.nvidia.com/v1"
+llm_temperature: 0.2
+llm_max_tokens: 1024
+
+critic_min_confidence: 0.60
+critic_need_agreement: true
+risk_consec_loss_penalty: 2
+risk_max_open_positions: 2
+risk_crisis_scale_cap: 0.5
+
+default_position_size:
+  crypto: 100.0
+  fx: 10000.0
+  bond: 1.0
+  oil: 1.0
+  index: 1.0
+
 gatekeeper_weights:
   news: 0.35
   volatility: 0.35

@@ -44,6 +44,25 @@ class AgentConfig:
         "oil": ["CL"],
         "index": ["MES", "ES_PROXY"],
     })
+    # Phase 1 crisis-reasoning subgraph settings
+    use_llm: bool = False
+    llm_model: str = "nvidia/nemotron-3.5-lightning-30b-a3b"
+    llm_base_url: str = "https://integrate.api.nvidia.com/v1"
+    llm_temperature: float = 0.2
+    llm_max_tokens: int = 1024
+    # Consensus / risk thresholds
+    critic_min_confidence: float = 0.60
+    critic_need_agreement: bool = True
+    risk_consec_loss_penalty: int = 2
+    risk_max_open_positions: int = 2
+    risk_crisis_scale_cap: float = 0.5
+    default_position_size: dict[str, float] = field(default_factory=lambda: {
+        "crypto": 100.0,    # USD cash qty
+        "fx": 10000.0,      # notional
+        "bond": 1.0,        # contracts
+        "oil": 1.0,
+        "index": 1.0,
+    })
 
     def __post_init__(self) -> None:
         self._ensure_dirs()
@@ -82,6 +101,11 @@ class AgentConfig:
         cfg.crisis_threshold = float(os.environ.get("AGENT_CRISIS_THRESHOLD", cfg.crisis_threshold))
         cfg.log_window_minutes = float(os.environ.get("AGENT_LOG_WINDOW_MINUTES", cfg.log_window_minutes))
         cfg.news_lookback_minutes = float(os.environ.get("AGENT_NEWS_LOOKBACK_MINUTES", cfg.news_lookback_minutes))
+        cfg.use_llm = os.environ.get("AGENT_USE_LLM", "0").lower() in {"1", "true", "on"}
+        cfg.llm_model = os.environ.get("AGENT_LLM_MODEL", cfg.llm_model)
+        cfg.llm_base_url = os.environ.get("AGENT_LLM_BASE_URL", cfg.llm_base_url)
+        cfg.llm_temperature = float(os.environ.get("AGENT_LLM_TEMPERATURE", cfg.llm_temperature))
+        cfg.llm_max_tokens = int(os.environ.get("AGENT_LLM_MAX_TOKENS", cfg.llm_max_tokens))
         if "AGENT_GATEKEEPER_WEIGHTS" in os.environ:
             import json
             cfg.gatekeeper_weights = json.loads(os.environ["AGENT_GATEKEEPER_WEIGHTS"])

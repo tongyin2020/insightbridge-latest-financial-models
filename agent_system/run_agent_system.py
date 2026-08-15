@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from agent_system.adapters import BotFactory
 from agent_system.config import AgentConfig
 from agent_system.gatekeeper.macro_monitor import MacroMonitor
+from agent_system.graph import CrisisGraph
 from agent_system.persistence import TraceStore
 from agent_system.state import AgentState
 
@@ -57,6 +58,21 @@ def build_report(state: AgentState) -> str:
             lines.append(f"  - {k}: {v}")
         lines.append(f"- signal summary: {json.dumps(bot.signal_summary, ensure_ascii=False)}")
         lines.append("")
+    if state.reports:
+        lines += ["", "## Agent Reports", ""]
+        for report_name, report_data in state.reports.items():
+            if report_name == "consensus" or not isinstance(report_data, dict):
+                continue
+            lines.append(f"### {report_name}")
+            signals = report_data.get("signals") or report_data.get("bots")
+            if signals:
+                for bot_id, details in signals.items():
+                    lines.append(f"- **{bot_id}**: {details}")
+            if "approved" in report_data:
+                lines.append(f"- approved: {report_data['approved']}")
+            if "vetoes" in report_data:
+                lines.append(f"- vetoes: {report_data['vetoes']}")
+            lines.append("")
     if state.recommendation:
         lines += ["", "## Recommendation", ""]
         lines.append(f"```json\n{json.dumps(state.recommendation, ensure_ascii=False, indent=2)}\n```")
@@ -92,16 +108,17 @@ def main(argv: list[str] | None = None) -> int:
     factory = BotFactory(cfg)
     for bot in factory.all_bots():
         state.bot_snapshots[bot.bot_id] = bot.snapshot()
-        # In crisis, hold new signals unless consensus later approves
-        if state.phase == "CRISIS_AWAKEN":
-            state.bot_snapshots[bot.bot_id].allowed = False
 
-    # Phase 0 always observe-only regardless of switch; recommendation only
-    state.recommendation = {
-        "action": "HOLD" if state.phase == "CRISIS_AWAKEN" else "MONITOR",
-        "note": "Phase 0: 系统处于观察模式，不连接执行。",
-        "execution_enabled": False,
-    }
+    # Layer 2/3: 危机研判子图（只在 CRISIS_AWAKEN 时激活）
+    if state.phase == "CRISIS_AWAKEN":
+        graph = CrisisGraph(cfg)
+        state = graph.run(state)
+    else:
+        state.recommendation = {
+            "action": "MONITOR",
+            "note": "Phase 0/1: Gatekeeper 未触发危机，保持观察。",
+            "execution_enabled": False,
+        }
 
     # Persist
     trace = TraceStore(cfg.trace_dir)
@@ -112,6 +129,7 @@ def main(argv: list[str] | None = None) -> int:
         "crisis_score": state.gatekeeper.score if state.gatekeeper else 0.0,
         "gatekeeper": state.gatekeeper.__dict__ if state.gatekeeper else {},
         "bot_snapshots": {k: v.__dict__ for k, v in state.bot_snapshots.items()},
+        "reports": state.reports,
         "recommendation": state.recommendation,
     }
     trace.append(record)

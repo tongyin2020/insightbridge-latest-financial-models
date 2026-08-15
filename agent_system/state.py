@@ -37,4 +37,5 @@ class AgentState:
     gatekeeper: Optional[GatekeeperResult] = None
     bot_snapshots: dict[str, BotSnapshot] = field(default_factory=dict)
     recommendation: Optional[dict[str, Any]] = None
+    reports: Optional[dict[str, Any]] = None
     trace_id: str = ""
