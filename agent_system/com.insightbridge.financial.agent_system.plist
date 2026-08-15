@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.insightbridge.financial.agent_system</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/anaconda3/envs/oi/bin/python3</string>
+        <string>/Users/tongyin/InsightBridge_Financial_Models_Latest/agent_system/run_agent_system.py</string>
+        <string>--run-reflection</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/tongyin/InsightBridge_Financial_Models_Latest</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>AGENT_BASE</key>
+        <string>/Users/tongyin/InsightBridge_Financial_Models_Latest</string>
+        <key>AGENT_OBSERVE_ONLY</key>
+        <string>1</string>
+        <key>AGENT_EXECUTION_ENABLED</key>
+        <string>0</string>
+    </dict>
+
+    <!-- Run every 30 minutes during market hours (UTC) -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <dict>
+            <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+    </array>
+
+    <key>StandardOutPath</key>
+    <string>/Users/tongyin/InsightBridge_Financial_Models_Latest/reports/agent_system/launchd_out.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/tongyin/InsightBridge_Financial_Models_Latest/reports/agent_system/launchd_err.log</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>
