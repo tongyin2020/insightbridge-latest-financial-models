@@ -6,8 +6,10 @@ from pathlib import Path
 
 from agent_system.adapters import BotFactory
 from agent_system.config import AgentConfig
+from agent_system.execution import ExecutionBridge
 from agent_system.gatekeeper.macro_monitor import MacroMonitor
 from agent_system.graph import CrisisGraph
+from agent_system.reflection import ReflectionAgent
 from agent_system.state import AgentState
 
 
@@ -152,3 +154,38 @@ def test_crisis_graph_runs_and_produces_recommendation(tmp_path):
     assert result.recommendation is not None
     assert "actions" in result.recommendation
     assert result.recommendation["observe_only"] is True
+
+
+def test_execution_bridge_stages_orders(tmp_path):
+    base = _make_base(tmp_path)
+    cfg = AgentConfig(base_dir=base)
+    bridge = ExecutionBridge(cfg)
+    recommendation = {
+        "actions": [
+            {"bot_id": "oil", "direction": "BUY", "symbol": "CL", "suggested_size": 1.0, "confidence": 0.8},
+            {"bot_id": "crypto", "direction": "HOLD", "symbol": "BTC"},
+        ]
+    }
+    result = bridge.execute(recommendation, trace_id="t-001")
+    assert result["status"] == "no_action" if result["staged"] == 0 else "staged"
+    assert all(a["direction"] in ("BUY", "SELL") for a in result.get("signals", []))
+    # Default observe_only -> no live routing
+    assert result["live"] is False
+
+
+def test_reflection_agent_writes_report(tmp_path):
+    base = _make_base(tmp_path)
+    now = datetime.now(timezone.utc).isoformat()
+    with sqlite3.connect(str(base / "data.db")) as conn:
+        conn.execute("""
+            INSERT INTO trades (client_ref, symbol, direction, status,
+                                entry_price, quantity, pnl_abs, pnl_pct,
+                                opened_at, closed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, ("cl-1", "CL", "LONG", "CLOSED", 75.0, 1.0, 120.0, 0.018, now, now))
+    cfg = AgentConfig(base_dir=base)
+    agent = ReflectionAgent(cfg)
+    path = agent.run(lookback_hours=24.0)
+    assert path.exists()
+    text = path.read_text(encoding="utf-8")
+    assert "CL" in text and "120" in text

@@ -13,9 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from agent_system.adapters import BotFactory
 from agent_system.config import AgentConfig
+from agent_system.execution import ExecutionBridge
 from agent_system.gatekeeper.macro_monitor import MacroMonitor
 from agent_system.graph import CrisisGraph
 from agent_system.persistence import TraceStore
+from agent_system.reflection import ReflectionAgent
 from agent_system.state import AgentState
 
 
@@ -80,10 +82,11 @@ def build_report(state: AgentState) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="InsightBridge Financial Agent System — Phase 0")
+    parser = argparse.ArgumentParser(description="InsightBridge Financial Agent System — Phase 0/1/2")
     parser.add_argument("--base-dir", default=None, help="Repo base directory")
     parser.add_argument("--crisis-threshold", type=float, default=None, help="Gatekeeper crisis threshold")
     parser.add_argument("--execution-enabled", action="store_true", help="DANGER: allow execution (default OFF)")
+    parser.add_argument("--run-reflection", action="store_true", help="Also run post-market reflection")
     parser.add_argument("--report-path", default=None, help="Optional markdown report path")
     args = parser.parse_args(argv)
 
@@ -116,9 +119,15 @@ def main(argv: list[str] | None = None) -> int:
     else:
         state.recommendation = {
             "action": "MONITOR",
-            "note": "Phase 0/1: Gatekeeper 未触发危机，保持观察。",
+            "note": "Phase 0/1/2: Gatekeeper 未触发危机，保持观察。",
             "execution_enabled": False,
         }
+
+    # Layer 4: 执行桥（默认只预演挂单，不连接 IBKR）
+    bridge = ExecutionBridge(cfg)
+    execution_result = bridge.execute(state.recommendation or {}, trace_id=state.trace_id)
+    state.recommendation = state.recommendation or {}
+    state.recommendation["execution_result"] = execution_result
 
     # Persist
     trace = TraceStore(cfg.trace_dir)
@@ -139,6 +148,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.report_path:
         Path(args.report_path).write_text(build_report(state), encoding="utf-8")
+
+    if args.run_reflection:
+        reflect = ReflectionAgent(cfg)
+        report_path = reflect.run(lookback_hours=24.0)
+        print(f"\nReflection report: {report_path}")
 
     return 0
 
