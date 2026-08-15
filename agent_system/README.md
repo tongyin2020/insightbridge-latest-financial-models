@@ -17,7 +17,7 @@ Gatekeeper (MacroMonitor) → CRISIS_AWAKEN → LangGraph crisis subgraph
   ├─ critic_agent       红队批判
   └─ risk_agent         极端尾部风险 / 头寸管理
 
-consensus → ExecutionBridge (stage/live) → ReflectionAgent
+consensus → Precision Sniping layer (optional: interlock + breakout + kinetic) → ExecutionBridge (stage/live) → ReflectionAgent
 ```
 
 ## 快速开始
@@ -31,6 +31,9 @@ python3 agent_system/run_agent_system.py
 
 # 同时生成复盘报告
 python3 agent_system/run_agent_system.py --run-reflection
+
+# 启用 Precision Sniping 层（默认关闭）
+AGENT_PRECISION_SNIPING=1 python3 agent_system/run_agent_system.py
 ```
 
 ## macOS 定时运行 (launchd)
@@ -51,6 +54,7 @@ cd agent_system/scripts
 | `AGENT_USE_LLM` | `0` | `1` 启用 NVIDIA/LLM 总结 |
 | `AGENT_LLM_MODEL` | `nvidia/nemotron-3.5-lightning-30b-a3b` | LLM 模型 ID |
 | `AGENT_LLM_BASE_URL` | `https://integrate.api.nvidia.com/v1` | LLM endpoint |
+| `AGENT_PRECISION_SNIPING` | `0` | `1` 启用 Precision Sniping 层 |
 
 ## 测试
 
