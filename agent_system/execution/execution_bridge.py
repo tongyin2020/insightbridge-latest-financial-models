@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import json
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from agent_system.config import AgentConfig
+from agent_system.precision_sniping.position_risk_balancer import PositionRiskBalancer
+from agent_system.precision_sniping.regime_interlock import CrossAssetInterlock
+from agent_system.state import BotSnapshot
 
 
 class ExecutionBridge:
@@ -73,10 +75,32 @@ class ExecutionBridge:
                 results.append({"status": "error", "reason": str(exc), "signal": sig})
         return results
 
-    def execute(self, recommendation: dict[str, Any], trace_id: str = "") -> dict[str, Any]:
-        signals = self.stage_orders(recommendation, trace_id)
+    def execute(
+        self,
+        recommendation: dict[str, Any],
+        trace_id: str = "",
+        bot_snapshots: dict[str, BotSnapshot] | None = None,
+    ) -> dict[str, Any]:
+        actions = recommendation.get("actions", [])
+
+        # Optional Precision Sniping layer: cross-asset interlock + secondary scaling
+        precision_note = "precision_sniping_disabled"
+        if self.cfg.precision_sniping_enabled and bot_snapshots:
+            interlock = CrossAssetInterlock(self.cfg).evaluate(bot_snapshots)
+            if interlock.score < interlock.threshold:
+                return {
+                    "status": "filtered_by_precision_sniping",
+                    "interlock": interlock.__dict__,
+                    "staged": 0,
+                    "routed": 0,
+                    "signals": [],
+                }
+            actions = PositionRiskBalancer(interlock.secondary_scale).scale(interlock.primary_bot, actions)
+            precision_note = f"interlock_score={interlock.score:.3f}, regime={interlock.regime_type}"
+
+        signals = self.stage_orders({"actions": actions}, trace_id)
         if not signals:
-            return {"status": "no_action", "staged": 0, "routed": 0}
+            return {"status": "no_action", "staged": 0, "routed": 0, "precision": precision_note}
 
         persist_path = self.persist(signals)
 
@@ -88,6 +112,7 @@ class ExecutionBridge:
         return {
             "status": "staged" if not live else "routed",
             "live": live,
+            "precision": precision_note,
             "staged": len(signals),
             "routed": len(routed),
             "signals": signals,

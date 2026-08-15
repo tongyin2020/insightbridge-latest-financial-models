@@ -8,6 +8,7 @@ crisis_threshold: 0.55
 
 # Phase 1 crisis-reasoning subgraph
 use_llm: false
+precision_sniping_enabled: false
 llm_model: "nvidia/nemotron-3.5-lightning-30b-a3b"
 llm_base_url: "https://integrate.api.nvidia.com/v1"
 llm_temperature: 0.2

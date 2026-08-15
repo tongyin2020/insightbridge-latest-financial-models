@@ -125,7 +125,11 @@ def main(argv: list[str] | None = None) -> int:
 
     # Layer 4: 执行桥（默认只预演挂单，不连接 IBKR）
     bridge = ExecutionBridge(cfg)
-    execution_result = bridge.execute(state.recommendation or {}, trace_id=state.trace_id)
+    execution_result = bridge.execute(
+        state.recommendation or {},
+        trace_id=state.trace_id,
+        bot_snapshots=state.bot_snapshots,
+    )
     state.recommendation = state.recommendation or {}
     state.recommendation["execution_result"] = execution_result
 

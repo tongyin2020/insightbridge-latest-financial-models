@@ -63,6 +63,7 @@ class AgentConfig:
         "oil": 1.0,
         "index": 1.0,
     })
+    precision_sniping_enabled: bool = False
 
     def __post_init__(self) -> None:
         self._ensure_dirs()
@@ -106,6 +107,7 @@ class AgentConfig:
         cfg.llm_base_url = os.environ.get("AGENT_LLM_BASE_URL", cfg.llm_base_url)
         cfg.llm_temperature = float(os.environ.get("AGENT_LLM_TEMPERATURE", cfg.llm_temperature))
         cfg.llm_max_tokens = int(os.environ.get("AGENT_LLM_MAX_TOKENS", cfg.llm_max_tokens))
+        cfg.precision_sniping_enabled = os.environ.get("AGENT_PRECISION_SNIPING", "0").lower() in {"1", "true", "on"}
         if "AGENT_GATEKEEPER_WEIGHTS" in os.environ:
             import json
             cfg.gatekeeper_weights = json.loads(os.environ["AGENT_GATEKEEPER_WEIGHTS"])
