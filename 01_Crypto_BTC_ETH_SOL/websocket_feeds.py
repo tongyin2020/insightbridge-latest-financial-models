@@ -4,10 +4,12 @@ Uses cached reference prices and simulates realistic market movements
 """
 import asyncio
 import logging
+import os
 import random
 from typing import Dict, Callable, Optional, List
 from datetime import datetime, timezone
 from models import FeatureSnapshot
+from coinbase_feed import CoinbaseMarketFeed
 
 logger = logging.getLogger(__name__)
 
@@ -246,21 +248,33 @@ class SimulatedMarketFeed:
 
 
 # Global feed instance
-market_feed: Optional[SimulatedMarketFeed] = None
+market_feed = None
 
 
-def get_market_feed(symbols: List[str] = None) -> SimulatedMarketFeed:
+def _use_real_feed() -> bool:
+    """默认用 Coinbase 真实行情；CRYPTO_REAL_FEED=0 时回退到模拟。"""
+    return os.getenv("CRYPTO_REAL_FEED", "1") != "0"
+
+
+def _new_feed(symbols):
+    symbols = symbols or ["BTC", "ETH", "SOL"]
+    if _use_real_feed():
+        return CoinbaseMarketFeed(symbols)
+    return SimulatedMarketFeed(symbols)
+
+
+def get_market_feed(symbols: List[str] = None):
     """Get or create the global market feed instance"""
     global market_feed
     if market_feed is None:
-        market_feed = SimulatedMarketFeed(symbols or ["BTC", "ETH", "SOL"])
+        market_feed = _new_feed(symbols)
     return market_feed
 
 
-def reset_market_feed(symbols: List[str] = None) -> SimulatedMarketFeed:
+def reset_market_feed(symbols: List[str] = None):
     """Reset the market feed with new symbols"""
     global market_feed
     if market_feed:
         asyncio.create_task(market_feed.stop())
-    market_feed = SimulatedMarketFeed(symbols or ["BTC", "ETH", "SOL"])
+    market_feed = _new_feed(symbols)
     return market_feed
