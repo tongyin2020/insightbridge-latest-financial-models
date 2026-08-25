@@ -21,13 +21,13 @@ from __future__ import annotations
 
 from typing import List
 
-# 当前启用（8 个）
+# 当前启用（10 个）
 ENABLED_SYMBOLS: List[str] = [
     "MES", "MNQ",        # 股指
     "ZT", "ZN",          # 国债
     "SR3",               # 利率
     "EURUSD", "USDJPY",  # 外汇
-    "BTC",               # 现货加密（ZEROHASH），软止损
+    "BTC", "ETH", "SOL",  # 现货加密（ZEROHASH），软止损
 ]
 
 # 已实现但因选择暂不启用
@@ -45,6 +45,8 @@ SYMBOL_NOTES = {
     "EURUSD": "EUR/USD spot (IDEALPRO)",
     "USDJPY": "USD/JPY spot (IDEALPRO)",
     "BTC": "BTC/USD 现货 (ZEROHASH) — IOC 限价 + 软止损",
+    "ETH": "ETH/USD 现货 (ZEROHASH) — IOC 限价 + 软止损（tick 需核实）",
+    "SOL": "SOL/USD 现货 (ZEROHASH) — IOC 限价 + 软止损（tick 需核实）",
     "MBT": "Micro Bitcoin 期货 (CME) — 现用现货 BTC 代替，默认禁用",
 }
 

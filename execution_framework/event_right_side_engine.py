@@ -127,6 +127,11 @@ DEFAULT_RULES: Dict[str, AssetRule] = {
     # 点差/滑点上限用“tick 数”表达；BTC 波动大，阈值略宽（可用真实数据校准）。
     "BTC": AssetRule("BTC", "CRYPTO_SPOT", 25, 90, tick_size=0.01,
                      max_spread_ticks=2000.0, max_slippage_ticks=3000.0),
+    # ETH/SOL 现货（ZEROHASH）——tick 为估算值，需对照 IBKR 真实合约规格核实。
+    "ETH": AssetRule("ETH", "CRYPTO_SPOT", 25, 90, tick_size=0.01,
+                     max_spread_ticks=2000.0, max_slippage_ticks=3000.0),
+    "SOL": AssetRule("SOL", "CRYPTO_SPOT", 25, 90, tick_size=0.001,
+                     max_spread_ticks=2000.0, max_slippage_ticks=3000.0),
 }
 
 
