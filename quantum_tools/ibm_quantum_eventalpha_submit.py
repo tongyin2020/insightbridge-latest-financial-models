@@ -26,8 +26,8 @@ from qiskit_optimization.translators import to_ising
 
 TOOLS_BASE = Path("/Users/tongyin/Desktop/Anaconda_Local_Tools")
 DEFAULT_ENV_FILE = TOOLS_BASE / ".env.ibm_quantum"
-DEFAULT_PACK_DIR = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_tasks")
-DEFAULT_OUT_DIR = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/quantum_runs")
+DEFAULT_PACK_DIR = Path(__file__).resolve().parents[1] / "reports/quantum_tasks"
+DEFAULT_OUT_DIR = Path(__file__).resolve().parents[1] / "reports/quantum_runs"
 WAIT_ONE_HOT_LAMBDA = 1.2
 RISK_ONE_HOT_LAMBDA = 1.1
 RISK_BUDGET_LAMBDA = 0.35

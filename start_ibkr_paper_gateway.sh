@@ -1,12 +1,35 @@
-#!/bin/zsh
+#!/bin/bash
+IBREPO="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+export IBREPO
 set -euo pipefail
 
-BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
+BASE="$IBREPO"
 PY="${PYTHON_BIN:-/opt/anaconda3/bin/python3}"
 RUNTIME_DIR="$BASE/ibkr_runtime"
 LOG_DIR="$RUNTIME_DIR/logs"
 PID_FILE="$RUNTIME_DIR/ib_gateway.pid"
 LAUNCH_LOG="$LOG_DIR/ib_gateway_launch.log"
+APPLICATIONS_DIR="/Users/tongyin/Applications"
+
+resolve_gateway_version() {
+  if [[ -n "${IB_GATEWAY_VERSION:-}" ]]; then
+    echo "${IB_GATEWAY_VERSION}"
+    return 0
+  fi
+
+  local latest
+  latest="$(
+    find "$APPLICATIONS_DIR" -maxdepth 1 -type d -name 'IB Gateway 10.*' 2>/dev/null \
+      | sort -V \
+      | tail -n 1
+  )"
+
+  if [[ -z "$latest" ]]; then
+    return 1
+  fi
+
+  basename "$latest" | sed 's/^IB Gateway //'
+}
 
 "$PY" "$BASE/prepare_ibkr_paper_runtime.py" >/dev/null
 
@@ -20,10 +43,17 @@ if [[ -f "$PID_FILE" ]]; then
   fi
 fi
 
+if ! GATEWAY_VERSION="$(resolve_gateway_version)"; then
+  echo "No installed IB Gateway 10.x folder found under $APPLICATIONS_DIR"
+  exit 1
+fi
+
+echo "Using IB Gateway version $GATEWAY_VERSION"
+
 nohup "$BASE/third_party/IBC/resources/scripts/ibcstart.sh" \
-  10.45 \
+  "$GATEWAY_VERSION" \
   --gateway \
-  --tws-path="/Users/tongyin/Applications" \
+  --tws-path="$APPLICATIONS_DIR" \
   --tws-settings-path="$RUNTIME_DIR/ib_settings/paper" \
   --ibc-path="$BASE/third_party/IBC/resources" \
   --ibc-ini="$RUNTIME_DIR/private/config.paper.ini" \

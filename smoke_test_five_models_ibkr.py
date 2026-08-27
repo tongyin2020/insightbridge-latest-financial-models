@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import sys
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 MOD_DIR = BASE / "02_StockIndex_IBKR_ES_NQ"
 if str(MOD_DIR) not in sys.path:
     sys.path.insert(0, str(MOD_DIR))

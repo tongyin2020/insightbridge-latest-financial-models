@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from zipfile import ZipFile
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 SOURCE_JAR = Path("/Users/tongyin/JForex4/libs/demo/4.8.15/jforex-api-4.8.13-sources.jar")
 REPORT_DIR = BASE / "reports" / "broker_diagnostics"
 REPORT_JSON = REPORT_DIR / "dukascopy_eight_symbol_matrix_latest.json"

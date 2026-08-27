@@ -7,15 +7,15 @@
   <key>ProgramArguments</key>
   <array>
     <string>/bin/zsh</string>
-    <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/start_ibkr_paper_gateway.sh</string>
+    <string>/Users/tongyin/Library/InsightBridge_IBKR/ensure_ib_gateway_launchd.sh</string>
   </array>
   <key>RunAtLoad</key>
   <true/>
-  <key>KeepAlive</key>
-  <true/>
+  <key>StartInterval</key>
+  <integer>180</integer>
   <key>StandardOutPath</key>
-  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/ibkr_runtime/logs/launchd_stdout.log</string>
+  <string>/Users/tongyin/Library/Logs/InsightBridge/ib_gateway_watchdog_stdout.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/ibkr_runtime/logs/launchd_stderr.log</string>
+  <string>/Users/tongyin/Library/Logs/InsightBridge/ib_gateway_watchdog_stderr.log</string>
 </dict>
 </plist>

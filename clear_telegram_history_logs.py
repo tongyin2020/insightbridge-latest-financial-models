@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 
 LOG_FILES = [
     BASE / "reports" / "dukascopy_bridge" / "dukascopy_fx_backend.log",

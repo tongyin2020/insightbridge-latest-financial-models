@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 RUNNER = BASE / "eventalpha_continuous_runner.py"
 RUNTIME_DIR = BASE / "reports" / "runtime_logs"
 PID_FILE = RUNTIME_DIR / "eventalpha_runtime.pid"

@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 ROOT = "http://127.0.0.1:8001"
 RUNTIME_PAIRS = ["AUD/USD", "NZD/USD", "EUR/USD", "USD/JPY", "GBP/USD", "AUD/JPY", "NZD/JPY"]
 PROBE_INPUT = "AUD/USD,NZD/USD,EUR/USD,USD/JPY,GBP/USD,AUD/JPY,NZD/JPY"

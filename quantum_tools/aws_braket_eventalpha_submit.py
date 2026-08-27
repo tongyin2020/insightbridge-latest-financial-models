@@ -30,7 +30,7 @@ from ibm_quantum_eventalpha_submit import (
 )
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[1]
 DEFAULT_PACK_DIR = BASE / "reports" / "quantum_tasks"
 DEFAULT_OUT_DIR = BASE / "reports" / "quantum_runs"
 DEFAULT_DEVICE_ARN = "arn:aws:braket:::device/quantum-simulator/amazon/sv1"

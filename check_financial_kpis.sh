@@ -1,7 +1,9 @@
 #!/bin/zsh
+IBREPO="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+export IBREPO
 set -euo pipefail
 
-BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
+BASE="$IBREPO"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 echo "InsightBridge Financial KPI Check"

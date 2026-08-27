@@ -1,5 +1,7 @@
 #!/bin/zsh
-BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
+IBREPO="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+export IBREPO
+BASE="$IBREPO"
 PY="/opt/anaconda3/bin/python3"
 
 EVENT_TYPE="${1:-cpi}"

@@ -16,7 +16,7 @@ from aws_braket_eventalpha_submit import select_problem
 from ibm_quantum_eventalpha_submit import decode_counts, ensure_best_exact_solution, load_pack
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[1]
 DEFAULT_RUN_DIR = BASE / "reports" / "quantum_runs"
 
 

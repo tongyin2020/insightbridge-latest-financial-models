@@ -1,8 +1,10 @@
 #!/bin/zsh
+IBREPO="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+export IBREPO
 
 set -euo pipefail
 
-BASE="/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest"
+BASE="$IBREPO"
 PY="${PYTHON_BIN:-/opt/anaconda3/bin/python3}"
 LABEL="com.insightbridge.five-models.paper"
 PLIST="$BASE/com.insightbridge.five-models.paper.plist"
@@ -32,6 +34,13 @@ launchctl kickstart -k "$GUI_DOMAIN/$LABEL" >/dev/null 2>&1 || true
 echo
 echo "Step 3/4: waiting for heartbeat..."
 sleep 5
+
+if ! "$PY" "$BASE/check_five_models_runtime_health.py" | grep -q "Overall: LIVE"; then
+  echo
+  echo "launchd path did not come up cleanly; falling back to safe background runner..."
+  bash "$BASE/start_five_models_paper_live_safe.sh"
+  sleep 5
+fi
 
 echo
 echo "Step 4/4: verifying runtime health..."

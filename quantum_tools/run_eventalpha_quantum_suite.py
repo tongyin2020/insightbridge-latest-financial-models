@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 TOOLS_BASE = Path("/Users/tongyin/Desktop/Anaconda_Local_Tools")
-PROJECT_BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+PROJECT_BASE = Path(__file__).resolve().parents[1]
 SUBMIT_SCRIPT = TOOLS_BASE / "ibm_quantum_eventalpha_submit.py"
 DEFAULT_PACK_DIR = PROJECT_BASE / "reports" / "quantum_tasks"
 DEFAULT_OUT_DIR = PROJECT_BASE / "reports" / "quantum_suite_runs"

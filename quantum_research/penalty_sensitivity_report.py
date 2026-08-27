@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 
-PROJECT_BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+PROJECT_BASE = Path(__file__).resolve().parents[1]
 DEFAULT_CSV = PROJECT_BASE / "reports" / "quantum_research" / "penalty_results.csv"
 DEFAULT_OUTPUT = PROJECT_BASE / "reports" / "quantum_research" / "penalty_sensitivity_report.md"
 

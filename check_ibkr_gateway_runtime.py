@@ -11,11 +11,14 @@ from pathlib import Path
 from typing import Any
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 RUNTIME_DIR = BASE / "ibkr_runtime"
 PID_FILE = RUNTIME_DIR / "ib_gateway.pid"
 STATE_FILE = RUNTIME_DIR / "runtime_state.json"
 LAUNCH_LOG = RUNTIME_DIR / "logs" / "ib_gateway_launch.log"
+SUPPORT_RUNTIME_DIR = Path.home() / "Library" / "InsightBridge_IBKR" / "runtime"
+SUPPORT_LOG_DIR = SUPPORT_RUNTIME_DIR / "logs"
+SUPPORT_LAUNCH_LOG = SUPPORT_LOG_DIR / "ib_gateway_launch.log"
 CHECK_SCRIPT = BASE / "check_ibkr_paper_setup.py"
 
 
@@ -80,6 +83,14 @@ def tail_log(path: Path, lines: int = 8) -> list[str]:
     return content[-lines:]
 
 
+def choose_log_path() -> Path:
+    candidates = [SUPPORT_LAUNCH_LOG, LAUNCH_LOG]
+    existing = [path for path in candidates if path.exists()]
+    if not existing:
+        return LAUNCH_LOG
+    return max(existing, key=lambda path: path.stat().st_mtime)
+
+
 def run_readiness() -> dict[str, Any]:
     proc = subprocess.run(
         ["/opt/anaconda3/bin/python3", str(CHECK_SCRIPT), "--json"],
@@ -94,12 +105,15 @@ def run_readiness() -> dict[str, Any]:
 
 def main() -> int:
     state = read_runtime_state()
-    api_port = int(state.get("api_port", 7497))
+    api_port = int(state.get("api_port", 4002))
     command_port = int(state.get("command_server_port", 7462))
     pid, running = read_pid()
     api_state = asdict(port_state(api_port))
     command_state = asdict(port_state(command_port))
     readiness = run_readiness()
+    read_only_ok = bool(readiness.get("ok") and (readiness.get("payload", {}).get("checks", {}).get("read_only_connection", {}) or {}).get("ok"))
+    effective_live = bool(api_state["ok"] and read_only_ok)
+    chosen_log = choose_log_path()
 
     print("IBKR Paper Gateway Runtime Check")
     print("=" * 60)
@@ -108,12 +122,13 @@ def main() -> int:
     print(f"pid_file: {PID_FILE}")
     print(f"pid: {pid or 'none'}")
     print(f"process_running: {running}")
+    print(f"effective_live: {effective_live}")
     print("-" * 60)
     print(f"api_port_{api_port}: {api_state['detail']}")
     print(f"command_server_{command_port}: {command_state['detail']}")
     print("-" * 60)
-    print(f"launch_log: {LAUNCH_LOG}")
-    log_tail = tail_log(LAUNCH_LOG)
+    print(f"launch_log: {chosen_log}")
+    log_tail = tail_log(chosen_log)
     if log_tail:
         for line in log_tail:
             print(f"log> {line}")
@@ -135,6 +150,13 @@ def main() -> int:
     else:
         print("readiness_check: ATTENTION")
         print(f"error: {readiness.get('error', 'unknown')}")
+    print("-" * 60)
+    if effective_live:
+        print("Overall: LIVE - IB Gateway paper API is reachable and account handshake succeeded.")
+    elif api_state["ok"]:
+        print("Overall: PARTIAL - API port is up, but account handshake is not yet confirmed.")
+    else:
+        print("Overall: ATTENTION - IB Gateway paper API is not reachable yet.")
     return 0
 
 

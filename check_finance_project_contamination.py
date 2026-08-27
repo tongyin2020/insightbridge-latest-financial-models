@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 
 
-DEFAULT_BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+DEFAULT_BASE = Path(__file__).resolve().parents[0]
 
 CODE_EXTENSIONS = {
     ".py",
