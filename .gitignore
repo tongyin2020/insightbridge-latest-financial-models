@@ -40,3 +40,4 @@ reports/runtime/*.log
 reports/runtime/*.pid
 reports/runtime/476404
 eventalpha_core/advanced/live_signals_cache.json
+reports/runtime/heartbeat.json
