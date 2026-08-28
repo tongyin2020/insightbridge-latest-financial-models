@@ -40,7 +40,7 @@ from enabled_symbols import (ENABLED_SYMBOLS, filter_enabled, rejected,
                              SYMBOL_NOTES)
 from ibkr_session import IBKRSession
 from ibkr_contract_resolver import IBKRContractResolver, ResolvedContract, FUT_SPECS
-from right_side_pipeline import RightSidePipeline
+from right_side_pipeline import RightSidePipeline, DEFAULT_CONTRACT_FEES
 from v2_telemetry_shadow import V2TelemetryShadow
 from microstructure_shadow import MicrostructureShadow
 from timeseries_shadow import TimeSeriesShadow
@@ -266,7 +266,8 @@ def main() -> int:
                              account_id=account_id,
                              strategy_version=args.strategy_version,
                              annual_event_limit=args.annual_event_limit,
-                             max_products_per_event=args.max_products_per_event)
+                             max_products_per_event=args.max_products_per_event,
+                             contract_fees=DEFAULT_CONTRACT_FEES)
     pipe.attach_session(sess)
 
     lease_owner = f"runner-{os.getpid()}-client-{args.client_id}"

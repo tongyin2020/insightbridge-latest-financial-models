@@ -78,6 +78,25 @@ class RightSideKPI:
         }
 
 
+# ── 默认单边费用表（symbol -> 账户货币 USD/手/边）────────────────────────────
+# 口径：IBKR 佣金 + 交易所/监管穿透费，单边每手。
+# 来源（2026-08-27 抓取，见 REVIEW_MANIFEST R3 成本地板表）：
+#   IBKR 期货佣金页：标准期货 $0.85/张/边、Micro $0.25；
+#   TradeStation 交易所穿透费页：MES/MNQ $0.35、ZT $0.65、ZN $0.80、
+#   SR3 $1.25、CL $1.50。
+# 现货外汇（点差内含成本）与现货加密（0.18%/边、最低 $1.75，按比例非定额）
+# 无法折成"每手定额"，不在表内——journal 中按 0.0 记，净 R 退化为毛 R，
+# 统计输出里可与已配费品种区分。
+DEFAULT_CONTRACT_FEES: Dict[str, float] = {
+    "MES": 0.60,   # $0.25 佣金 + $0.35 穿透
+    "MNQ": 0.60,   # $0.25 佣金 + $0.35 穿透
+    "ZT":  1.50,   # $0.85 佣金 + $0.65 穿透
+    "ZN":  1.65,   # $0.85 佣金 + $0.80 穿透
+    "SR3": 2.10,   # $0.85 佣金 + $1.25 穿透
+    "CL":  2.35,   # $0.85 佣金 + $1.50 穿透
+}
+
+
 class RightSidePipeline:
     def __init__(self, ib=None, dry_run: bool = True,
                  equity: float = 50000.0, max_loss_pct: float = 0.0025,
