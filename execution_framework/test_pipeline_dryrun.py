@@ -115,6 +115,8 @@ def main() -> int:
         print(f"  ✓ dry-run 下单意图: {result['action']} {result['quantity']} "
               f"@ limit {result['limit_price']:.2f}, stop {result['stop_loss']:.2f}")
         print(f"  ✓ 仓位由风险约束算出: {result['sizing']}")
+        assert result["sizing"].get("contract_multiplier") == 2.0, result
+        assert result["sizing"].get("contract_value", 0) > result["limit_price"], result
         # 模拟成交确认
         state = pipe.confirm_fill(symbol, result["client_ref"])
         print(f"  ✓ 成交确认状态(dry-run 下保持 DRYRUN): {state}")

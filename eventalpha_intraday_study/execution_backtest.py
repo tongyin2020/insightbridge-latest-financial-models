@@ -64,14 +64,18 @@ def _simulate_path(series: pd.DataFrame, t0: pd.Timestamp, win: tuple[int, int],
     price = post["Price"].to_numpy(dtype=float)
     rel = price / p0 - 1.0
 
-    # early-move magnitude (classification), executable at CLASSIFY_S
+    # Early-move magnitude is not knowable until CLASSIFY_S.  Entry must not
+    # happen before that classification timestamp; otherwise a 30-second entry
+    # could be selected using a 60-second move and leak the future.
     early_mask = secs <= CLASSIFY_S
     early_bps = (float(np.max(np.abs(rel[early_mask]))) * 1e4
                  if np.any(early_mask) else None)
 
     min_wait, max_wait = win
     thr = entry_bps / 1e4
-    entry_mask = (secs >= min_wait) & (secs <= max_wait) & (np.abs(rel) > thr)
+    decision_floor = max(float(min_wait), float(CLASSIFY_S))
+    entry_mask = ((secs >= decision_floor) & (secs <= max_wait)
+                  & (np.abs(rel) > thr))
     if not np.any(entry_mask):
         return {"entered": 0, "early_bps": early_bps}
     idx = int(np.argmax(entry_mask))
