@@ -199,7 +199,7 @@ class EventAlphaBrain:
             "confidence_decay_above_0.22",
             "profit_giveback_above_35pct_of_mfe",
         ]
-        if direction == Direction.FLAT or execution_confidence < 0.70:
+        if direction == Direction.FLAT or execution_confidence < 0.85:
             action = DecisionAction.WATCH
             risk = 0.0
             reasons.append("direction_or_confidence_not_confirmed")
