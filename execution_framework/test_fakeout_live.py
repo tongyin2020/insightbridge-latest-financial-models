@@ -42,8 +42,10 @@ def _breakout_df(n: int = 20) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["open", "high", "low", "close", "volume"])
 
 
-def _evaluate(fakeout: bool, bid_sizes=None, ask_sizes=None, symbol: str = "BTC"):
-    eng = RightSideEventEngine(fakeout_filter_enabled=fakeout)
+def _evaluate(fakeout: bool, bid_sizes=None, ask_sizes=None, symbol: str = "BTC",
+              require_book: bool = False):
+    eng = RightSideEventEngine(fakeout_filter_enabled=fakeout,
+                               fakeout_require_book=require_book)
     now = datetime.now(timezone.utc)
     eng.states[symbol] = EventState(
         symbol=symbol, event_name="unit_cpi", event_time=now - timedelta(minutes=30),
@@ -83,11 +85,19 @@ def test_no_level2_never_blocks():
     print("✓ no Level-2 sizes + gate ON -> BUY (never blocks unjudgeable trade)")
 
 
+def test_strict_mode_blocks_when_level2_is_missing():
+    out = _evaluate(True, bid_sizes=None, ask_sizes=None, require_book=True)
+    assert out["status"] == "HOLD", out
+    assert out["reason"] == "fakeout_book_required_but_unavailable", out
+    print("✓ strict fakeout mode + no Level-2 -> HOLD (fail closed)")
+
+
 def main() -> int:
     test_gate_off_is_inert()
     test_supported_breakout_trades()
     test_contradicting_book_rejected_as_fakeout()
     test_no_level2_never_blocks()
+    test_strict_mode_blocks_when_level2_is_missing()
     print("\n✅ live fakeout gate self-check passed.")
     return 0
 

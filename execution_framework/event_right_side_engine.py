@@ -26,6 +26,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, time, timedelta, timezone
 from typing import Any, Dict, Literal, Optional, Tuple
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -85,8 +86,13 @@ class AssetRule:
     # 第二步用历史数据校准前只是占位。仅在 fakeout_filter_enabled=True 时生效。
     min_obi_abs: Optional[float] = None
     risk_fraction: float = 0.0025      # 单笔风险预算（占权益比例，交给 sizer 用）
-    # 交易时段（UTC）。None 表示 24h（如 FX/Crypto）。
-    session_start_utc: Optional[time] = None
+    # 交易时段。优先用交易所本地时区表达（session_tz + *_local）：事件锚定
+    # 美东时间，写死 UTC 会在夏令时切换时整体漂移一小时（CPI 8:30 ET =
+    # 12:30/13:30 UTC）。*_utc 字段保留用于兼容旧配置；本地字段优先。
+    session_tz: str = "America/New_York"
+    session_start_local: Optional[time] = None
+    session_end_local: Optional[time] = None
+    session_start_utc: Optional[time] = None  # 兼容旧配置；新配置请用 *_local
     session_end_utc: Optional[time] = None
 
 
@@ -98,26 +104,37 @@ DEFAULT_RULES: Dict[str, AssetRule] = {
     "USDJPY": AssetRule("USDJPY", "FX", 10, 45, tick_size=0.005,
                         max_spread_ticks=3.0, max_slippage_ticks=4.0),
 
-    # Index —— CME 主时段（RTH 约 13:30–20:00 UTC）；Globex 深夜流动性差，默认只在 RTH
+    # Index —— CME 主时段 RTH 9:30–16:00 美东（夏/冬令时自动跟随；
+    # 旧配置写死 13:30–20:00 UTC，冬季会错位成 10:30–17:00 ET）。
+    # Globex 深夜流动性差，默认只在 RTH
     "MES": AssetRule("MES", "INDEX", 15, 60, tick_size=0.25,
                      max_spread_ticks=2.0, max_slippage_ticks=4.0,
-                     session_start_utc=time(13, 30), session_end_utc=time(20, 0)),
+                     session_start_local=time(9, 30), session_end_local=time(16, 0)),
     "MNQ": AssetRule("MNQ", "INDEX", 15, 60, tick_size=0.25,
                      max_spread_ticks=3.0, max_slippage_ticks=5.0,
-                     session_start_utc=time(13, 30), session_end_utc=time(20, 0)),
+                     session_start_local=time(9, 30), session_end_local=time(16, 0)),
 
-    # Treasury —— CBOT；亚洲时段流动性弱，默认只在欧美时段
+    # Treasury —— CBOT；亚洲时段流动性弱，默认只在欧美时段。
+    # 3:00–16:00 美东 ≈ 旧配置 7:00–20:00 UTC 的夏季窗口，且全年跟随 ET 事件锚点
     "ZT": AssetRule("ZT", "TREASURY", 5, 35, tick_size=0.0078125,
                     max_spread_ticks=2.0, max_slippage_ticks=3.0,
-                    session_start_utc=time(7, 0), session_end_utc=time(20, 0)),
+                    session_start_local=time(3, 0), session_end_local=time(16, 0)),
     "ZN": AssetRule("ZN", "TREASURY", 5, 35, tick_size=0.015625,
                     max_spread_ticks=2.0, max_slippage_ticks=3.0,
-                    session_start_utc=time(7, 0), session_end_utc=time(20, 0)),
+                    session_start_local=time(3, 0), session_end_local=time(16, 0)),
 
-    # Rates —— SOFR 3M 期货
+    # Rates —— SOFR 3M 期货（同 Treasury 时段）
     "SR3": AssetRule("SR3", "RATES", 3, 25, tick_size=0.0025,
                      max_spread_ticks=2.0, max_slippage_ticks=3.0,
-                     session_start_utc=time(7, 0), session_end_utc=time(20, 0)),
+                     session_start_local=time(3, 0), session_end_local=time(16, 0)),
+
+    # Commodity —— NYMEX WTI 原油（④号产品，EIA 周度库存/OPEC 事件）。
+    # tick 0.01 = $10/手（1000 桶）；RTH 9:00–14:30 ET 流动性最佳。
+    # 阈值同为未验证先验，需用 shadow 数据校准；enabled_symbols（主仓库）
+    # 需包含 CL 才会真正接线。
+    "CL": AssetRule("CL", "COMMODITY", 10, 45, tick_size=0.01,
+                    max_spread_ticks=2.0, max_slippage_ticks=3.0,
+                    session_start_local=time(9, 0), session_end_local=time(14, 30)),
 
     # Crypto futures —— CME Micro Bitcoin，24h
     "MBT": AssetRule("MBT", "CRYPTO_FUT", 25, 90, tick_size=5.0,
@@ -146,6 +163,7 @@ class EventState:
     event_time: datetime
     base_atr: float
     peak_atr: float
+    event_id: str = ""
     event_price: float = 0.0            # close at trigger, for early-move magnitude
     active: bool = True
     confirmed_pending: bool = False     # 已产生信号、等待成交确认
@@ -159,7 +177,8 @@ class RightSideEventEngine:
 
     def __init__(self, rules: Optional[Dict[str, AssetRule]] = None,
                  selectivity_enabled: bool = False,
-                 fakeout_filter_enabled: bool = False):
+                 fakeout_filter_enabled: bool = False,
+                 fakeout_require_book: bool = False):
         self.rules = rules or DEFAULT_RULES
         self.states: Dict[str, EventState] = {}
         # Fakeout (false-breakout) filter: after the K-line breakout + volume +
@@ -169,6 +188,10 @@ class RightSideEventEngine:
         # when no Level-2 sizes are supplied (never blocks a trade it can't judge).
         # Thresholds are UNVALIDATED placeholders pending Step-2 calibration.
         self.fakeout_filter_enabled = fakeout_filter_enabled and _SELECTIVITY_OK
+        # Optional fail-closed mode.  When explicitly enabled, inability to
+        # observe a usable Level-2 book means WATCH, never "cannot tell -> buy".
+        # It remains opt-in until venue-specific depth quality is verified.
+        self.fakeout_require_book = bool(fakeout_require_book)
         # Selectivity gate: stand down on 'small' early-move events (the only
         # logic change the 2024-2025 P&L study proved adds edge). Default OFF so
         # the live judgement is byte-for-byte unchanged unless a caller opts in
@@ -207,7 +230,8 @@ class RightSideEventEngine:
 
     # ── 事件触发 ──────────────────────────────────────────────────────────
     def trigger_event(self, symbol: str, event_name: str,
-                      event_time: datetime, df: pd.DataFrame) -> None:
+                      event_time: datetime, df: pd.DataFrame,
+                      event_id: Optional[str] = None) -> None:
         if symbol not in self.rules:
             raise KeyError(f"未配置品种规则: {symbol}")
         rule = self.rules[symbol]
@@ -227,9 +251,11 @@ class RightSideEventEngine:
             raise ValueError(f"ATR 非正: {symbol}")
 
         event_price = float(df["close"].iloc[-1]) if len(df) else 0.0
+        stable_event_id = event_id or f"{event_name}@{event_time.isoformat()}"
         self.states[symbol] = EventState(
             symbol=symbol, event_name=event_name, event_time=event_time,
             base_atr=base_atr, peak_atr=base_atr, event_price=event_price,
+            event_id=stable_event_id,
             active=True, reason="macro_event_triggered",
         )
 
@@ -258,13 +284,22 @@ class RightSideEventEngine:
 
     @staticmethod
     def _in_session(rule: AssetRule, now: datetime) -> bool:
-        if rule.session_start_utc is None or rule.session_end_utc is None:
+        # 优先用交易所本地时区窗口（夏令时安全：窗口跟随 session_tz 的
+        # UTC 偏移自动伸缩）；本地字段缺省时回退到旧 UTC 字段（兼容旧配置）。
+        if rule.session_start_local is not None and rule.session_end_local is not None:
+            if now.tzinfo is None:
+                raise ValueError("now must be timezone-aware")
+            t = now.astimezone(ZoneInfo(rule.session_tz)).time()
+            start, end = rule.session_start_local, rule.session_end_local
+        elif rule.session_start_utc is not None and rule.session_end_utc is not None:
+            t = now.astimezone(timezone.utc).time()
+            start, end = rule.session_start_utc, rule.session_end_utc
+        else:
             return True  # 24h 品种
-        t = now.astimezone(timezone.utc).time()
-        if rule.session_start_utc <= rule.session_end_utc:
-            return rule.session_start_utc <= t <= rule.session_end_utc
+        if start <= end:
+            return start <= t <= end
         # 跨午夜时段
-        return t >= rule.session_start_utc or t <= rule.session_end_utc
+        return t >= start or t <= end
 
     def _atr_whipsaw_finished(self, rule: AssetRule, st: EventState,
                               current_atr: float) -> Tuple[bool, str]:
@@ -419,6 +454,12 @@ class RightSideEventEngine:
         obi = _order_book_imbalance(bid_sizes, ask_sizes) if _SELECTIVITY_OK else None
         fakeout, fakeout_reason = (False, "fakeout_filter_disabled")
         if self.fakeout_filter_enabled:
+            if obi is None and self.fakeout_require_book:
+                return {"status": "HOLD", "symbol": symbol, "event": st.event_name,
+                        "reason": "fakeout_book_required_but_unavailable",
+                        "obi": None, "pre_signal": signal,
+                        "fakeout_filter_enabled": True,
+                        "fakeout_require_book": True}
             cfg = _FakeoutConfig(min_obi_abs=rule.min_obi_abs) if rule.min_obi_abs is not None else _FakeoutConfig()
             fakeout, fakeout_reason = _is_breakout_fakeout(signal.get("direction", ""), obi, cfg)
             if fakeout:
@@ -435,5 +476,6 @@ class RightSideEventEngine:
                 "early_move_bps": early_move_bps, "impact_bucket": impact_bucket,
                 "selectivity_enabled": self.selectivity_enabled,
                 "obi": obi, "fakeout_filter_enabled": self.fakeout_filter_enabled,
+                "fakeout_require_book": self.fakeout_require_book,
                 "fakeout_reason": fakeout_reason,
                 "requires_fill_confirmation": True}

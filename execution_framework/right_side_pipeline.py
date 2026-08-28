@@ -30,6 +30,8 @@ from typing import Any, Dict, Optional
 from event_right_side_engine import RightSideEventEngine, DEFAULT_RULES
 from ibkr_contract_resolver import IBKRContractResolver, ContractResolutionError
 from ibkr_order_manager import IBKROrderManager
+from intent_ledger import IntentLedger
+from position_lifecycle import PositionLifecycleMonitor
 from trade_journal import TradeJournal, TradeRecord
 from trade_telegram_notifier import TradeTelegramNotifier
 
@@ -81,7 +83,15 @@ class RightSidePipeline:
                  equity: float = 50000.0, max_loss_pct: float = 0.0025,
                  log_path: Optional[str] = None, journal_db: Optional[str] = None,
                  selectivity_enabled: Optional[bool] = None,
-                 fakeout_filter_enabled: Optional[bool] = None):
+                 fakeout_filter_enabled: Optional[bool] = None,
+                 fakeout_require_book: Optional[bool] = None,
+                 safety_db: Optional[str] = None,
+                 account_id: str = "PAPER",
+                 strategy_version: str = "eventalpha-v3",
+                 annual_event_limit: int = 15,
+                 max_products_per_event: int = 1,
+                 lifecycle_db: Optional[str] = None,
+                 contract_fees: Optional[Dict[str, float]] = None):
         # Opt-in selectivity gate: default OFF; enable via arg or
         # EVENTALPHA_SELECTIVITY=1 (paper first). See event_right_side_engine.
         if selectivity_enabled is None:
@@ -93,9 +103,13 @@ class RightSidePipeline:
         if fakeout_filter_enabled is None:
             fakeout_filter_enabled = os.environ.get(
                 "EVENTALPHA_FAKEOUT_FILTER", "").lower() in {"1", "true", "yes", "on"}
+        if fakeout_require_book is None:
+            fakeout_require_book = os.environ.get(
+                "EVENTALPHA_FAKEOUT_REQUIRE_BOOK", "").lower() in {"1", "true", "yes", "on"}
         self.engine = RightSideEventEngine(DEFAULT_RULES,
                                            selectivity_enabled=selectivity_enabled,
-                                           fakeout_filter_enabled=fakeout_filter_enabled)
+                                           fakeout_filter_enabled=fakeout_filter_enabled,
+                                           fakeout_require_book=fakeout_require_book)
         self.resolver = IBKRContractResolver(ib)
         self.om = IBKROrderManager(ib, dry_run=dry_run)
         self.kpi = RightSideKPI()
@@ -109,6 +123,24 @@ class RightSidePipeline:
         self._halt_reason = ""
         self._pre_event_frozen: set = set()   # 会前冻结的品种（禁新入场）
         self.trade_notifier = TradeTelegramNotifier(enabled=True)
+        self.intent_ledger = IntentLedger(safety_db) if safety_db else None
+        # 持仓生命周期持久化：默认落在 safety_db 旁边的 .lifecycle.db，
+        # 进程崩溃/重启后硬封顶时钟不丢失（此前只在内存，重启即清零）。
+        if lifecycle_db is None and safety_db:
+            lifecycle_db = str(Path(safety_db).with_suffix(".lifecycle.db"))
+        self.lifecycle = PositionLifecycleMonitor(persist_path=lifecycle_db)
+        # Fencing-token 守卫：由 runner 在取得账户租约后调用
+        # configure_lease_guard() 启用；启用后每次下单前校验 token 未过期、
+        # 未被其他进程接管，防止停顿进程苏醒后继续发单（split-brain）。
+        self._lease_owner: Optional[str] = None
+        self._fencing_token: Optional[int] = None
+        self.account_id = account_id
+        self.strategy_version = strategy_version
+        self.annual_event_limit = int(annual_event_limit)
+        self.max_products_per_event = int(max_products_per_event)
+        # 单边每手费用表（symbol -> 账户货币），用于 journal 产出净 R；
+        # 未配置的品种按 0.0 计（此时净 R 退化为毛 R，统计里可区分）。
+        self.contract_fees = dict(contract_fees or {})
 
         if _SHARED_OK:
             self.hard_stop = HardStopController(
@@ -188,11 +220,36 @@ class RightSidePipeline:
         session.on_fatal = lambda code, msg: self.halt(f"ibkr_fatal_{code}:{msg}")
         session.on_reconnect = lambda: self._log({"stage": "reconnected"})
 
+    # ── Fencing-token 守卫 ────────────────────────────────────────────────
+    def configure_lease_guard(self, lease_owner: str) -> bool:
+        """在取得账户级执行租约后启用 fencing 校验。
+
+        从 ledger 读当前 fencing epoch 并固定下来；之后 step() 每次下单前
+        用 check_fencing 复核：租约被其他进程接管、或本进程停顿超过 TTL 后
+        租约过期，epoch 都会失配，下单被拒绝并触发 halt。
+        """
+        if self.intent_ledger is None:
+            return False
+        token = self.intent_ledger.current_fencing_token(
+            self.account_id, lease_owner)
+        if token is None:
+            return False
+        self._lease_owner = lease_owner
+        self._fencing_token = token
+        self._log({"stage": "lease_guard_enabled",
+                   "owner": lease_owner, "fencing_token": token})
+        return True
+
     # ── 触发事件 ──────────────────────────────────────────────────────────
-    def on_event(self, symbol: str, event_name: str, event_time, df) -> None:
-        self.engine.trigger_event(symbol, event_name, event_time, df)
+    def on_event(self, symbol: str, event_name: str, event_time, df,
+                 event_id: Optional[str] = None) -> None:
+        self.engine.trigger_event(
+            symbol, event_name, event_time, df, event_id=event_id)
         self.kpi.active_events += 1
-        self._log({"stage": "event_triggered", "symbol": symbol, "event": event_name})
+        st = self.engine.states.get(symbol)
+        self._log({"stage": "event_triggered", "symbol": symbol,
+                   "event": event_name,
+                   "event_id": st.event_id if st else event_id})
 
     # ── 每根K线评估 + 风控 + 仓位 + 下单意图 ──────────────────────────────
     def step(self, symbol: str, now, df, bid=None, ask=None,
@@ -239,36 +296,7 @@ class RightSidePipeline:
                 return {"status": "HOLD", "reason": f"hard_stop_{decision.reason}",
                         "symbol": symbol, "detail": decision.message}
 
-        # ── 仓位由风险约束决定（不再写死 1 手）──────────────────────────────
-        entry = signal["entry_price"]
-        stop = signal["stop_loss"]
-        tick = signal["tick_size"]
-        plan_stop_pct = abs(entry - stop) / entry if entry else 0.0
-        contracts = 1.0
-        sizing_detail: Dict[str, Any] = {"fallback": "shared_core_unavailable"}
-
-        if _SHARED_OK and plan_stop_pct > 0:
-            sizer = CorrectPositionSizer(
-                equity=self.equity, max_loss_pct=self.max_loss_pct,
-                contract_value=max(entry, 1.0))
-            res = sizer.compute(
-                plan_stop_pct=plan_stop_pct,
-                pred_slippage_pct=(tick * 3) / entry if entry else 0.0004,
-                available_depth=available_depth,
-                asset_class=_asset_class_for(signal.get("asset_class", "")))
-            contracts = max(0.0, float(res.final_contracts))
-            sizing_detail = {"binding": res.binding_constraint,
-                             "notional": res.final_notional,
-                             "effective_stop_pct": res.effective_stop_width}
-
-        if contracts <= 0:
-            self.kpi.orders_blocked_by_risk += 1
-            self.engine.mark_abandoned(symbol, "zero_size")
-            self._log({"stage": "size_zero", "symbol": symbol, **sizing_detail})
-            return {"status": "HOLD", "reason": "risk_sized_to_zero",
-                    "symbol": symbol, "sizing": sizing_detail}
-
-        # ── 合约解析（禁用 CONTFUT，必须锁 conId）──────────────────────────
+        # ── 先解析合约，再按真实 multiplier 做仓位换算 ──────────────────────
         try:
             rc = self.resolver.resolve(symbol)
         except ContractResolutionError as exc:
@@ -278,13 +306,137 @@ class RightSidePipeline:
             return {"status": "HOLD", "reason": "contract_unresolved",
                     "symbol": symbol, "error": str(exc)}
 
+        # ── 仓位由风险约束决定（不再写死 1 手）──────────────────────────────
+        entry = signal["entry_price"]
+        stop = signal["stop_loss"]
+        tick = signal["tick_size"]
+        plan_stop_pct = abs(entry - stop) / entry if entry else 0.0
+        contracts = 1.0
+        multiplier = 1.0
+        sizing_detail: Dict[str, Any] = {"fallback": "shared_core_unavailable"}
+
+        if _SHARED_OK and plan_stop_pct > 0:
+            multiplier = 1.0
+            if getattr(rc, "sec_type", "") == "FUT":
+                try:
+                    multiplier = float(rc.multiplier)
+                except (TypeError, ValueError):
+                    multiplier = 0.0
+                if multiplier <= 0:
+                    self.engine.mark_abandoned(symbol, "invalid_futures_multiplier")
+                    return {"status": "HOLD", "reason": "invalid_futures_multiplier",
+                            "symbol": symbol}
+            sizer = CorrectPositionSizer(
+                equity=self.equity, max_loss_pct=self.max_loss_pct,
+                contract_value=max(entry * multiplier, 1.0))
+            res = sizer.compute(
+                plan_stop_pct=plan_stop_pct,
+                pred_slippage_pct=(tick * 3) / entry if entry else 0.0004,
+                available_depth=available_depth,
+                asset_class=_asset_class_for(signal.get("asset_class", "")))
+            contracts = max(0.0, float(res.final_contracts))
+            sizing_detail = {"binding": res.binding_constraint,
+                             "notional": res.final_notional,
+                             "effective_stop_pct": res.effective_stop_width,
+                             "contract_multiplier": multiplier,
+                             "contract_value": entry * multiplier}
+
+        if contracts <= 0:
+            self.kpi.orders_blocked_by_risk += 1
+            self.engine.mark_abandoned(symbol, "zero_size")
+            self._log({"stage": "size_zero", "symbol": symbol, **sizing_detail})
+            return {"status": "HOLD", "reason": "risk_sized_to_zero",
+                    "symbol": symbol, "sizing": sizing_detail}
+
         # ── 下单意图（默认 dry-run）────────────────────────────────────────
         action = "BUY" if signal["status"] == "BUY" else "SELL"
-        ticket = self.om.submit_bracket(
-            resolved_contract=rc, symbol=symbol, action=action,
-            quantity=round(contracts) if contracts >= 1 else round(contracts, 2),
-            ref_price=entry, stop_loss=stop, tick_size=tick,
-            protect_ticks=3, confirm_live=confirm_live)
+        intent_id = None
+        if self.intent_ledger is not None:
+            st = self.engine.states.get(symbol)
+            if st is None or not st.event_id:
+                self.engine.mark_abandoned(symbol, "missing_event_id")
+                return {"status": "HOLD", "reason": "missing_event_id",
+                        "symbol": symbol}
+            event_year = int(st.event_time.year)
+            event_res = self.intent_ledger.reserve_event(
+                self.account_id, st.event_id, event_year,
+                annual_limit=self.annual_event_limit)
+            if not event_res.accepted:
+                self.engine.mark_abandoned(symbol, event_res.reason)
+                self._log({"stage": "event_budget_block", "symbol": symbol,
+                           "event_id": st.event_id, "reason": event_res.reason,
+                           "counted_events": event_res.counted_events,
+                           "annual_limit": event_res.annual_limit})
+                return {"status": "HOLD", "reason": event_res.reason,
+                        "symbol": symbol}
+            intent_res = self.intent_ledger.reserve_intent(
+                self.account_id, st.event_id, event_year, symbol, action,
+                self.strategy_version,
+                max_intents_per_event=self.max_products_per_event)
+            if not intent_res.accepted:
+                if event_res.reason == "reserved":
+                    self.intent_ledger.release_untraded_event(
+                        self.account_id, st.event_id, event_year)
+                self.engine.mark_abandoned(symbol, intent_res.reason)
+                self._log({"stage": "intent_block", "symbol": symbol,
+                           "event_id": st.event_id,
+                           "intent_id": intent_res.intent_id,
+                           "reason": intent_res.reason})
+                return {"status": "HOLD", "reason": intent_res.reason,
+                        "symbol": symbol}
+            intent_id = intent_res.intent_id
+
+            # ── Fencing token：真正发单前确认本进程仍是唯一有效 leader ─────
+            # 进程停顿超过租约 TTL 后，另一进程可接管租约（epoch +1）；本进程
+            # 苏醒时持有的旧 token 在此失配，拒绝下单并停机，堵住 split-brain。
+            if self._lease_owner is not None and not self.intent_ledger.check_fencing(
+                    self.account_id, self._lease_owner,
+                    self._fencing_token if self._fencing_token is not None else -1):
+                self.intent_ledger.advance_intent(intent_id, "CANCELLED")
+                if event_res.reason == "reserved":
+                    self.intent_ledger.release_untraded_event(
+                        self.account_id, st.event_id, event_year)
+                self.engine.mark_abandoned(symbol, "fencing_token_stale")
+                self._log({"stage": "fencing_block", "symbol": symbol,
+                           "intent_id": intent_id,
+                           "owner": self._lease_owner,
+                           "token": self._fencing_token})
+                self.halt("fencing_token_stale")
+                return {"status": "HOLD", "reason": "fencing_token_stale",
+                        "symbol": symbol}
+
+        try:
+            ticket = self.om.submit_bracket(
+                resolved_contract=rc, symbol=symbol, action=action,
+                quantity=round(contracts) if contracts >= 1 else round(contracts, 2),
+                ref_price=entry, stop_loss=stop, tick_size=tick,
+                protect_ticks=3, confirm_live=confirm_live,
+                client_ref=intent_id)
+        except Exception as exc:
+            if self.intent_ledger is not None and intent_id is not None:
+                self.intent_ledger.advance_intent(intent_id, "REJECTED")
+                row = self.intent_ledger.get_intent(intent_id)
+                if row:
+                    self.intent_ledger.release_untraded_event(
+                        self.account_id, row["event_id"], int(row["event_year"]))
+            self.engine.mark_abandoned(symbol, f"submit_exception:{exc}")
+            self._log({"stage": "submit_exception", "symbol": symbol,
+                       "intent_id": intent_id, "error": str(exc)})
+            return {"status": "HOLD", "reason": "submit_exception",
+                    "symbol": symbol, "error": str(exc)}
+
+        if self.intent_ledger is not None and intent_id is not None:
+            if ticket.state == "SUBMITTED":
+                self.intent_ledger.advance_intent(
+                    intent_id, "SUBMITTED",
+                    broker_order_id=(str(ticket.parent_id)
+                                     if ticket.parent_id is not None else None))
+            elif ticket.state in ("REJECTED", "CANCELLED"):
+                self.intent_ledger.advance_intent(intent_id, ticket.state)
+                row = self.intent_ledger.get_intent(intent_id)
+                if row:
+                    self.intent_ledger.release_untraded_event(
+                        self.account_id, row["event_id"], int(row["event_year"]))
 
         if ticket.state in ("SUBMITTED", "DRYRUN"):
             self.kpi.orders_ready_for_ibkr += 1
@@ -298,6 +450,8 @@ class RightSidePipeline:
                     direction="LONG" if action == "BUY" else "SHORT",
                     entry_price=entry, stop_loss=stop, quantity=ticket.quantity,
                     risk_per_unit=abs(entry - stop), minutes_after_event=mins,
+                    multiplier=multiplier,
+                    fee_per_side=self.contract_fees.get(symbol, 0.0),
                     model_decision=signal["status"],
                     signal_time=now.isoformat() if hasattr(now, "isoformat") else str(now),
                     submit_time=datetime.now(timezone.utc).isoformat(),
@@ -313,6 +467,29 @@ class RightSidePipeline:
     # ── 成交确认（调用方在拿到券商回报后驱动事件状态推进）─────────────────
     def confirm_fill(self, symbol: str, client_ref: str) -> str:
         ticket = self.om.poll_fill(client_ref)
+        intent_row = (self.intent_ledger.get_intent(client_ref)
+                      if self.intent_ledger is not None else None)
+        if intent_row is not None and ticket.state in ("SUBMITTED", "PARTIAL", "FILLED"):
+            self.intent_ledger.advance_intent(
+                client_ref, ticket.state,
+                broker_order_id=(str(ticket.parent_id)
+                                 if ticket.parent_id is not None else None),
+                filled_quantity=ticket.filled_quantity)
+            if ticket.filled_quantity > 0:
+                self.intent_ledger.mark_event_traded(
+                    self.account_id, intent_row["event_id"],
+                    int(intent_row["event_year"]))
+        if (ticket.state in ("PARTIAL", "FILLED")
+                and ticket.filled_quantity > 0
+                and ticket.average_fill_price > 0
+                and ticket.first_fill_time is not None):
+            rule = DEFAULT_RULES.get(symbol)
+            if rule is not None:
+                self.lifecycle.upsert_broker_fill(
+                    client_ref, symbol, rule.asset_class,
+                    "LONG" if ticket.action == "BUY" else "SHORT",
+                    ticket.filled_quantity, ticket.average_fill_price,
+                    ticket.first_fill_time)
         if ticket.state == "FILLED":
             trade_row = self.journal.get_trade(client_ref) if self.journal is not None else None
             if self.journal is not None and ticket.fills:
@@ -334,6 +511,12 @@ class RightSidePipeline:
                         )
             self.engine.mark_filled(symbol)       # 成交后才关闭事件
         elif ticket.state in ("REJECTED", "CANCELLED"):
+            if intent_row is not None:
+                self.intent_ledger.advance_intent(client_ref, ticket.state)
+                if float(intent_row.get("filled_quantity") or 0.0) <= 0:
+                    self.intent_ledger.release_untraded_event(
+                        self.account_id, intent_row["event_id"],
+                        int(intent_row["event_year"]))
             self.engine.mark_abandoned(symbol, ticket.state)
             self.om.release(symbol)
         return ticket.state
@@ -359,11 +542,26 @@ class RightSidePipeline:
                         pnl_abs=result.get("pnl_abs"),
                         pnl_pct=result.get("pnl_pct"),
                     )
+        if self.intent_ledger is not None:
+            self.intent_ledger.advance_intent(client_ref, "CLOSED")
         self.om.release(symbol)
         return result
 
     def journal_stats(self, symbol: Optional[str] = None) -> Optional[Dict[str, Any]]:
         return self.journal.stats(symbol) if self.journal is not None else None
+
+    def lifecycle_decisions(self, now=None) -> Dict[str, Dict[str, Any]]:
+        """Evaluate all broker-confirmed positions against non-negotiable caps."""
+        out: Dict[str, Dict[str, Any]] = {}
+        for client_ref in list(self.lifecycle.positions):
+            decision = self.lifecycle.evaluate(client_ref, now=now)
+            out[client_ref] = {
+                "action": decision.action,
+                "reason": decision.reason,
+                "elapsed_seconds": decision.elapsed_seconds,
+                "remaining_quantity": decision.remaining_quantity,
+            }
+        return out
 
     # ── KPI 计数 ──────────────────────────────────────────────────────────
     def _tally(self, signal: Dict[str, Any]) -> None:

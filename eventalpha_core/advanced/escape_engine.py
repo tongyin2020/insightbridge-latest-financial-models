@@ -23,7 +23,8 @@ class EscapeSignal:
 
 
 def _microstructure_exit_score(
-    pos: PositionState, config: CapitalSafetyExitConfig
+    pos: PositionState, config: CapitalSafetyExitConfig,
+    apply_config_cap: bool = True,
 ) -> tuple[float, List[str], bool]:
     """Capital-safety exit contributions from tape/book carried on ``pos.raw``.
 
@@ -33,6 +34,10 @@ def _microstructure_exit_score(
     cannot evaluate. Returns ``(score, reasons, force_exit)`` where ``force_exit``
     means a bid/ask-side liquidity collapse => flee now (capital safety first).
     Thresholds are UNVALIDATED placeholders pending Step-2 calibration.
+
+    ``apply_config_cap=False`` skips the config-based hard hold cap: the caller
+    has delegated the cap verdict to PositionLifecycleMonitor (single source of
+    truth) via ``escape_decision(..., hard_cap_breached=...)``.
     """
     raw = pos.raw or {}
     score = 0.0
@@ -62,7 +67,7 @@ def _microstructure_exit_score(
         force_exit = True
         reasons.append(f"liquidity_crash:{why}")
 
-    if pos.seconds_in_trade > config.max_hold_seconds:
+    if apply_config_cap and pos.seconds_in_trade >= config.max_hold_seconds:
         score += 0.20
         reasons.append(f"hard_hold_cap(>{config.max_hold_seconds}s)")
     return score, reasons, force_exit
@@ -74,6 +79,7 @@ def escape_decision(
     current_r_multiple: float = 0.0,
     microstructure_exit_enabled: bool = False,
     exit_config: CapitalSafetyExitConfig = CapitalSafetyExitConfig(),
+    hard_cap_breached: "bool | None" = None,
 ) -> EscapeSignal:
     """Sensitive exit engine. Exit should be faster than entry.
 
@@ -81,6 +87,17 @@ def escape_decision(
     ``microstructure_exit_enabled`` is set, capital-safety exits (CVD top
     divergence, near-side liquidity crash, hard hold cap) are added on top of the
     legacy thesis-decay exits. Default OFF -> byte-for-byte unchanged behaviour.
+
+    Hard-cap single source of truth: ``PositionLifecycleMonitor`` (broker-fill
+    clock) owns the hard hold cap.  Callers that run the lifecycle monitor
+    should pass its verdict as ``hard_cap_breached``:
+      * True  -> force EXIT regardless of any score (cap is a safety
+                 invariant, not a weighted opinion);
+      * False -> the config-based cap below is skipped entirely, so the two
+                 cap implementations can never disagree;
+      * None  -> legacy behaviour: this engine applies
+                 ``exit_config.max_hold_seconds`` itself (kept for backward
+                 compatibility with existing callers/tests).
     """
     reasons = []
     score = 0.0
@@ -108,10 +125,24 @@ def escape_decision(
         score += 0.12
         reasons.append(f"time_decay_without_momentum(>{time_stop}s)")
     force_exit = False
+    if hard_cap_breached is True:
+        # Authoritative verdict from PositionLifecycleMonitor (broker-fill
+        # clock).  A hard cap is a safety invariant, not a weighted opinion.
+        force_exit = True
+        reasons.append("hard_hold_cap(lifecycle_monitor)")
     if microstructure_exit_enabled:
-        ms_score, ms_reasons, force_exit = _microstructure_exit_score(pos, exit_config)
+        ms_score, ms_reasons, force_exit = _microstructure_exit_score(
+            pos, exit_config, apply_config_cap=hard_cap_breached is None)
         score += ms_score
         reasons.extend(ms_reasons)
+        # A hard cap is a safety invariant, not a weighted opinion.  Once the
+        # configured maximum is reached, exit regardless of confidence/momentum.
+        # Skipped when the caller delegates the cap to PositionLifecycleMonitor
+        # via an explicit hard_cap_breached flag (single source of truth).
+        if hard_cap_breached is None and pos.seconds_in_trade >= exit_config.max_hold_seconds:
+            force_exit = True
+        elif hard_cap_breached is True:
+            force_exit = True
     score = min(1.0, score)
     if force_exit:
         return EscapeSignal(DecisionAction.EXIT, 5, 1.0, score, reasons)

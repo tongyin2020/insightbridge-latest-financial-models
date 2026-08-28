@@ -13,6 +13,9 @@ enabled_symbols.py
   ✅ USDJPY (现货外汇, IDEALPRO)
   ❌ MBT   (Micro Bitcoin) —— 当前账户【无加密货币交易权限】，默认禁用。
             等开通权限后，把 "MBT" 加入 ENABLED_SYMBOLS 即可。
+  ❌ CL    (WTI 原油, NYMEX) —— 入场规则已就绪（DEFAULT_RULES，④号产品），
+            但模拟账户的 NYMEX 权限未确认，默认放在 DISABLED；确认权限后
+            把 "CL" 从 DISABLED_SYMBOLS 移入 ENABLED_SYMBOLS 即可。
 
 运行入口默认只交易 ENABLED_SYMBOLS 里的品种。
 """
@@ -33,6 +36,7 @@ ENABLED_SYMBOLS: List[str] = [
 # 已实现但因选择暂不启用
 DISABLED_SYMBOLS: List[str] = [
     "MBT",               # CME 微型比特币期货（现用现货 BTC代替）
+    "CL",                # NYMEX WTI 原油（规则已就绪；待确认模拟账户 NYMEX 权限后启用）
 ]
 
 # 备注：用于日志/报告展示
@@ -48,6 +52,7 @@ SYMBOL_NOTES = {
     "ETH": "ETH/USD 现货 (ZEROHASH) — IOC 限价 + 软止损（tick 需核实）",
     "SOL": "SOL/USD 现货 (ZEROHASH) — IOC 限价 + 软止损（tick 需核实）",
     "MBT": "Micro Bitcoin 期货 (CME) — 现用现货 BTC 代替，默认禁用",
+    "CL": "WTI 原油期货 (NYMEX) — 规则已就绪，待确认 NYMEX 权限后启用",
 }
 
 

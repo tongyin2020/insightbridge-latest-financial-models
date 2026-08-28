@@ -168,6 +168,33 @@ def test_escape_no_microstructure_data_is_safe_when_on():
     print("✓ microstructure exits never fire on absent data (never blocks)")
 
 
+def test_hard_hold_cap_forces_exit_by_itself():
+    pos = _healthy_long_position(seconds_in_trade=1800, raw={})
+    sig = escape_decision(pos, microstructure_exit_enabled=True)
+    assert sig.action == DecisionAction.EXIT and sig.urgency == 5
+    assert any("hard_hold_cap" in r for r in sig.reasons)
+    print("✓ hard hold cap alone forces immediate EXIT")
+
+
+def test_hard_cap_delegated_to_lifecycle_monitor():
+    """When the caller passes hard_cap_breached explicitly, the lifecycle
+    monitor's verdict is authoritative and the config clock is ignored."""
+    # (a) monitor says cap breached, even though config clock has NOT elapsed
+    pos = _healthy_long_position(seconds_in_trade=60, raw={})
+    sig = escape_decision(pos, microstructure_exit_enabled=True,
+                          hard_cap_breached=True)
+    assert sig.action == DecisionAction.EXIT and sig.urgency == 5
+    assert any("hard_hold_cap" in r for r in sig.reasons)
+    # (b) monitor says NOT breached, even though the config clock HAS elapsed
+    #     -> this engine must not force an exit on its own clock
+    pos = _healthy_long_position(seconds_in_trade=7200, raw={})
+    sig = escape_decision(pos, microstructure_exit_enabled=True,
+                          hard_cap_breached=False)
+    assert sig.action == DecisionAction.WATCH
+    assert not any("hard_hold_cap" in r for r in sig.reasons)
+    print("✓ hard cap delegated to lifecycle monitor (single source of truth)")
+
+
 def test_config_defaults_are_placeholders():
     # guardrail: the defaults exist and are the documented provisional priors.
     assert FakeoutConfig().min_obi_abs == 0.40
@@ -190,6 +217,8 @@ def main() -> int:
     test_escape_liquidity_crash_forces_exit_when_on()
     test_escape_cvd_divergence_contributes_when_on()
     test_escape_no_microstructure_data_is_safe_when_on()
+    test_hard_hold_cap_forces_exit_by_itself()
+    test_hard_cap_delegated_to_lifecycle_monitor()
     test_config_defaults_are_placeholders()
     print("\n✅ microstructure self-check passed.")
     return 0
