@@ -26,6 +26,11 @@ from typing import Dict, List, Optional
 FX_SPECS: Dict[str, Dict[str, str]] = {
     "EURUSD": {"symbol": "EUR", "currency": "USD", "exchange": "IDEALPRO"},
     "USDJPY": {"symbol": "USD", "currency": "JPY", "exchange": "IDEALPRO"},
+    "AUDUSD": {"symbol": "AUD", "currency": "USD", "exchange": "IDEALPRO"},
+    "NZDUSD": {"symbol": "NZD", "currency": "USD", "exchange": "IDEALPRO"},
+    "GBPUSD": {"symbol": "GBP", "currency": "USD", "exchange": "IDEALPRO"},
+    "AUDJPY": {"symbol": "AUD", "currency": "JPY", "exchange": "IDEALPRO"},
+    "NZDJPY": {"symbol": "NZD", "currency": "JPY", "exchange": "IDEALPRO"},
 }
 
 # ── 期货：模糊模板，交给 reqContractDetails 展开到期月 ───────────────────────

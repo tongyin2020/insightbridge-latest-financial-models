@@ -103,6 +103,18 @@ DEFAULT_RULES: Dict[str, AssetRule] = {
                         max_spread_ticks=3.0, max_slippage_ticks=4.0),
     "USDJPY": AssetRule("USDJPY", "FX", 10, 45, tick_size=0.005,
                         max_spread_ticks=3.0, max_slippage_ticks=4.0),
+    # FX 扩展五品种（③号外汇模型，2026-08-28 接线）。美元盘 tick 同 EURUSD
+    # （0.00005 = 半 pip），日元盘 tick 同 USDJPY（0.005）。
+    "AUDUSD": AssetRule("AUDUSD", "FX", 10, 45, tick_size=0.00005,
+                        max_spread_ticks=3.0, max_slippage_ticks=4.0),
+    "NZDUSD": AssetRule("NZDUSD", "FX", 10, 45, tick_size=0.00005,
+                        max_spread_ticks=3.0, max_slippage_ticks=4.0),
+    "GBPUSD": AssetRule("GBPUSD", "FX", 10, 45, tick_size=0.00005,
+                        max_spread_ticks=3.0, max_slippage_ticks=4.0),
+    "AUDJPY": AssetRule("AUDJPY", "FX", 10, 45, tick_size=0.005,
+                        max_spread_ticks=3.0, max_slippage_ticks=4.0),
+    "NZDJPY": AssetRule("NZDJPY", "FX", 10, 45, tick_size=0.005,
+                        max_spread_ticks=3.0, max_slippage_ticks=4.0),
 
     # Index —— CME 主时段 RTH 9:30–16:00 美东（夏/冬令时自动跟随；
     # 旧配置写死 13:30–20:00 UTC，冬季会错位成 10:30–17:00 ET）。
