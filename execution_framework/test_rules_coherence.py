@@ -8,6 +8,8 @@ so one of the five models had no live wiring.
 from __future__ import annotations
 
 from event_right_side_engine import DEFAULT_RULES
+from ibkr_contract_resolver import FUT_SPECS, CRYPTO_SPECS, FX_SPECS
+from enabled_symbols import ENABLED_SYMBOLS
 from position_lifecycle import PROVISIONAL_PAPER_CAP_SECONDS
 
 
@@ -53,12 +55,26 @@ def test_all_five_model_families_present():
         assert expected in families, f"missing family {expected}"
 
 
+def test_enabled_symbols_have_resolver_specs():
+    """每个启用且有规则的品种，在合约解析器里必须有规格表条目。
+
+    回归覆盖：CL 有 DEFAULT_RULES 且已启用，但 FUT_SPECS 缺条目，
+    连续运行器报"未知品种: CL"跳过该品种——五模型实际只剩四路。
+    """
+    for sym in ENABLED_SYMBOLS:
+        if sym not in DEFAULT_RULES:
+            continue  # 无规则的品种（如现货 FX/加密走软止损通道）不经过规则解析
+        spec_tables = {**FUT_SPECS, **CRYPTO_SPECS, **FX_SPECS}
+        assert sym in spec_tables, f"{sym}: enabled + ruled but no resolver spec"
+
+
 def main() -> int:
     test_commodity_product_is_wired()
     test_every_rule_has_lifecycle_cap()
     test_rule_parameters_are_sane()
     test_all_five_model_families_present()
-    print("✓ DEFAULT_RULES coherence (incl. CL wiring) passed")
+    test_enabled_symbols_have_resolver_specs()
+    print("✓ DEFAULT_RULES coherence (incl. CL wiring + resolver specs) passed")
     return 0
 
 

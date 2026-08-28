@@ -41,6 +41,8 @@ FUT_SPECS: Dict[str, Dict[str, str]] = {
     "MBT": {"symbol": "MBT", "exchange": "CME", "currency": "USD"},   # Micro Bitcoin
     "ZT":  {"symbol": "ZT",  "exchange": "CBOT", "currency": "USD"},
     "ZN":  {"symbol": "ZN",  "exchange": "CBOT", "currency": "USD"},
+    "CL":  {"symbol": "CL",  "exchange": "NYMEX", "currency": "USD",
+            "tradingClass": "CL"},   # WTI 原油（乘数 1000 由 contractDetails 带回）
     "SR3": {
         "symbol": "SR3",
         "exchange": "CME",

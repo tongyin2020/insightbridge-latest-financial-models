@@ -91,6 +91,9 @@ class IBKRSession:
             self._ib_insync_ok = False
 
         self._reconnecting = threading.Lock()
+        # 延迟行情回退：实时订阅不足（354/10090/10167/10168）时切换一次，
+        # 账户级生效，对所有后续 reqMktData 请求起作用
+        self._mkt_data_delayed = False
         # 外部可挂的回调
         self.on_fatal: Optional[Callable[[int, str], None]] = None
         self.on_retry: Optional[Callable[[int, str], None]] = None
@@ -125,6 +128,18 @@ class IBKRSession:
 
     # ── 错误处理 ──────────────────────────────────────────────────────────
     def _on_error(self, reqId, errorCode, errorString, contract=None):
+        # 实时行情订阅不足 → 一次性切换为延迟行情（3=delayed，15 分钟延迟）
+        if (errorCode in (354, 10090, 10167, 10168)
+                and not self._mkt_data_delayed
+                and self.ib is not None and self.ib.isConnected()):
+            self._mkt_data_delayed = True
+            try:
+                self.ib.reqMarketDataType(3)
+                logger.warning(
+                    "实时行情订阅不足（错误 %s），已切换为延迟行情模式"
+                    "（约 15 分钟延迟）；后续所有行情请求按延迟数据处理", errorCode)
+            except Exception as exc:        # noqa: BLE001
+                logger.warning("切换延迟行情模式失败: %s", exc)
         cls = classify_error(errorCode)
         msg = f"[{cls}] IBKR {errorCode}: {errorString} (reqId={reqId})"
         if cls == "INFO":
@@ -166,6 +181,12 @@ class IBKRSession:
                     logger.warning("Reconnect failed: %s", exc)
                 if self.ib and self.ib.isConnected():
                     logger.info("Reconnected to TWS")
+                    # 重连后行情类型被重置，恢复延迟模式
+                    if self._mkt_data_delayed:
+                        try:
+                            self.ib.reqMarketDataType(3)
+                        except Exception:   # noqa: BLE001
+                            pass
                     # 连接恢复后重新拉取未结订单与持仓（1101 会丢数据）
                     try:
                         self.ib.reqOpenOrders()
