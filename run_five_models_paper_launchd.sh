@@ -8,7 +8,7 @@ BASE="$IBREPO"
 PY="/opt/anaconda3/bin/python3"
 SCRIPT="$BASE/execution_framework/run_tws_continuous.py"
 PORT="4002"
-SYMBOLS="BTC,EURUSD,USDJPY,MES,MNQ,ZT,ZN,SR3"
+SYMBOLS="BTC,EURUSD,USDJPY,MES,MNQ,CL,ZT,ZN,SR3"
 
 export HOME="/Users/tongyin"
 export USER="tongyin"

@@ -12,7 +12,7 @@ PID_FILE="$LOG_DIR/five_models_paper_live.pid"
 
 mkdir -p "$LOG_DIR"
 
-SYMBOLS="BTC,EURUSD,USDJPY,MES,MNQ,ZT,ZN,SR3"
+SYMBOLS="BTC,EURUSD,USDJPY,MES,MNQ,CL,ZT,ZN,SR3"
 PORT="4002"
 
 if [[ -f "$PID_FILE" ]]; then
