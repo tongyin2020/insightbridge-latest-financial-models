@@ -1,0 +1,15 @@
+{
+  "name": "五金融模型 · 运行健康监控",
+  "canvas": "InsightBridge · 模型监控中心",
+  "canvasId": "canvas_9ba5b630-46d1-433a-a4c4-9d0952aad506",
+  "widgetId": "widget_8c4ac0a6-5011-4e2c-ab48-e815031e6574",
+  "automationId": "automation_1e4fe895-ec4b-4d2a-acc1-ead17de29f07",
+  "bindingId": "binding_c6b37e3f-8023-423e-a817-0baf3b4ed095",
+  "schedule": "每 30 分钟（每小时 11 分和 41 分，Asia/Shanghai），cron: 11,41 * * * *",
+  "files": {
+    "automation.py": "Automation 数据脚本：运行 check_five_models_runtime_health.py 并解析输出，探测 IB Gateway 4002 端口，返回 artifact JSON",
+    "widget_index.html": "Widget 看板界面（Kimi Work Widget 沙箱环境运行）"
+  },
+  "backed_up_at": "2026-08-29 22:02",
+  "note": "线上运行版本位于 Kimi Work blueprint 目录，此为本看板程序的离线存档"
+}
