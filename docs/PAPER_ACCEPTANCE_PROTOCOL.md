@@ -17,10 +17,19 @@
 ## PAPER 观察期
 
 - 观察期最短 10 个交易日。中途出现任一阻断性条件应重新计时。
+  **口径说明**：`PaperAcceptanceChecker` 目前按**日历日**计算
+  `observation_days`（加密 24/7 无差；债券 / 原油 / 指数 10 个日历日约合
+  7 个交易日）。因此对非加密模型，`min_observation_days` 应按
+  `ceil(10 交易日 × 7/5)`（即至少 14）配置，或由人工复核确认覆盖 10 个
+  交易日；交易日口径的自动计数属于后续工作。
 - 观察期内订单只能进入 PAPER 通道；不允许把 PAPER 与 LIVE 通道混用。
+  配置 `paper_account_ids` 后，账本内出现白名单外的 `account_id` 或
+  `ACKED_LIVE` 回执即 FAIL；未配置时检查器无法自行判定通道，该项不启用。
 - 意图账本必须覆盖整个观察期；不允许存在任何长期悬挂（默认创建后 24 小时仍
   处于非终态：`RESERVED` / `SUBMITTED` / `PARTIAL` / `FILLED` / `EXIT_*`）
   且未在 cutoff 前进入终态（`CLOSED` / `CANCELLED` / `REJECTED`）的意图。
+  24 小时是日内事件驱动模型的默认值；允许多日持仓的模型（如债券）必须在其
+  部署配置里按最长持仓周期显式设置 `hanging_grace_s`，不得沿用默认值。
 - 观察期只统计 `created_epoch <= cutoff` 的意图；cutoff 之后新增或更新的
   记录不得用于凑足观察天数。
 
@@ -41,6 +50,31 @@
    且截至 cutoff 仍未解除的 `BLOCKED_BY_UPSTREAM` 状态。
 
 所有检查均为只读，不修改账本、不修改归档、不修改日志目录。
+
+### 已知限制
+
+- `upstream_block_cleared` 只看 `upstream_states` 的当前状态：cutoff 时仍
+  阻断、cutoff 之后才解除的情况无法从当前状态表中还原，需结合运行日志
+  人工复核。
+- 观察天数按日历日计（见上节口径说明）。
+- 事件回放器 `EventReplayer` 默认 strict：归档内出现坏 JSONL 行或缺少
+  `observed_at_utc` 的行即抛错；只有显式 `strict=False` 才跳过并在
+  `skipped_rows` 中计数，且不得用于验收。
+
+## 部署清单（首次启用 broker-ack 检查）
+
+1. 在当前 PAPER 观察期完整结束、且处于维护窗口时部署，不要在观察期中途
+   切换代码。
+2. 首次启动会对旧账本执行幂等迁移：`ALTER TABLE order_intents ADD COLUMN
+   broker_ack_state ... DEFAULT 'PENDING_BROKER_ACK'`。**所有历史行都会被
+   填成 `PENDING_BROKER_ACK`**，新检查器会把其中所有 `state != RESERVED`
+   且超过 `ack_grace_s` 的历史行判为 FAIL（fail-closed 按设计工作）。
+3. 因此迁移后必须先回填历史回执：对照券商成交 / 撤单记录，把已确认的
+   PAPER 单批量调用 `IntentLedger.record_broker_ack(intent_id, "ACKED_PAPER")`
+   （或相应的 `REJECTED` / `CANCEL_ACKED`），回填操作与 payload 一并留档。
+4. 回填完成后再首次运行 `PaperAcceptanceChecker`，并在报告中记录
+   `hanging_grace_s` / `ack_grace_s` / `paper_account_ids` /
+   `min_observation_days` 的实际取值。
 
 ## 监控指标
 

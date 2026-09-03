@@ -13,7 +13,7 @@ import os
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 from event_replayer import verify_manifest
 from intent_ledger import TERMINAL_INTENT_STATES
@@ -73,6 +73,7 @@ class PaperAcceptanceChecker:
         strict: bool = True,
         hanging_grace_s: float = DEFAULT_HANGING_GRACE_S,
         ack_grace_s: float = DEFAULT_ACK_GRACE_S,
+        paper_account_ids: Optional[Sequence[str]] = None,
     ) -> None:
         self.intent_ledger_path = Path(intent_ledger_path)
         self.event_archive_root = Path(event_archive_root)
@@ -87,6 +88,14 @@ class PaperAcceptanceChecker:
             raise ValueError("grace periods must be >= 0")
         self.hanging_grace_s = float(hanging_grace_s)
         self.ack_grace_s = float(ack_grace_s)
+        # Optional PAPER channel allow-list: when given, any intent on another
+        # account (or acked as ACKED_LIVE) fails the ledger check.  The checker
+        # cannot know by itself which accounts are paper, so None disables it.
+        self.paper_account_ids = (
+            None if paper_account_ids is None
+            else frozenset(str(a).strip() for a in paper_account_ids if str(a).strip()))
+        if self.paper_account_ids is not None and not self.paper_account_ids:
+            raise ValueError("paper_account_ids must be None or non-empty")
 
     def check(self) -> Dict[str, Any]:
         checks: List[Dict[str, Any]] = [
@@ -173,6 +182,18 @@ class PaperAcceptanceChecker:
                 ).fetchall()
                 has_ack_column = "broker_ack_state" in columns
                 pending_ack_rows = []
+                live_rows = []
+                if self.paper_account_ids is not None:
+                    acct_marks = ",".join("?" * len(self.paper_account_ids))
+                    live_clause = (" OR broker_ack_state='ACKED_LIVE'"
+                                   if has_ack_column else "")
+                    live_rows = conn.execute(
+                        "SELECT intent_id, state, account_id, created_epoch"
+                        " FROM order_intents WHERE created_epoch<=? AND"
+                        f" (account_id NOT IN ({acct_marks}){live_clause})"
+                        " ORDER BY created_epoch",
+                        (cutoff_epoch, *sorted(self.paper_account_ids))
+                    ).fetchall()
                 if has_ack_column:
                     pending_ack_rows = conn.execute(
                         "SELECT intent_id, state, created_epoch FROM order_intents"
@@ -188,6 +209,8 @@ class PaperAcceptanceChecker:
 
         def _describe(rows) -> List[Dict[str, Any]]:
             return [{"intent_id": r["intent_id"], "state": r["state"],
+                     **({"account_id": r["account_id"]}
+                        if "account_id" in r.keys() else {}),
                      "created_utc": datetime.fromtimestamp(
                          float(r["created_epoch"]), tz=timezone.utc).isoformat()}
                     for r in rows[:20]]
@@ -198,6 +221,7 @@ class PaperAcceptanceChecker:
             "observation_days": round(span_days, 3),
             "hanging_intents": len(hanging_rows),
             "pending_broker_ack_intents": len(pending_ack_rows),
+            "non_paper_channel_intents": len(live_rows),
             "total_intents_before_cutoff": int(row["total"]),
             "hanging_grace_s": self.hanging_grace_s,
             "ack_grace_s": self.ack_grace_s,
@@ -208,6 +232,11 @@ class PaperAcceptanceChecker:
                                  "reason": "insufficient_observation_days",
                                  "min_observation_days":
                                      self.min_observation_days}}
+        if live_rows:
+            return {"name": "ledger_observation", "status": "FAIL",
+                    "evidence": {**evidence,
+                                 "reason": "non_paper_channel_intents",
+                                 "non_paper_channel": _describe(live_rows)}}
         if hanging_rows:
             return {"name": "ledger_observation", "status": "FAIL",
                     "evidence": {**evidence,

@@ -13,7 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -124,10 +124,19 @@ class ReplayView:
     metadata: Dict[str, Any]
     _dir: Path
     _cutoff: datetime
+    strict: bool = True
+    skipped_rows: Dict[str, int] = field(default_factory=dict)
     read_only: bool = True
     may_submit_orders: bool = False
 
     def _read_stream(self, name: str, cutoff: Optional[datetime]) -> List[Dict[str, Any]]:
+        """Rows of ``name`` observed at or before the cutoff.
+
+        In ``strict`` mode (default) a malformed line or a row without a
+        parseable ``observed_at_utc`` raises ``ValueError`` so a damaged
+        archive can never silently replay with gaps.  A lenient view skips
+        such rows and counts them in ``self.skipped_rows[name]``.
+        """
         if name not in STREAM_NAMES:
             raise ValueError(f"unknown stream: {name}")
         active_cutoff = self._cutoff if cutoff is None else _require_aware(cutoff)
@@ -135,23 +144,31 @@ class ReplayView:
         if not target.exists():
             return []
         results: List[Dict[str, Any]] = []
+        skipped = 0
         with target.open("r", encoding="utf-8") as fh:
-            for line in fh:
+            for lineno, line in enumerate(fh, start=1):
                 line = line.strip()
                 if not line:
                     continue
                 try:
                     row = json.loads(line)
-                except json.JSONDecodeError:
-                    # Fail closed on any corrupt row: skip so backtests cannot
-                    # be misled by partially valid rows.
+                except json.JSONDecodeError as exc:
+                    if self.strict:
+                        raise ValueError(
+                            f"{target.name}:{lineno} malformed JSON: {exc}") from exc
+                    skipped += 1
                     continue
                 observed = _parse_observed(row.get("observed_at_utc"))
                 if observed is None:
+                    if self.strict:
+                        raise ValueError(
+                            f"{target.name}:{lineno} missing or invalid observed_at_utc")
+                    skipped += 1
                     continue
                 if observed > active_cutoff:
                     continue
                 results.append(row)
+        self.skipped_rows[name] = skipped
         return results
 
     def bars(self, cutoff: Optional[datetime] = None) -> List[Dict[str, Any]]:
@@ -183,7 +200,7 @@ class EventReplayer:
                 f"archive root does not exist: {self.archive_root}")
 
     def load_event(self, event_id: str, symbol: str,
-                   cutoff_utc: datetime) -> ReplayView:
+                   cutoff_utc: datetime, *, strict: bool = True) -> ReplayView:
         cutoff = _require_aware(cutoff_utc)
         event_dir = self.archive_root / _safe_name(event_id) / _safe_name(str(symbol).upper())
         if not event_dir.exists():
@@ -205,4 +222,5 @@ class EventReplayer:
             raise ValueError(
                 "manifest verification failed: "
                 f"{verification['status']} {verification['mismatches']}")
-        return ReplayView(metadata=metadata, _dir=event_dir, _cutoff=cutoff)
+        return ReplayView(metadata=metadata, _dir=event_dir, _cutoff=cutoff,
+                          strict=bool(strict))

@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import os
 import sqlite3
-import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
+
+import pytest
 
 from event_data_archive import EventDataArchive
 from paper_acceptance import (
@@ -432,3 +433,43 @@ def test_write_report_is_atomic(tmp_path: Path) -> None:
     assert target.exists()
     tmps = list(target.parent.glob(".*.tmp"))
     assert tmps == []
+
+
+def test_paper_account_allowlist_blocks_other_accounts(tmp_path: Path) -> None:
+    cutoff = datetime(2026, 9, 1, 12, 0, tzinfo=timezone.utc)
+    ledger = tmp_path / "ledger.db"
+    start = cutoff.timestamp() - 15 * 86400
+    end = cutoff.timestamp() - 3600
+    _build_ledger(ledger, start_epoch=start, end_epoch=end, hanging=0)
+    event_id = "2026-08-01T14Z-CPI"
+    archive_root = _seed_archive(tmp_path, event_id)
+    log_dir = _seed_runtime_log(tmp_path, mtime=cutoff.timestamp() - 60)
+    kwargs = dict(cutoff_utc=cutoff, min_observation_days=10,
+                  required_events=[event_id])
+    assert PaperAcceptanceChecker(
+        ledger, archive_root, log_dir,
+        paper_account_ids=["DU-PAPER"], **kwargs).check()["overall"] == READY
+    with sqlite3.connect(str(ledger)) as conn:
+        conn.execute("UPDATE order_intents SET account_id='U-LIVE'"
+                     " WHERE intent_id='intent-0'")
+    report = PaperAcceptanceChecker(
+        ledger, archive_root, log_dir,
+        paper_account_ids=["DU-PAPER"], **kwargs).check()
+    assert report["overall"] == NOT_READY
+    ledger_check = _ledger_check(report)
+    assert ledger_check["evidence"]["reason"] == "non_paper_channel_intents"
+    assert ledger_check["evidence"]["non_paper_channel"][0]["account_id"] == "U-LIVE"
+    # An ACKED_LIVE receipt on a paper account is also a channel violation.
+    with sqlite3.connect(str(ledger)) as conn:
+        conn.execute("UPDATE order_intents SET account_id='DU-PAPER',"
+                     " broker_ack_state='ACKED_LIVE' WHERE intent_id='intent-0'")
+    report = PaperAcceptanceChecker(
+        ledger, archive_root, log_dir,
+        paper_account_ids=["DU-PAPER"], **kwargs).check()
+    assert _ledger_check(report)["evidence"]["reason"] == "non_paper_channel_intents"
+    # Without an allow-list the channel check is disabled.
+    assert PaperAcceptanceChecker(
+        ledger, archive_root, log_dir, **kwargs).check()["overall"] == READY
+    with pytest.raises(ValueError):
+        PaperAcceptanceChecker(ledger, archive_root, log_dir,
+                               paper_account_ids=[], **kwargs)

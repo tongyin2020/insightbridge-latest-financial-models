@@ -28,7 +28,8 @@ _DRAW = _payload([
 ])
 
 
-def test_no_key_returns_empty():
+def test_no_key_returns_empty(monkeypatch):
+    monkeypatch.delenv("EIA_API_KEY", raising=False)
     f = EiaPetroleumFeed(api_key=None)
     assert f.fetch() == []
 

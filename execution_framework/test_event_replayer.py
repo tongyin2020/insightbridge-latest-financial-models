@@ -138,3 +138,25 @@ def test_synthetic_source_rejected(tmp_path: Path) -> None:
     replayer = EventReplayer(str(tmp_path / "archive"))
     with pytest.raises(ValueError):
         replayer.load_event(event_id, symbol, cutoff_utc=t0)
+
+
+def test_malformed_rows_fail_closed_unless_lenient(tmp_path: Path) -> None:
+    from event_replayer import ReplayView
+
+    event_id, symbol, t0 = _seed(tmp_path)
+    event_dir = tmp_path / "archive" / _safe(event_id) / _safe(symbol)
+    with (event_dir / "bars.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write("{not json\n")
+        fh.write(json.dumps({"observed_at_utc": "yesterday", "o": 1}) + "\n")
+    # The manifest catches the tamper first.
+    with pytest.raises(ValueError):
+        EventReplayer(str(tmp_path / "archive")).load_event(
+            event_id, symbol, cutoff_utc=t0)
+    # Reading the stream directly: strict raises, lenient skips and counts.
+    strict_view = ReplayView(metadata={}, _dir=event_dir, _cutoff=t0)
+    with pytest.raises(ValueError, match="bars.jsonl:5 malformed JSON"):
+        strict_view.bars()
+    lenient_view = ReplayView(metadata={}, _dir=event_dir, _cutoff=t0,
+                              strict=False)
+    assert len(lenient_view.bars()) == 4
+    assert lenient_view.skipped_rows == {"bars": 2}
