@@ -28,6 +28,14 @@ VALID_INTENT_STATES = {
     "RESERVED", "SUBMITTED", "PARTIAL", "FILLED", "EXIT_SUBMITTED",
     "EXIT_PARTIAL", "CANCELLED", "REJECTED", "CLOSED",
 }
+# Broker acknowledgement is tracked separately from the intent state machine:
+# ``state`` follows what we did, ``broker_ack_state`` follows what the broker
+# confirmed.  It only carries the PAPER/LIVE channel of the ack, never a
+# permission to trade.
+VALID_BROKER_ACK_STATES = {
+    "PENDING_BROKER_ACK", "ACKED_LIVE", "ACKED_PAPER", "REJECTED",
+    "CANCEL_ACKED", "CANCEL_REJECTED",
+}
 
 # Explicit state-transition table.  Without it, regressions such as
 # FILLED -> SUBMITTED were silently accepted.  Same-state updates are always
@@ -144,6 +152,10 @@ class IntentLedger:
                     symbol TEXT NOT NULL,
                     side TEXT NOT NULL,
                     strategy_version TEXT NOT NULL,
+                    algo_version TEXT NOT NULL DEFAULT 'UNSPECIFIED',
+                    operator_id TEXT NOT NULL DEFAULT 'SYSTEM_UNSPECIFIED',
+                    broker_ack_state TEXT NOT NULL DEFAULT 'PENDING_BROKER_ACK',
+                    broker_ack_payload TEXT,
                     state TEXT NOT NULL,
                     broker_order_id TEXT,
                     filled_quantity REAL NOT NULL DEFAULT 0,
@@ -151,6 +163,20 @@ class IntentLedger:
                     updated_epoch REAL NOT NULL,
                     UNIQUE(account_id, event_id, symbol, side, strategy_version)
                 )""")
+            columns = {
+                str(row["name"]) for row in
+                conn.execute("PRAGMA table_info(order_intents)").fetchall()
+            }
+            for name, ddl in (
+                ("algo_version", "TEXT NOT NULL DEFAULT 'UNSPECIFIED'"),
+                ("operator_id", "TEXT NOT NULL DEFAULT 'SYSTEM_UNSPECIFIED'"),
+                ("broker_ack_state",
+                 "TEXT NOT NULL DEFAULT 'PENDING_BROKER_ACK'"),
+                ("broker_ack_payload", "TEXT"),
+            ):
+                if name not in columns:
+                    conn.execute(
+                        f"ALTER TABLE order_intents ADD COLUMN {name} {ddl}")
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_intents_state "
                 "ON order_intents(account_id, state)")
@@ -309,11 +335,17 @@ class IntentLedger:
                        symbol: str, side: str,
                        strategy_version: str,
                        max_intents_per_event: int = 1,
-                       now_epoch: Optional[float] = None) -> IntentReservation:
+                       now_epoch: Optional[float] = None,
+                       operator_id: str = "SYSTEM_UNSPECIFIED",
+                       algo_version: Optional[str] = None) -> IntentReservation:
         if max_intents_per_event <= 0:
             raise ValueError("max_intents_per_event must be positive")
+        # operator/algo are audit provenance only: they are deliberately not
+        # part of the deterministic ID so they cannot bypass deduplication.
         intent_id = deterministic_intent_id(
             account_id, event_id, symbol, side, strategy_version)
+        operator_id = str(operator_id or "SYSTEM_UNSPECIFIED")
+        algo_version = str(algo_version or strategy_version)
         now = time.time() if now_epoch is None else float(now_epoch)
         with self._conn() as conn:
             conn.execute("BEGIN IMMEDIATE")
@@ -336,11 +368,12 @@ class IntentLedger:
             conn.execute("""
                 INSERT INTO order_intents(
                     intent_id,account_id,event_year,event_id,symbol,side,
-                    strategy_version,state,created_epoch,updated_epoch)
-                VALUES(?,?,?,?,?,?,?,'RESERVED',?,?)
+                    strategy_version,algo_version,operator_id,state,
+                    created_epoch,updated_epoch)
+                VALUES(?,?,?,?,?,?,?,?,?,'RESERVED',?,?)
                 """, (intent_id, account_id, event_year, event_id,
                       symbol.upper().replace("/", ""), side.upper(),
-                      strategy_version, now, now))
+                      strategy_version, algo_version, operator_id, now, now))
             conn.commit()
             return IntentReservation(True, intent_id, "reserved", "RESERVED")
 
@@ -377,6 +410,29 @@ class IntentLedger:
                 """, (new_state, broker_order_id, quantity, now, intent_id))
             conn.commit()
             return True
+
+    def record_broker_ack(self, intent_id: str, ack_state: str,
+                          payload_json: Optional[str] = None) -> bool:
+        """Record a broker acknowledgement without mutating ``state``.
+
+        ``ack_state`` must be one of :data:`VALID_BROKER_ACK_STATES`; anything
+        else raises (fail closed).  ``updated_epoch`` is left untouched so the
+        PAPER acceptance checker's hanging-intent logic keys off creation time
+        and the state machine only.
+        """
+        if ack_state not in VALID_BROKER_ACK_STATES:
+            raise ValueError(f"invalid broker_ack_state: {ack_state}")
+        if payload_json is not None and not isinstance(payload_json, str):
+            raise ValueError("payload_json must be a JSON string or None")
+        with self._conn() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            cur = conn.execute(
+                "UPDATE order_intents SET broker_ack_state=?,"
+                " broker_ack_payload=COALESCE(?,broker_ack_payload)"
+                " WHERE intent_id=?",
+                (ack_state, payload_json, intent_id))
+            conn.commit()
+            return cur.rowcount == 1
 
     def get_intent(self, intent_id: str) -> Optional[dict]:
         with self._conn() as conn:
