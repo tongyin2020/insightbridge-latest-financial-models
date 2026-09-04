@@ -1,0 +1,71 @@
+# InsightBridge Financial Agent System — default configuration
+observe_only: true
+execution_enabled: false
+
+log_window_minutes: 60.0
+news_lookback_minutes: 30.0
+crisis_threshold: 0.55
+
+# Phase 1 crisis-reasoning subgraph
+use_llm: false
+precision_sniping_enabled: false
+llm_model: "nvidia/nemotron-3.5-lightning-30b-a3b"
+llm_base_url: "https://integrate.api.nvidia.com/v1"
+llm_temperature: 0.2
+llm_max_tokens: 1024
+
+critic_min_confidence: 0.60
+critic_need_agreement: true
+risk_consec_loss_penalty: 2
+risk_max_open_positions: 2
+risk_crisis_scale_cap: 0.5
+
+default_position_size:
+  crypto: 100.0
+  fx: 10000.0
+  bond: 1.0
+  oil: 1.0
+  index: 1.0
+
+gatekeeper_weights:
+  news: 0.35
+  volatility: 0.35
+  microstructure: 0.15
+  pipeline_health: 0.15
+
+macro_alert_keywords:
+  - war
+  - iran
+  - israel
+  - gaza
+  - ukraine
+  - russia
+  - boj
+  - fed
+  - intervention
+  - sanctions
+  - missile
+  - invasion
+  - conflict
+  - crisis
+  - oil shock
+  - currency war
+
+bot_symbols:
+  crypto: [BTC, ETH, SOL]
+  fx: [AUDUSD, NZDUSD]
+  bond: [ZN, ZT]
+  oil: [CL]
+  index: [MES, ES_PROXY]
+
+typical_move_frac:
+  BTC: 0.025
+  ETH: 0.030
+  SOL: 0.040
+  AUDUSD: 0.008
+  NZDUSD: 0.009
+  ZN: 0.006
+  ZT: 0.004
+  CL: 0.018
+  MES: 0.010
+  MNQ: 0.012
