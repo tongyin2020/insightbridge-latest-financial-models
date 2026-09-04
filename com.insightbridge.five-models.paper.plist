@@ -5,6 +5,8 @@
   <key>Label</key>
   <string>com.insightbridge.five-models.paper</string>
 
+  <!-- launchd(后台)受 macOS TCC 限制无法打开 ~/Desktop 下的脚本(会 exit 127)，
+       故直接调用 python3(有磁盘访问权)运行 .py，避免经由 zsh 打开 Desktop 下的包装脚本。 -->
   <key>ProgramArguments</key>
   <array>
     <string>/bin/zsh</string>
@@ -13,6 +15,16 @@
 
   <key>WorkingDirectory</key>
   <string>/Users/tongyin/InsightBridge_Financial_Models_Latest</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/anaconda3/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>PYTHONPATH</key>
+    <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest</string>
+    <key>PYTHONUNBUFFERED</key>
+    <string>1</string>
+  </dict>
 
   <key>RunAtLoad</key>
   <true/>
