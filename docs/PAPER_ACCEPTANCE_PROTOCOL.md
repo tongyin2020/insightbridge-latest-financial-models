@@ -75,6 +75,11 @@
 4. 回填完成后再首次运行 `PaperAcceptanceChecker`，并在报告中记录
    `hanging_grace_s` / `ack_grace_s` / `paper_account_ids` /
    `min_observation_days` 的实际取值。
+5. 运行时会在 `confirm_fill` 中根据 IB `orderStatus` 写入回执：`PreSubmitted` /
+   `Submitted` / `Filled` 按会话端口写为 `ACKED_PAPER` 或 `ACKED_LIVE`，
+   `Cancelled` / `ApiCancelled` 写为 `CANCEL_ACKED`，`Inactive` 写为
+   `REJECTED`；在到达券商前本地取消/拒绝的意图会在 payload 标记 `source:"local"`。
+   `PendingSubmit` 不视为回执。
 
 ## 监控指标
 
