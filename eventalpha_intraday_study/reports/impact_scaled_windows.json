@@ -1,0 +1,94 @@
+{
+  "assets": {
+    "CRYPTO": {
+      "move_bps_edges": {
+        "small<": 48.6,
+        "mid<": 106.9,
+        "big>=": 106.9
+      },
+      "by_bucket": {
+        "small": {
+          "n": 21,
+          "move_bps_med": 33.1,
+          "min_wait": 115,
+          "max_wait": 225,
+          "time_stop": 690
+        },
+        "mid": {
+          "n": 21,
+          "move_bps_med": 79.7,
+          "min_wait": 35,
+          "max_wait": 225,
+          "time_stop": 1350
+        },
+        "big": {
+          "n": 21,
+          "move_bps_med": 144.0,
+          "min_wait": 5,
+          "max_wait": 705,
+          "time_stop": 1800
+        }
+      }
+    },
+    "FX": {
+      "move_bps_edges": {
+        "small<": 21.1,
+        "mid<": 41.8,
+        "big>=": 41.8
+      },
+      "by_bucket": {
+        "small": {
+          "n": 42,
+          "move_bps_med": 11.6,
+          "min_wait": 105,
+          "max_wait": 345,
+          "time_stop": 1500
+        },
+        "mid": {
+          "n": 42,
+          "move_bps_med": 30.9,
+          "min_wait": 30,
+          "max_wait": 330,
+          "time_stop": 1620
+        },
+        "big": {
+          "n": 42,
+          "move_bps_med": 53.9,
+          "min_wait": 30,
+          "max_wait": 1110,
+          "time_stop": 1800
+        }
+      }
+    },
+    "OIL": {
+      "move_bps_edges": {
+        "small<": 22.8,
+        "mid<": 42.4,
+        "big>=": 42.4
+      },
+      "by_bucket": {
+        "small": {
+          "n": 21,
+          "move_bps_med": 16.1,
+          "min_wait": 60,
+          "max_wait": 360,
+          "time_stop": 690
+        },
+        "mid": {
+          "n": 21,
+          "move_bps_med": 31.3,
+          "min_wait": 65,
+          "max_wait": 630,
+          "time_stop": 1650
+        },
+        "big": {
+          "n": 21,
+          "move_bps_med": 59.0,
+          "min_wait": 60,
+          "max_wait": 1200,
+          "time_stop": 1800
+        }
+      }
+    }
+  }
+}
