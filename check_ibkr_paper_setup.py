@@ -50,13 +50,13 @@ def check_installation() -> CheckResult:
     home = Path.home()
     candidates = [
         home / "Applications" / "Trader Workstation",
-        home / "Applications" / "IB Gateway 10.45",
         home / "Applications" / "IBKR Desktop",
         home / "Jts",
         home / "Library" / "Application Support" / "Trader Workstation",
-        home / "Library" / "Application Support" / "IB Gateway 10.45",
         home / "Library" / "Application Support" / "IBKR Desktop",
     ]
+    candidates.extend(sorted((home / "Applications").glob("IB Gateway 10.*")))
+    candidates.extend(sorted((home / "Library" / "Application Support").glob("IB Gateway 10.*")))
     existing = [str(p) for p in candidates if p.exists()]
     ok = bool(existing)
     return CheckResult(
@@ -214,7 +214,7 @@ def main() -> int:
 
     print("IBKR Paper Trading Readiness Check")
     print("=" * 60)
-    print(f"project: {Path(__file__).resolve().parents[0]}")
+    print(f"project: {Path(__file__).resolve().parent}")
     print(f"host: {args.host}")
     print(f"paper_port: {args.port}")
     print("-" * 60)

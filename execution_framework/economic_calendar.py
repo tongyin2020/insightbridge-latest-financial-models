@@ -33,14 +33,17 @@ from typing import Any, Dict, List, Optional
 # 事件 → 受影响品种（仅已启用品种）
 EVENT_IMPACT: Dict[str, List[str]] = {
     # BTC 现货对宏观利率事件（CPI/FOMC）敏感，并入 CPI/FOMC 影响面
-    "CPI":  ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY", "BTC"],
-    "FOMC": ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY", "BTC"],
-    "NFP":  ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY"],
+    "CPI":  ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY", "BTC",
+             "AUDUSD", "NZDUSD", "GBPUSD"],
+    "FOMC": ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY", "BTC",
+             "AUDUSD", "NZDUSD", "GBPUSD"],
+    "NFP":  ["MES", "MNQ", "ZT", "ZN", "SR3", "EURUSD", "USDJPY",
+             "AUDUSD", "NZDUSD", "GBPUSD"],
     "PPI":  ["MES", "MNQ", "ZT", "ZN", "SR3"],
     "RETAIL_SALES": ["MES", "MNQ", "ZT", "ZN", "USDJPY"],
     "TREASURY_AUCTION": ["ZT", "ZN", "SR3"],
     "ECB":  ["EURUSD"],
-    "BOJ":  ["USDJPY"],
+    "BOJ":  ["USDJPY", "AUDJPY", "NZDJPY"],
     # EIA weekly crude inventory affects oil (CL). Not one of this loop's live
     # symbols, so affected_symbols filters to empty here — recorded for the
     # separate oil model / Phase C.

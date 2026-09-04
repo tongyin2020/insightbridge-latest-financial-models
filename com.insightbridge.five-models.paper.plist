@@ -7,21 +7,12 @@
 
   <key>ProgramArguments</key>
   <array>
-    <string>/opt/anaconda3/bin/python3</string>
-    <string>-u</string>
-    <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/execution_framework/run_tws_continuous.py</string>
-    <string>--live</string>
-    <string>--port</string>
-    <string>4002</string>
-    <string>--symbols</string>
-    <string>BTC,EURUSD,USDJPY,MES,MNQ,ZT,ZN,SR3</string>
-    <string>--interval</string>
-    <string>60</string>
-    <string>--broker-source-of-truth</string>
+    <string>/bin/zsh</string>
+    <string>/Users/tongyin/InsightBridge_Financial_Models_Latest/run_five_models_paper_launchd.sh</string>
   </array>
 
   <key>WorkingDirectory</key>
-  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest</string>
+  <string>/Users/tongyin/InsightBridge_Financial_Models_Latest</string>
 
   <key>RunAtLoad</key>
   <true/>
@@ -30,10 +21,10 @@
   <true/>
 
   <key>StandardOutPath</key>
-  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/runtime/launchd_stdout.log</string>
+  <string>/Users/tongyin/Library/Logs/InsightBridge/five_models_paper_launchd_stdout.log</string>
 
   <key>StandardErrorPath</key>
-  <string>/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest/reports/runtime/launchd_stderr.log</string>
+  <string>/Users/tongyin/Library/Logs/InsightBridge/five_models_paper_launchd_stderr.log</string>
 
   <key>ProcessType</key>
   <string>Background</string>

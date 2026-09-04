@@ -44,12 +44,18 @@ class TradeRecord:
     fill_price: Optional[float] = None
     slippage: Optional[float] = None
     minutes_after_event: float = 0.0   # 入场距事件时点的分钟（供冷静期校准）
+    multiplier: float = 1.0            # 合约乘数（每点价值）；现货/外汇为 1
+    fee_per_side: float = 0.0          # 单边每手费用（佣金+交易所+监管，账户货币）
     opened_at: str = field(default_factory=_utcnow)
     exit_price: Optional[float] = None
     closed_at: Optional[str] = None
-    pnl_abs: Optional[float] = None     # 价格点数 * 数量（未乘合约乘数，由调用方决定）
+    pnl_abs: Optional[float] = None     # 旧语义：价格点数 * 数量（不含乘数/费用）
     pnl_pct: Optional[float] = None     # 相对入场价
-    r_multiple: Optional[float] = None  # 盈亏 / 初始风险（核心学习指标）
+    r_multiple: Optional[float] = None  # 毛 R：价格点数盈亏 / 初始风险
+    pnl_gross_abs: Optional[float] = None  # 货币口径毛盈亏：点数 * 数量 * 乘数
+    fee_total: Optional[float] = None      # 双边总费用：fee_per_side * 数量 * 2
+    pnl_net_abs: Optional[float] = None    # 净盈亏 = pnl_gross_abs - fee_total
+    r_multiple_net: Optional[float] = None # 净 R：净盈亏 / (初始货币风险 + 双边费用)
     exit_reason: str = ""
     status: str = "OPEN"                 # OPEN / CLOSED
 
@@ -104,6 +110,12 @@ class TradeJournal:
                 "ALTER TABLE trades ADD COLUMN signal_price REAL",
                 "ALTER TABLE trades ADD COLUMN fill_price REAL",
                 "ALTER TABLE trades ADD COLUMN slippage REAL",
+                "ALTER TABLE trades ADD COLUMN multiplier REAL",
+                "ALTER TABLE trades ADD COLUMN fee_per_side REAL",
+                "ALTER TABLE trades ADD COLUMN pnl_gross_abs REAL",
+                "ALTER TABLE trades ADD COLUMN fee_total REAL",
+                "ALTER TABLE trades ADD COLUMN pnl_net_abs REAL",
+                "ALTER TABLE trades ADD COLUMN r_multiple_net REAL",
             ]:
                 try:
                     c.execute(ddl)
@@ -114,6 +126,10 @@ class TradeJournal:
 
     # ── 开仓 ──────────────────────────────────────────────────────────────
     def record_open(self, rec: TradeRecord) -> None:
+        if rec.multiplier <= 0:
+            raise ValueError("multiplier must be positive")
+        if rec.fee_per_side < 0:
+            raise ValueError("fee_per_side cannot be negative")
         with self._lock, self._conn() as c:
             # 幂等：同一 client_ref 不重复插入
             existing = c.execute("SELECT 1 FROM trades WHERE client_ref=?",
@@ -126,14 +142,16 @@ class TradeJournal:
                     order_status,
                     entry_price, signal_price, fill_price, slippage,
                     stop_loss, quantity, risk_per_unit,
-                    minutes_after_event, opened_at, status)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    minutes_after_event, multiplier, fee_per_side,
+                    opened_at, status)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (rec.client_ref, rec.symbol, rec.event_name, rec.direction,
                  rec.model_decision, rec.signal_time, rec.submit_time, rec.fill_time,
                  "SUBMITTED" if rec.submit_time else "SIGNAL",
                  rec.entry_price, rec.signal_price, rec.fill_price, rec.slippage,
                  rec.stop_loss, rec.quantity, rec.risk_per_unit,
-                 rec.minutes_after_event, rec.opened_at, "OPEN"))
+                 rec.minutes_after_event, float(rec.multiplier),
+                 float(rec.fee_per_side), rec.opened_at, "OPEN"))
 
     def record_fill(self, client_ref: str, fill_price: float, order_status: str = "FILLED",
                     fill_time: Optional[str] = None) -> Optional[Dict[str, Any]]:
@@ -178,16 +196,30 @@ class TradeJournal:
             move = (exit_price - entry) * sign
             pnl_abs = move * qty
             pnl_pct = (move / entry) if entry else 0.0
-            r_multiple = move / risk      # 真实 R 倍数（核心学习指标）
+            r_multiple = move / risk      # 毛 R 倍数（价格口径，不含乘数/费用）
+
+            # 货币口径（净 R）：旧行无乘数/费用时按 1.0 / 0.0 退化，
+            # 此时 pnl_gross_abs == pnl_abs、r_multiple_net == r_multiple。
+            multiplier = float(row["multiplier"]) if row["multiplier"] else 1.0
+            fee_per_side = float(row["fee_per_side"]) if row["fee_per_side"] else 0.0
+            pnl_gross_abs = move * qty * multiplier
+            fee_total = fee_per_side * qty * 2.0   # 开仓 + 平仓两边
+            pnl_net_abs = pnl_gross_abs - fee_total
+            risk_money = risk * qty * multiplier + fee_total
+            r_multiple_net = pnl_net_abs / risk_money
 
             c.execute("""
                 UPDATE trades SET exit_price=?, closed_at=?, pnl_abs=?, pnl_pct=?,
-                    r_multiple=?, exit_reason=?, status='CLOSED'
+                    r_multiple=?, pnl_gross_abs=?, fee_total=?, pnl_net_abs=?,
+                    r_multiple_net=?, exit_reason=?, status='CLOSED'
                 WHERE client_ref=?""",
                 (exit_price, _utcnow(), pnl_abs, pnl_pct, r_multiple,
+                 pnl_gross_abs, fee_total, pnl_net_abs, r_multiple_net,
                  exit_reason, client_ref))
             return {"client_ref": client_ref, "pnl_abs": pnl_abs,
-                    "pnl_pct": pnl_pct, "r_multiple": r_multiple}
+                    "pnl_pct": pnl_pct, "r_multiple": r_multiple,
+                    "pnl_gross_abs": pnl_gross_abs, "fee_total": fee_total,
+                    "pnl_net_abs": pnl_net_abs, "r_multiple_net": r_multiple_net}
 
     def get_trade(self, client_ref: str) -> Optional[Dict[str, Any]]:
         with self._lock, self._conn() as c:
@@ -213,6 +245,12 @@ class TradeJournal:
         rs = [float(r["r_multiple"]) for r in rows if r["r_multiple"] is not None]
         wins = [x for x in rs if x > 0]
         total_pnl = sum(float(r["pnl_abs"] or 0.0) for r in rows)
+        # 净口径（货币）：乘数/费用已计入；旧数据无净口径时这些字段为 None
+        rs_net = [float(r["r_multiple_net"]) for r in rows
+                  if r["r_multiple_net"] is not None]
+        total_pnl_net = sum(float(r["pnl_net_abs"] or 0.0)
+                            for r in rows if r["pnl_net_abs"] is not None)
+        total_fees = sum(float(r["fee_total"] or 0.0) for r in rows)
 
         # 连亏
         max_consec = consec = 0
@@ -230,6 +268,9 @@ class TradeJournal:
             "avg_r": round(sum(rs) / len(rs), 4) if rs else None,
             "avg_win_r": round(sum(wins) / len(wins), 4) if wins else None,
             "total_pnl_abs": round(total_pnl, 2),
+            "avg_r_net": round(sum(rs_net) / len(rs_net), 4) if rs_net else None,
+            "total_pnl_net_abs": round(total_pnl_net, 2),
+            "total_fees": round(total_fees, 2),
             "max_consec_losses": max_consec,
         }
 
@@ -237,6 +278,21 @@ class TradeJournal:
         with self._lock, self._conn() as c:
             rows = c.execute("SELECT * FROM trades WHERE status='OPEN'").fetchall()
             return [dict(r) for r in rows]
+
+    def current_consecutive_losses(self) -> int:
+        """Return the current trailing loss streak, not the historical maximum."""
+        with self._lock, self._conn() as c:
+            rows = c.execute(
+                "SELECT r_multiple FROM trades WHERE status='CLOSED' "
+                "ORDER BY closed_at DESC").fetchall()
+        streak = 0
+        for row in rows:
+            value = row["r_multiple"]
+            if value is not None and float(value) < 0:
+                streak += 1
+            else:
+                break
+        return streak
 
     def export_jsonl(self, path: str) -> int:
         with self._lock, self._conn() as c:

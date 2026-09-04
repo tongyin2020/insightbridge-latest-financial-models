@@ -66,9 +66,9 @@ def render_config(env: dict[str, str]) -> str:
     read_only = "yes" if get_value(env, "IBKR_READ_ONLY", "no").lower() in {"1", "yes", "true", "on"} else "no"
     accept_incoming = get_value(env, "IBKR_ACCEPT_INCOMING", "accept") or "accept"
     existing_session = get_value(env, "IBKR_EXISTING_SESSION_ACTION", "primaryoverride") or "primaryoverride"
-    command_server_port = get_value(env, "IBKR_COMMAND_SERVER_PORT", "7462") or "7462"
+    command_server_port = get_value(env, "IBKR_COMMAND_SERVER_PORT", "0") or "0"
     control_from = get_value(env, "IBKR_CONTROL_FROM", "127.0.0.1,localhost") or "127.0.0.1,localhost"
-    api_port = get_value(env, "IBKR_OVERRIDE_API_PORT", "7497") or "7497"
+    api_port = get_value(env, "IBKR_OVERRIDE_API_PORT", "4002") or "4002"
     master_client_id = get_value(env, "IBKR_OVERRIDE_MASTER_CLIENT_ID", "98") or "98"
     auto_restart = get_value(env, "IBKR_AUTO_RESTART_TIME")
     cold_restart = get_value(env, "IBKR_COLD_RESTART_TIME")
@@ -118,8 +118,8 @@ def main() -> int:
         log_dir=str(LOG_DIR),
         trading_mode=get_value(env, "IBKR_TRADING_MODE", "paper") or "paper",
         read_only_api="yes" if get_value(env, "IBKR_READ_ONLY", "no").lower() in {"1", "yes", "true", "on"} else "no",
-        api_port=get_value(env, "IBKR_OVERRIDE_API_PORT", "7497") or "7497",
-        command_server_port=get_value(env, "IBKR_COMMAND_SERVER_PORT", "7462") or "7462",
+        api_port=get_value(env, "IBKR_OVERRIDE_API_PORT", "4002") or "4002",
+        command_server_port=get_value(env, "IBKR_COMMAND_SERVER_PORT", "0") or "0",
     )
     STATE_FILE.write_text(json.dumps(asdict(state), ensure_ascii=False, indent=2))
 

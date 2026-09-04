@@ -28,6 +28,7 @@ This keeps it unit-testable with a fake ``ib`` and no TWS.
 from __future__ import annotations
 
 from collections import deque
+from datetime import datetime, timezone
 from typing import Any, Deque, Dict, List, Optional, Tuple
 
 
@@ -44,6 +45,7 @@ class DepthCollector:
         self._prices: Dict[str, Deque[float]] = {}
         self._volumes: Dict[str, Deque[float]] = {}
         self._tape_source: Dict[str, str] = {}
+        self._last_depth: Dict[str, Dict[str, Any]] = {}
 
     # ── Level-2 depth ────────────────────────────────────────────────────────
     def fetch_depth(self, ib: Any, contract: Any, symbol: str
@@ -67,9 +69,15 @@ class DepthCollector:
                 except Exception:           # noqa: BLE001
                     break
                 waited += step
-                bid_sizes = self._sizes(getattr(tkr, "domBids", None))
-                ask_sizes = self._sizes(getattr(tkr, "domAsks", None))
+                bid_rows = self._levels(getattr(tkr, "domBids", None))
+                ask_rows = self._levels(getattr(tkr, "domAsks", None))
+                bid_sizes = [row["size"] for row in bid_rows]
+                ask_sizes = [row["size"] for row in ask_rows]
                 if bid_sizes or ask_sizes:
+                    self._last_depth[symbol] = {
+                        "observed_at": datetime.now(timezone.utc).isoformat(),
+                        "bids": bid_rows, "asks": ask_rows,
+                    }
                     break
                 if waited >= self.depth_sleep:
                     break
@@ -86,14 +94,22 @@ class DepthCollector:
         return (bid_sizes or None, ask_sizes or None)
 
     def _sizes(self, dom: Any) -> List[float]:
-        out: List[float] = []
-        for lvl in (dom or [])[: self.levels]:
+        return [row["size"] for row in self._levels(dom)]
+
+    def _levels(self, dom: Any) -> List[Dict[str, float]]:
+        out: List[Dict[str, float]] = []
+        for position, lvl in enumerate((dom or [])[: self.levels]):
             size = getattr(lvl, "size", None)
+            price = getattr(lvl, "price", None)
             if size is None and isinstance(lvl, (int, float)):
                 size = lvl
             try:
                 if size is not None and float(size) >= 0:
-                    out.append(float(size))
+                    out.append({
+                        "level": int(position),
+                        "price": float(price) if price is not None else 0.0,
+                        "size": float(size),
+                    })
             except (TypeError, ValueError):
                 continue
         return out
@@ -126,6 +142,16 @@ class DepthCollector:
 
     def tape_source(self, symbol: str) -> str:
         return self._tape_source.get(symbol, "none")
+
+    def last_depth_snapshot(self, symbol: str) -> Optional[Dict[str, Any]]:
+        snapshot = self._last_depth.get(symbol)
+        if snapshot is None:
+            return None
+        return {
+            "observed_at": snapshot["observed_at"],
+            "bids": [dict(row) for row in snapshot["bids"]],
+            "asks": [dict(row) for row in snapshot["asks"]],
+        }
 
     def raw_for_exit(self, symbol: str) -> Dict[str, Any]:
         """Assemble the ``pos.raw`` microstructure fields the capital-safety exit

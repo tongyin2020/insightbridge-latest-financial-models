@@ -26,12 +26,18 @@ from typing import Dict, List, Optional
 FX_SPECS: Dict[str, Dict[str, str]] = {
     "EURUSD": {"symbol": "EUR", "currency": "USD", "exchange": "IDEALPRO"},
     "USDJPY": {"symbol": "USD", "currency": "JPY", "exchange": "IDEALPRO"},
+    "AUDUSD": {"symbol": "AUD", "currency": "USD", "exchange": "IDEALPRO"},
+    "NZDUSD": {"symbol": "NZD", "currency": "USD", "exchange": "IDEALPRO"},
+    "GBPUSD": {"symbol": "GBP", "currency": "USD", "exchange": "IDEALPRO"},
+    "AUDJPY": {"symbol": "AUD", "currency": "JPY", "exchange": "IDEALPRO"},
+    "NZDJPY": {"symbol": "NZD", "currency": "JPY", "exchange": "IDEALPRO"},
 }
 
 # ── 期货：模糊模板，交给 reqContractDetails 展开到期月 ───────────────────────
 CRYPTO_SPECS: Dict[str, Dict[str, str]] = {
     "BTC": {"symbol": "BTC", "currency": "USD", "exchange": "ZEROHASH"},
-    # 如需 ETH: "ETH": {"symbol": "ETH", "currency": "USD", "exchange": "ZEROHASH"},
+    "ETH": {"symbol": "ETH", "currency": "USD", "exchange": "ZEROHASH"},
+    "SOL": {"symbol": "SOL", "currency": "USD", "exchange": "ZEROHASH"},
 }
 
 FUT_SPECS: Dict[str, Dict[str, str]] = {
@@ -40,6 +46,8 @@ FUT_SPECS: Dict[str, Dict[str, str]] = {
     "MBT": {"symbol": "MBT", "exchange": "CME", "currency": "USD"},   # Micro Bitcoin
     "ZT":  {"symbol": "ZT",  "exchange": "CBOT", "currency": "USD"},
     "ZN":  {"symbol": "ZN",  "exchange": "CBOT", "currency": "USD"},
+    "CL":  {"symbol": "CL",  "exchange": "NYMEX", "currency": "USD",
+            "tradingClass": "CL"},   # WTI 原油（乘数 1000 由 contractDetails 带回）
     "SR3": {
         "symbol": "SR3",
         "exchange": "CME",

@@ -12,7 +12,7 @@
       "USDJPY"
     ],
     "title": "Nonfarm Payrolls (Jun) 08:30 ET",
-    "triggered": false
+    "triggered": true
   },
   {
     "name": "CPI",
@@ -28,7 +28,7 @@
       "BTC"
     ],
     "title": "CPI (Jun) 08:30 ET",
-    "triggered": false
+    "triggered": true
   },
   {
     "name": "PPI",
@@ -41,7 +41,7 @@
       "SR3"
     ],
     "title": "PPI (Jun) 08:30 ET",
-    "triggered": false
+    "triggered": true
   },
   {
     "name": "FOMC",

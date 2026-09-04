@@ -166,6 +166,19 @@ def stderr_warning_counts() -> dict[str, int]:
     return counts
 
 
+def launchd_spawn_blocked() -> bool:
+    text = read_text(STDERR_LOG)
+    raw = launchd_info().get("raw", "")
+    combined = f"{raw}\n{text}"
+    needles = [
+        "Service could not initialize: posix_spawn",
+        "Operation not permitted",
+        "exit(78)",
+        "EX_CONFIG",
+    ]
+    return all(token in combined for token in needles)
+
+
 def format_age(dt: datetime | None) -> str:
     if not dt:
         return "N/A"
@@ -243,6 +256,7 @@ def main() -> int:
     warn_counts = stderr_warning_counts()
     service_running = launchd["running"] or manual["running"]
     attached_runtime = infer_attached_runtime(configured_set, latest_eval)
+    spawn_blocked = launchd_spawn_blocked()
     if launchd["running"]:
         service_source = "launchd"
     elif manual["running"]:
@@ -259,6 +273,7 @@ def main() -> int:
     print(f"service_running: {launchd['running']}")
     print(f"service_state: {launchd['state']}")
     print(f"service_pid: {launchd['pid'] if launchd['pid'] else 'none'}")
+    print(f"launchd_spawn_blocked: {spawn_blocked}")
     print(f"manual_runner_configured: {manual['configured']}")
     print(f"manual_runner_running: {manual['running']}")
     print(f"manual_runner_pid: {manual['pid'] if manual['pid'] else 'none'}")

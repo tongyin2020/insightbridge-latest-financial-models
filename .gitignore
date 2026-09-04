@@ -31,3 +31,13 @@ ibkr_runtime/
 
 __MACOSX/
 data.db
+
+# takeover cleanup 2026-08-27（运行时输出/备份，不入库）
+_duplicate_backup_20260824/
+reports/agent_system/
+reports/eventalpha_decisions.jsonl
+reports/runtime/*.log
+reports/runtime/*.pid
+reports/runtime/476404
+eventalpha_core/advanced/live_signals_cache.json
+reports/runtime/heartbeat.json

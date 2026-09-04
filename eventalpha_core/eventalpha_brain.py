@@ -10,7 +10,6 @@ from .advanced.asset_ranking_engine import AssetRank, rank_assets
 from .advanced.bayesian_confidence_engine import combine_signals, default_event_signals
 from .advanced.escape_engine import escape_decision
 from .advanced.event_severity_engine import event_severity
-from .advanced.macro_regime_engine import RegimeInput, infer_macro_regime
 from .advanced.measured_timing import impact_bucket, measured_wait_window_by_impact
 from .advanced.waiting_policy_engine import waiting_policy
 
@@ -62,47 +61,9 @@ class EventAlphaBrain:
         state: MarketState,
         related: Dict[str, MarketState],
     ) -> Tuple[MacroRegime, Dict[str, float], List[str]]:
-        related_states = list(related.values())
-        equity_state = next((s for s in related_states if s.asset == AssetClass.INDEX), None)
-        crypto_state = next((s for s in related_states if s.asset == AssetClass.CRYPTO), None)
-        oil_state = next((s for s in related_states if s.asset == AssetClass.OIL), None)
-        rates_state = next((s for s in related_states if s.asset == AssetClass.RATES), None)
-        fx_state = next((s for s in related_states if s.asset == AssetClass.FX), None)
-        vix_proxy = max(
-            0.0,
-            (1.0 - (equity_state.liquidity_score if equity_state else state.liquidity_score)) * 3.0
-            + max(0.0, (equity_state.volatility_z if equity_state else state.volatility_z) - 1.0) * 0.25,
-        )
-        regime_input = RegimeInput(
-            dxy_momentum=(fx_state.momentum_score - 0.5) * 4.0 if fx_state else (state.momentum_score - 0.5) * 2.0,
-            us2y_yield_momentum=(rates_state.momentum_score - 0.5) * 4.0 if rates_state else 0.0,
-            us10y_yield_momentum=(rates_state.trend_persistence - 0.5) * 4.0 if rates_state else 0.0,
-            breakeven_inflation_momentum=event.surprise_score * 0.8 + event.policy_score * 0.3,
-            gold_momentum=max(0.0, 0.6 - state.cross_asset_alignment),
-            oil_momentum=(oil_state.momentum_score - 0.5) * 4.0 if oil_state else 0.0,
-            equity_momentum=(equity_state.momentum_score - 0.5) * 4.0 if equity_state else 0.0,
-            vix_momentum=vix_proxy,
-            credit_spread_momentum=max(0.0, 0.7 - state.liquidity_score) * 3.0,
-            btc_momentum=(crypto_state.momentum_score - 0.5) * 4.0 if crypto_state else 0.0,
-            policy_hawkishness=event.policy_score * 2.0 - 1.0,
-            geopolitical_tension=event.geopolitical_score * 3.0,
-            liquidity_stress=event.liquidity_score * 3.0 + max(0.0, 0.55 - state.liquidity_score) * 2.0,
-        )
-        regime_output = infer_macro_regime(regime_input)
-        regime_map = {
-            "risk_on": MacroRegime.RISK_ON,
-            "risk_off": MacroRegime.RISK_OFF,
-            "inflation_shock": MacroRegime.INFLATION_SHOCK,
-            "growth_shock": MacroRegime.MIXED,
-            "liquidity_crisis": MacroRegime.LIQUIDITY_STRESS,
-            "central_bank_pivot": MacroRegime.MIXED,
-            "war_shock": MacroRegime.WAR_SHOCK,
-            "dollar_squeeze": MacroRegime.LIQUIDITY_STRESS,
-            "neutral": MacroRegime.MIXED,
-        }
-        translated = regime_map.get(regime_output.primary.value, MacroRegime.MIXED)
-        probabilities = {k.value: round(v, 4) for k, v in regime_output.probabilities.items()}
-        return translated, probabilities, regime_output.explanation
+        # 宏观因子已按 2024-2025 真实数据验证为无交易优势（新闻情绪≈掷硬币、
+        # 宏观 surprise 在 30-60s 内被价格消化），故移除宏观 regime 推断，固定返回中性。
+        return MacroRegime.MIXED, {}, ["macro_factor_retired"]
 
     def rank_assets_for_event(
         self,
@@ -238,7 +199,7 @@ class EventAlphaBrain:
             "confidence_decay_above_0.22",
             "profit_giveback_above_35pct_of_mfe",
         ]
-        if direction == Direction.FLAT or execution_confidence < 0.70:
+        if direction == Direction.FLAT or execution_confidence < 0.85:
             action = DecisionAction.WATCH
             risk = 0.0
             reasons.append("direction_or_confidence_not_confirmed")

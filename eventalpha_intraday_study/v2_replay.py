@@ -61,7 +61,7 @@ def event_window_features(path: dict, asset: str) -> dict:
       early_move_bps   -- observed early-move magnitude (real)
     """
     price = np.asarray(path["price"], dtype=float)
-    entry, exit_ = path["entry_idx"], path["exit_idx"]
+    entry = int(path["entry_idx"])
     d = path["direction"]
     early = float(path["early_bps"] or 0.0)
 
@@ -69,17 +69,24 @@ def event_window_features(path: dict, asset: str) -> dict:
     mid_cut = MEASURED_IMPACT_EDGES.get(ac, (30.0, 60.0))[0]
     momentum = _clip(0.5 + 0.5 * np.tanh(early / max(mid_cut, 1e-6)))
 
-    fwd = price[entry:exit_ + 1]
-    if fwd.size >= 2:
-        exc = (fwd / fwd[0] - 1.0) * d
-        persistence = _clip(float(np.mean(exc[1:] > 0)))
-        peak = float(np.max(exc)) if exc.size else 0.0
-        final = float(exc[-1])
+    # Decision features must be causal.  The previous implementation used
+    # price[entry:exit+1], which let the entry decision see the entire future
+    # holding path.  Only observations available at (and before) entry may be
+    # used here.
+    observed = price[:entry + 1]
+    if observed.size >= 3:
+        lookback = observed[-min(10, observed.size):]
+        signed_returns = (np.diff(lookback) / lookback[:-1]) * d
+        persistence = _clip(float(np.mean(signed_returns > 0)))
+        signed_exc = (lookback / lookback[0] - 1.0) * d
+        peak = float(np.max(signed_exc)) if signed_exc.size else 0.0
+        final = float(signed_exc[-1])
         reversal = _clip((peak - final) / peak) if peak > 1e-9 else 0.5
     else:
         persistence, reversal = 0.5, 0.5
 
-    rets = np.diff(price) / price[:-1] if price.size >= 2 else np.array([0.0])
+    rets = (np.diff(observed) / observed[:-1]
+            if observed.size >= 2 else np.array([0.0]))
     vol = float(np.std(rets)) * np.sqrt(max(rets.size, 1))
     volatility_z = _clip(vol * 1e4 / max(mid_cut, 1e-6), 0.0, 5.0)
 

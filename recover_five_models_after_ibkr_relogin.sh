@@ -35,6 +35,13 @@ echo
 echo "Step 3/4: waiting for heartbeat..."
 sleep 5
 
+if ! "$PY" "$BASE/check_five_models_runtime_health.py" | grep -q "Overall: LIVE"; then
+  echo
+  echo "launchd path did not come up cleanly; falling back to safe background runner..."
+  bash "$BASE/start_five_models_paper_live_safe.sh"
+  sleep 5
+fi
+
 echo
 echo "Step 4/4: verifying runtime health..."
 "$PY" "$BASE/check_five_models_runtime_health.py"

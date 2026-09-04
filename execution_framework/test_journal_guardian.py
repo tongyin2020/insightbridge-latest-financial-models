@@ -37,6 +37,7 @@ def test_journal():
     stats = j.stats()
     assert stats["closed_trades"] == 2, stats
     assert 0 <= stats["win_rate"] <= 1, stats
+    assert j.current_consecutive_losses() == 1
     print("✓ 学习库 P&L 回写 + R 倍数 + 统计 正确:", stats)
 
 
