@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import multiprocessing as mp
+import sqlite3
 import tempfile
 from pathlib import Path
 
@@ -200,6 +201,90 @@ def test_state_transition_table():
         assert ledger.advance_intent(iid, "CLOSED")  # 同状态幂等允许
 
 
+def test_operator_and_algo_provenance_do_not_change_intent_id() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        ledger = IntentLedger(str(Path(tmp) / "safety.db"))
+        first = ledger.reserve_intent(
+            "DU-PAPER", "prov-evt", 2026, "MNQ", "BUY", "v4",
+            operator_id="ops-42")
+        assert first.accepted
+        row = ledger.get_intent(first.intent_id)
+        assert row["operator_id"] == "ops-42"
+        assert row["algo_version"] == "v4"
+        again = ledger.reserve_intent(
+            "DU-PAPER", "prov-evt", 2026, "MNQ", "BUY", "v4",
+            operator_id="someone-else")
+        assert not again.accepted
+        assert again.intent_id == first.intent_id
+        assert again.reason == "duplicate_economic_intent"
+
+
+def test_broker_ack_default_is_pending_and_valid_updates() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        ledger = IntentLedger(str(Path(tmp) / "safety.db"))
+        reservation = ledger.reserve_intent(
+            "DU-PAPER", "broker-ack-evt", 2026, "MNQ", "BUY", "v-ack",
+            now_epoch=1000.0)
+        assert reservation.accepted
+        row = ledger.get_intent(reservation.intent_id)
+        assert row["broker_ack_state"] == "PENDING_BROKER_ACK"
+        assert row["broker_ack_payload"] is None
+        assert ledger.record_broker_ack(
+            reservation.intent_id, "ACKED_PAPER",
+            payload_json='{"broker_order_id":"BX-1"}')
+        after = ledger.get_intent(reservation.intent_id)
+        assert after["broker_ack_state"] == "ACKED_PAPER"
+        assert after["broker_ack_payload"] == '{"broker_order_id":"BX-1"}'
+        assert after["state"] == row["state"], \
+            "record_broker_ack must not mutate state"
+        assert after["updated_epoch"] == 1000.0, \
+            "record_broker_ack must not touch updated_epoch"
+        assert not ledger.record_broker_ack("missing-intent", "ACKED_PAPER")
+
+
+def test_broker_ack_rejects_unknown_state() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        ledger = IntentLedger(str(Path(tmp) / "safety.db"))
+        reservation = ledger.reserve_intent(
+            "DU-PAPER", "bad-ack-evt", 2026, "MNQ", "BUY", "v-ack")
+        try:
+            ledger.record_broker_ack(reservation.intent_id, "NOT_A_REAL_STATE")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("unknown broker_ack_state must raise")
+
+
+def test_broker_ack_columns_migrate_old_schema() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        db = str(Path(tmp) / "old.db")
+        with sqlite3.connect(db) as conn:
+            conn.execute("""
+                CREATE TABLE order_intents (
+                    intent_id TEXT PRIMARY KEY,
+                    account_id TEXT NOT NULL,
+                    event_year INTEGER NOT NULL,
+                    event_id TEXT NOT NULL,
+                    symbol TEXT NOT NULL,
+                    side TEXT NOT NULL,
+                    strategy_version TEXT NOT NULL,
+                    state TEXT NOT NULL,
+                    broker_order_id TEXT,
+                    filled_quantity REAL NOT NULL DEFAULT 0,
+                    created_epoch REAL NOT NULL,
+                    updated_epoch REAL NOT NULL,
+                    UNIQUE(account_id,event_id,symbol,side,strategy_version)
+                )""")
+        ledger = IntentLedger(db)
+        reservation = ledger.reserve_intent(
+            "DU-PAPER", "migrate-ack", 2026, "MNQ", "BUY", "v-ack")
+        assert reservation.accepted
+        row = ledger.get_intent(reservation.intent_id)
+        assert row["broker_ack_state"] == "PENDING_BROKER_ACK"
+        assert row["operator_id"] == "SYSTEM_UNSPECIFIED"
+        assert row["algo_version"] == "v-ack"
+
+
 def main() -> int:
     test_deterministic_intent_id()
     test_cross_process_uniqueness()
@@ -210,6 +295,10 @@ def main() -> int:
     test_fencing_token_blocks_stale_leader()
     test_fencing_column_migration_on_old_database()
     test_state_transition_table()
+    test_operator_and_algo_provenance_do_not_change_intent_id()
+    test_broker_ack_default_is_pending_and_valid_updates()
+    test_broker_ack_rejects_unknown_state()
+    test_broker_ack_columns_migrate_old_schema()
     print("✓ durable intent ledger, leader lease and annual event cap passed")
     return 0
 
