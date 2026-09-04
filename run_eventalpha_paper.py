@@ -12,7 +12,7 @@ from pathlib import Path
 import sys
 
 
-BASE = Path("/Users/tongyin/Desktop/InsightBridge_Financial_Models_Latest")
+BASE = Path(__file__).resolve().parents[0]
 if str(BASE) not in sys.path:
     sys.path.insert(0, str(BASE))
 
