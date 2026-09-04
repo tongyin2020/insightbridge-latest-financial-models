@@ -267,7 +267,8 @@ def main() -> int:
                              strategy_version=args.strategy_version,
                              annual_event_limit=args.annual_event_limit,
                              max_products_per_event=args.max_products_per_event,
-                             contract_fees=DEFAULT_CONTRACT_FEES)
+                             contract_fees=DEFAULT_CONTRACT_FEES,
+                             broker_channel=("PAPER" if sess.is_paper else "LIVE"))
     pipe.attach_session(sess)
 
     lease_owner = f"runner-{os.getpid()}-client-{args.client_id}"

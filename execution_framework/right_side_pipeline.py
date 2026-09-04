@@ -110,7 +110,10 @@ class RightSidePipeline:
                  annual_event_limit: int = 15,
                  max_products_per_event: int = 1,
                  lifecycle_db: Optional[str] = None,
-                 contract_fees: Optional[Dict[str, float]] = None):
+                 contract_fees: Optional[Dict[str, float]] = None,
+                 broker_channel: str = "PAPER"):
+        if broker_channel not in ("PAPER", "LIVE"):
+            raise ValueError("broker_channel must be PAPER or LIVE")
         # Opt-in selectivity gate: default OFF; enable via arg or
         # EVENTALPHA_SELECTIVITY=1 (paper first). See event_right_side_engine.
         if selectivity_enabled is None:
@@ -154,6 +157,7 @@ class RightSidePipeline:
         self._lease_owner: Optional[str] = None
         self._fencing_token: Optional[int] = None
         self.account_id = account_id
+        self.broker_channel = broker_channel
         self.strategy_version = strategy_version
         self.annual_event_limit = int(annual_event_limit)
         self.max_products_per_event = int(max_products_per_event)
@@ -174,6 +178,22 @@ class RightSidePipeline:
         if self.log_path:
             with self.log_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
+
+    def _record_ack(self, intent_id, ack_state, payload: dict) -> None:
+        if self.intent_ledger is None or intent_id is None:
+            return
+        row = self.intent_ledger.get_intent(intent_id)
+        if row is None or row.get("broker_ack_state") == ack_state:
+            return
+        body = dict(payload, ack_state=ack_state, channel=self.broker_channel,
+                    recorded_at_utc=datetime.now(timezone.utc).isoformat())
+        try:
+            self.intent_ledger.record_broker_ack(
+                intent_id, ack_state, json.dumps(body, default=str))
+            self._log({"stage": "broker_ack", "intent_id": intent_id, **body})
+        except Exception as exc:
+            self._log({"stage": "broker_ack_error", "intent_id": intent_id,
+                       "ack_state": ack_state, "error": str(exc)})
 
     # ── 停机闸 ──────────────────────────────────────────────────────────────
     def halt(self, reason: str) -> None:
@@ -412,6 +432,9 @@ class RightSidePipeline:
                     self.account_id, self._lease_owner,
                     self._fencing_token if self._fencing_token is not None else -1):
                 self.intent_ledger.advance_intent(intent_id, "CANCELLED")
+                self._record_ack(
+                    intent_id, "CANCEL_ACKED",
+                    {"source": "local", "reason": "fencing_token_stale"})
                 if event_res.reason == "reserved":
                     self.intent_ledger.release_untraded_event(
                         self.account_id, st.event_id, event_year)
@@ -434,6 +457,10 @@ class RightSidePipeline:
         except Exception as exc:
             if self.intent_ledger is not None and intent_id is not None:
                 self.intent_ledger.advance_intent(intent_id, "REJECTED")
+                self._record_ack(
+                    intent_id, "REJECTED",
+                    {"source": "local", "reason": "submit_exception",
+                     "error": str(exc)})
                 row = self.intent_ledger.get_intent(intent_id)
                 if row:
                     self.intent_ledger.release_untraded_event(
@@ -451,6 +478,10 @@ class RightSidePipeline:
                     broker_order_id=(str(ticket.parent_id)
                                      if ticket.parent_id is not None else None))
             elif ticket.state in ("REJECTED", "CANCELLED"):
+                self._record_ack(
+                    intent_id,
+                    "REJECTED" if ticket.state == "REJECTED" else "CANCEL_ACKED",
+                    {"source": "local", "reason": ticket.note})
                 self.intent_ledger.advance_intent(intent_id, ticket.state)
                 row = self.intent_ledger.get_intent(intent_id)
                 if row:
@@ -488,6 +519,24 @@ class RightSidePipeline:
         ticket = self.om.poll_fill(client_ref)
         intent_row = (self.intent_ledger.get_intent(client_ref)
                       if self.intent_ledger is not None else None)
+        if intent_row is not None and ticket.broker_status:
+            acked = ("ACKED_PAPER" if self.broker_channel == "PAPER"
+                     else "ACKED_LIVE")
+            ack_state = None
+            if ticket.broker_status in ("PreSubmitted", "Submitted", "Filled"):
+                ack_state = acked
+            elif ticket.broker_status in ("Cancelled", "ApiCancelled"):
+                ack_state = "CANCEL_ACKED"
+            elif ticket.broker_status == "Inactive":
+                ack_state = "REJECTED"
+            if ack_state is not None:
+                self._record_ack(
+                    client_ref, ack_state,
+                    {"source": "broker", "broker_status": ticket.broker_status,
+                     "broker_order_id": (str(ticket.parent_id)
+                                         if ticket.parent_id is not None else None),
+                     "filled_quantity": ticket.filled_quantity,
+                     "avg_fill_price": ticket.average_fill_price})
         if intent_row is not None and ticket.state in ("SUBMITTED", "PARTIAL", "FILLED"):
             self.intent_ledger.advance_intent(
                 client_ref, ticket.state,

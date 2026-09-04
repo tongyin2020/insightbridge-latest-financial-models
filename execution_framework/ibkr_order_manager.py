@@ -41,6 +41,7 @@ class OrderTicket:
     stop_loss: float
     take_profit: Optional[float] = None
     state: OrderState = "NEW"
+    broker_status: Optional[str] = None
     parent_id: Optional[int] = None
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     fills: list = field(default_factory=list)
@@ -260,6 +261,7 @@ class IBKROrderManager:
         tr = self._find_parent_trade(ticket)
         if tr is not None:
             status = tr.orderStatus.status
+            ticket.broker_status = status
             filled = float(tr.orderStatus.filled or 0.0)
             ticket.filled_quantity = filled
             ticket.average_fill_price = float(
